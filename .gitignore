@@ -1,0 +1,17 @@
+# Obsidian 設定檔案
+.obsidian/workspace
+.obsidian/workspace.json
+.obsidian/workspace-mobile.json
+.obsidian/cache
+.obsidian/plugins/*/data.json
+
+# 快取檔案
+.trash/
+
+# 系統檔案
+.DS_Store
+Thumbs.db
+
+# 如果不想同步插件設定，可以加入：
+# .obsidian/plugins/
+# .obsidian/themes/
