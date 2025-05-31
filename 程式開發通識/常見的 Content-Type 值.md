@@ -1,7 +1,7 @@
 ---
 title: 常見的 Content-Type 值
-tags: [程式開發通識]
-
+tags:
+  - 程式開發通識
 ---
 
 ```htmlmixed=
