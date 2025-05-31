@@ -1,17 +1,21 @@
-# Obsidian 設定檔案
+# Obsidian 工作區設定（個人化，不同步）
 .obsidian/workspace
 .obsidian/workspace.json
 .obsidian/workspace-mobile.json
-.obsidian/cache
-#.obsidian/plugins/*/data.json
 
-# 快取檔案
+# 快取檔案（不需要同步）
+.obsidian/cache/
 .trash/
 
 # 系統檔案
 .DS_Store
 Thumbs.db
+desktop.ini
 
-# 如果不想同步插件設定，可以加入：
+# 個別插件的資料檔案（可能包含個人設定）
+# .obsidian/plugins/*/data.json
+
+# 如果您希望保持插件和主題設定同步，保留以下註解
+# 如果不想同步插件和主題，取消註解：
 # .obsidian/plugins/
 # .obsidian/themes/
