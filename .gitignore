@@ -3,7 +3,7 @@
 .obsidian/workspace.json
 .obsidian/workspace-mobile.json
 .obsidian/cache
-.obsidian/plugins/*/data.json
+#.obsidian/plugins/*/data.json
 
 # 快取檔案
 .trash/
