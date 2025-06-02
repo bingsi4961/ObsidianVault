@@ -1,4 +1,6 @@
 {
   "cssTheme": "Blue Topaz",
-  "baseFontSize": 20
+  "baseFontSize": 20,
+  "accentColor": "#e0a82e",
+  "baseFontSizeAction": false
 }

@@ -1,1 +1,7 @@
-{}
+{
+  "showLineNumber": false,
+  "readableLineLength": true,
+  "alwaysUpdateLinks": true,
+  "showUnsupportedFiles": false,
+  "attachmentFolderPath": "attachment"
+}
