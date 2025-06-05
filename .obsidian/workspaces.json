@@ -1,22 +1,22 @@
 {
   "workspaces": {
-    "版面配置 20250605": {
+    "版面配置 Default 20250605": {
       "main": {
         "id": "bbe8cc9ad4933b8d",
         "type": "split",
         "children": [
           {
-            "id": "e9bf64c60f1aab01",
+            "id": "978a9321908d7fc6",
             "type": "tabs",
             "children": [
               {
-                "id": "6f9580fbd544be1d",
+                "id": "249a0e8bd4859958",
                 "type": "leaf",
                 "state": {
                   "type": "markdown",
                   "state": {
-                    "file": "△ Symbol Pratice.md",
-                    "mode": "preview",
+                    "file": "展開運算子 && 其餘參數.md",
+                    "mode": "source",
                     "source": true,
                     "backlinks": true,
                     "backlinkOpts": {
@@ -30,8 +30,40 @@
                     }
                   },
                   "icon": "lucide-file",
-                  "title": "△ Symbol Pratice"
-                }
+                  "title": "展開運算子 && 其餘參數"
+                },
+                "group": "ba589ebcf8468a8e"
+              }
+            ]
+          },
+          {
+            "id": "847f4f81b11c2890",
+            "type": "tabs",
+            "children": [
+              {
+                "id": "758cadb681d2c018",
+                "type": "leaf",
+                "state": {
+                  "type": "markdown",
+                  "state": {
+                    "file": "展開運算子 && 其餘參數.md",
+                    "mode": "preview",
+                    "source": false,
+                    "backlinks": true,
+                    "backlinkOpts": {
+                      "collapseAll": false,
+                      "extraContext": false,
+                      "sortOrder": "alphabetical",
+                      "showSearch": false,
+                      "searchQuery": "",
+                      "backlinkCollapsed": false,
+                      "unlinkedCollapsed": true
+                    }
+                  },
+                  "icon": "lucide-file",
+                  "title": "展開運算子 && 其餘參數"
+                },
+                "group": "ba589ebcf8468a8e"
               }
             ]
           }
@@ -65,7 +97,7 @@
                 "state": {
                   "type": "search",
                   "state": {
-                    "query": "",
+                    "query": "c#",
                     "matchingCase": false,
                     "explainSearch": false,
                     "collapseAll": false,
@@ -105,7 +137,7 @@
           }
         ],
         "direction": "horizontal",
-        "width": 249.5
+        "width": 289.5
       },
       "right": {
         "id": "5361ec01500f36ba",
@@ -152,13 +184,12 @@
                 "state": {
                   "type": "outline",
                   "state": {
-                    "file": "△ Symbol Pratice.md",
                     "followCursor": false,
                     "showSearch": false,
                     "searchQuery": ""
                   },
                   "icon": "lucide-list",
-                  "title": "△ Symbol Pratice 的大綱"
+                  "title": "大綱"
                 }
               },
               {
@@ -184,6 +215,7 @@
                 "state": {
                   "type": "localgraph",
                   "state": {
+                    "file": "展開運算子 && 其餘參數.md",
                     "options": {
                       "collapse-filter": true,
                       "search": "",
@@ -206,19 +238,19 @@
                       "repelStrength": 10,
                       "linkStrength": 1,
                       "linkDistance": 250,
-                      "scale": 0.7132754626224431,
+                      "scale": 1.4019828977761049,
                       "close": true
                     }
                   },
                   "icon": "lucide-git-fork",
-                  "title": "關聯圖檢視"
+                  "title": "展開運算子 && 其餘參數 的關聯圖"
                 }
               }
             ]
           }
         ],
         "direction": "horizontal",
-        "width": 314.5
+        "width": 273.5
       },
       "left-ribbon": {
         "hiddenItems": {
@@ -231,9 +263,277 @@
           "workspaces:管理工作區配置": false
         }
       },
-      "active": "f6ac35b5380ba201",
-      "mtime": "2025-06-05T14:44:31+08:00"
+      "active": "249a0e8bd4859958",
+      "mtime": "2025-06-05T17:31:20+08:00"
+    },
+    "版面配置 HideTool 20250605": {
+      "main": {
+        "id": "bbe8cc9ad4933b8d",
+        "type": "split",
+        "children": [
+          {
+            "id": "978a9321908d7fc6",
+            "type": "tabs",
+            "children": [
+              {
+                "id": "249a0e8bd4859958",
+                "type": "leaf",
+                "state": {
+                  "type": "markdown",
+                  "state": {
+                    "file": "展開運算子 && 其餘參數.md",
+                    "mode": "source",
+                    "source": true,
+                    "backlinks": true,
+                    "backlinkOpts": {
+                      "collapseAll": false,
+                      "extraContext": false,
+                      "sortOrder": "alphabetical",
+                      "showSearch": false,
+                      "searchQuery": "",
+                      "backlinkCollapsed": false,
+                      "unlinkedCollapsed": true
+                    }
+                  },
+                  "icon": "lucide-file",
+                  "title": "展開運算子 && 其餘參數"
+                },
+                "group": "ba589ebcf8468a8e"
+              }
+            ]
+          },
+          {
+            "id": "847f4f81b11c2890",
+            "type": "tabs",
+            "children": [
+              {
+                "id": "758cadb681d2c018",
+                "type": "leaf",
+                "state": {
+                  "type": "markdown",
+                  "state": {
+                    "file": "展開運算子 && 其餘參數.md",
+                    "mode": "preview",
+                    "source": false,
+                    "backlinks": true,
+                    "backlinkOpts": {
+                      "collapseAll": false,
+                      "extraContext": false,
+                      "sortOrder": "alphabetical",
+                      "showSearch": false,
+                      "searchQuery": "",
+                      "backlinkCollapsed": false,
+                      "unlinkedCollapsed": true
+                    }
+                  },
+                  "icon": "lucide-file",
+                  "title": "展開運算子 && 其餘參數"
+                },
+                "group": "ba589ebcf8468a8e"
+              }
+            ]
+          }
+        ],
+        "direction": "vertical"
+      },
+      "left": {
+        "id": "81d39c1e758ff246",
+        "type": "split",
+        "children": [
+          {
+            "id": "c79da28ea4ad8c57",
+            "type": "tabs",
+            "children": [
+              {
+                "id": "f6ac35b5380ba201",
+                "type": "leaf",
+                "state": {
+                  "type": "file-explorer",
+                  "state": {
+                    "sortOrder": "alphabetical",
+                    "autoReveal": true
+                  },
+                  "icon": "lucide-folder-closed",
+                  "title": "檔案瀏覽器"
+                }
+              },
+              {
+                "id": "5c95cfcf3c5c726d",
+                "type": "leaf",
+                "state": {
+                  "type": "search",
+                  "state": {
+                    "query": "c#",
+                    "matchingCase": false,
+                    "explainSearch": false,
+                    "collapseAll": false,
+                    "extraContext": false,
+                    "sortOrder": "alphabetical"
+                  },
+                  "icon": "lucide-search",
+                  "title": "搜尋"
+                }
+              },
+              {
+                "id": "ac5c17bc9ecc4461",
+                "type": "leaf",
+                "state": {
+                  "type": "tag",
+                  "state": {
+                    "sortOrder": "frequency",
+                    "useHierarchy": false,
+                    "showSearch": false,
+                    "searchQuery": ""
+                  },
+                  "icon": "lucide-tags",
+                  "title": "標籤"
+                }
+              },
+              {
+                "id": "dc5062c579652376",
+                "type": "leaf",
+                "state": {
+                  "type": "bookmarks",
+                  "state": {},
+                  "icon": "lucide-bookmark",
+                  "title": "書籤"
+                }
+              }
+            ]
+          }
+        ],
+        "direction": "horizontal",
+        "width": 289.5,
+        "collapsed": true
+      },
+      "right": {
+        "id": "5361ec01500f36ba",
+        "type": "split",
+        "children": [
+          {
+            "id": "2e7c35682da28713",
+            "type": "tabs",
+            "children": [
+              {
+                "id": "847b4834bfafda3b",
+                "type": "leaf",
+                "state": {
+                  "type": "backlink",
+                  "state": {
+                    "collapseAll": false,
+                    "extraContext": false,
+                    "sortOrder": "alphabetical",
+                    "showSearch": false,
+                    "searchQuery": "",
+                    "backlinkCollapsed": false,
+                    "unlinkedCollapsed": true
+                  },
+                  "icon": "links-coming-in",
+                  "title": "反向連結"
+                }
+              },
+              {
+                "id": "16c37bbf0dcb876f",
+                "type": "leaf",
+                "state": {
+                  "type": "outgoing-link",
+                  "state": {
+                    "linksCollapsed": false,
+                    "unlinkedCollapsed": true
+                  },
+                  "icon": "links-going-out",
+                  "title": "對外連結"
+                }
+              },
+              {
+                "id": "f58bb9f8fe978d95",
+                "type": "leaf",
+                "state": {
+                  "type": "outline",
+                  "state": {
+                    "followCursor": false,
+                    "showSearch": false,
+                    "searchQuery": ""
+                  },
+                  "icon": "lucide-list",
+                  "title": "大綱"
+                }
+              },
+              {
+                "id": "06eb710fa7e3ef24",
+                "type": "leaf",
+                "state": {
+                  "type": "git-view",
+                  "state": {},
+                  "icon": "git-pull-request",
+                  "title": "Source Control"
+                }
+              }
+            ],
+            "currentTab": 3
+          },
+          {
+            "id": "0b549ee0b504dafe",
+            "type": "tabs",
+            "children": [
+              {
+                "id": "d884e16e1ee9631a",
+                "type": "leaf",
+                "state": {
+                  "type": "localgraph",
+                  "state": {
+                    "file": "展開運算子 && 其餘參數.md",
+                    "options": {
+                      "collapse-filter": true,
+                      "search": "",
+                      "localJumps": 1,
+                      "localBacklinks": true,
+                      "localForelinks": true,
+                      "localInterlinks": false,
+                      "showTags": false,
+                      "showAttachments": false,
+                      "hideUnresolved": false,
+                      "collapse-color-groups": true,
+                      "colorGroups": [],
+                      "collapse-display": true,
+                      "showArrow": false,
+                      "textFadeMultiplier": 0,
+                      "nodeSizeMultiplier": 1,
+                      "lineSizeMultiplier": 1,
+                      "collapse-forces": true,
+                      "centerStrength": 0.518713248970312,
+                      "repelStrength": 10,
+                      "linkStrength": 1,
+                      "linkDistance": 250,
+                      "scale": 1.4019828977761049,
+                      "close": true
+                    }
+                  },
+                  "icon": "lucide-git-fork",
+                  "title": "展開運算子 && 其餘參數 的關聯圖"
+                }
+              }
+            ]
+          }
+        ],
+        "direction": "horizontal",
+        "width": 273.5,
+        "collapsed": true
+      },
+      "left-ribbon": {
+        "hiddenItems": {
+          "canvas:建立新畫布": false,
+          "templates:插入模板": false,
+          "switcher:開啟快速切換": false,
+          "command-palette:開啟命令面板": false,
+          "obsidian-git:Open Git source control": false,
+          "graph:查看關聯圖": false,
+          "workspaces:管理工作區配置": false
+        }
+      },
+      "active": "249a0e8bd4859958",
+      "mtime": "2025-06-05T17:32:27+08:00"
     }
   },
-  "active": "版面配置 20250605"
+  "active": "版面配置 Default 20250605"
 }
