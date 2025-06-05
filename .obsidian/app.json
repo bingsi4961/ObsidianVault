@@ -3,5 +3,5 @@
   "readableLineLength": true,
   "alwaysUpdateLinks": true,
   "showUnsupportedFiles": false,
-  "attachmentFolderPath": "attachment"
+  "attachmentFolderPath": "_attachment"
 }
