@@ -91,7 +91,7 @@ people.sort((a, b) => a.age - b.age);
 
 ## 注意事項
 
-1. `sort()` 方法會直接修改原始陣列，這是一個「in-place」操作
+1. `sort()` ==方法會直接修改原始陣列，這是一個「in-place」操作==
 2. 如果需要保留原始陣列，可以先複製一份：`[...numbers].sort((a, b) => a - b)`
 
 這就是 `numbers.sort((a, b) => a - b)` 的詳細解析，它是在 JavaScript 中實現數字陣列按大小排序的標準方法。
