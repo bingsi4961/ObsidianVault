@@ -3,5 +3,7 @@
   "readableLineLength": true,
   "alwaysUpdateLinks": true,
   "showUnsupportedFiles": false,
-  "attachmentFolderPath": "_attachment"
+  "attachmentFolderPath": "_attachment",
+  "strictLineBreaks": false,
+  "rightToLeft": false
 }

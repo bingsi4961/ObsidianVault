@@ -1,0 +1,17 @@
+/* 調整程式碼區塊寬度 */
+.markdown-preview-view pre {
+    max-width: none !important;
+    width: 100% !important;
+}
+
+/* 編輯模式下的程式碼區塊 */
+.cm-editor .cm-line {
+    max-width: none !important;
+}
+
+/* 如果你想要固定寬度，可以使用這個 */
+.markdown-preview-view pre code {
+    display: block;
+    width: 100%;
+    overflow-x: auto;
+}

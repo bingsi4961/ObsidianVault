@@ -3,5 +3,8 @@
   "baseFontSize": 20,
   "accentColor": "#e0a82e",
   "baseFontSizeAction": false,
-  "theme": "system"
+  "theme": "system",
+  "enabledCssSnippets": [
+    "code-no-wrap"
+  ]
 }
