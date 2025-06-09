@@ -184,7 +184,7 @@ export { ProjectIndex } from './ProjectIndex.js';
 ```
 
 ## Edit.cshtml
-```htmlmixed=
+```html
 // 預設會有 defer 屬性延遲執行
 <script type="module">
     @{
