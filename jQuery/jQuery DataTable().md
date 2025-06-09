@@ -114,6 +114,8 @@ Topics :: {筆記跟什麼主題有關，用 `[Topic],[Topic]` 格式}
 </html>
 ```
 
+![[Pasted image 20250609120646.png]]
+
 ## `pagingType` 選項：
 
 - `"simple"` - 只有 【上一頁】【下一頁】
