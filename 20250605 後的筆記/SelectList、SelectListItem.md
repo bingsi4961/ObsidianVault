@@ -1,8 +1,8 @@
 ---
 date: 2025-06-10 23:30
-aliases: []
+aliases: 
 tags:
-  - C-Sharp-語法
+  - CSharp_語法
 ---
 
 # Metadata
