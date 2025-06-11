@@ -159,7 +159,8 @@
                     "showSearch": false,
                     "searchQuery": "",
                     "backlinkCollapsed": false,
-                    "unlinkedCollapsed": true
+                    "unlinkedCollapsed": true,
+                    "file": "20250605 後的筆記/input-group、input-group-text、btn-group.md"
                   },
                   "icon": "links-coming-in",
                   "title": "反向連結"
@@ -172,7 +173,8 @@
                   "type": "outgoing-link",
                   "state": {
                     "linksCollapsed": false,
-                    "unlinkedCollapsed": true
+                    "unlinkedCollapsed": true,
+                    "file": "20250605 後的筆記/input-group、input-group-text、btn-group.md"
                   },
                   "icon": "links-going-out",
                   "title": "對外連結"
@@ -426,7 +428,8 @@
                     "showSearch": false,
                     "searchQuery": "",
                     "backlinkCollapsed": false,
-                    "unlinkedCollapsed": true
+                    "unlinkedCollapsed": true,
+                    "file": "20250605 後的筆記/input-group、input-group-text、btn-group.md"
                   },
                   "icon": "links-coming-in",
                   "title": "反向連結"
@@ -439,7 +442,8 @@
                   "type": "outgoing-link",
                   "state": {
                     "linksCollapsed": false,
-                    "unlinkedCollapsed": true
+                    "unlinkedCollapsed": true,
+                    "file": "20250605 後的筆記/input-group、input-group-text、btn-group.md"
                   },
                   "icon": "links-going-out",
                   "title": "對外連結"
