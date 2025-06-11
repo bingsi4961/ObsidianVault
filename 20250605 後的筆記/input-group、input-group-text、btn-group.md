@@ -2,6 +2,7 @@
 date: 2025-06-11 09:17
 aliases: 
 tags:
+  - BootStrap
   - BootStrap_5
 ---
 
