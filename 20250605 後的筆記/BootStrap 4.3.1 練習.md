@@ -16,6 +16,7 @@ Topics :: {筆記跟什麼主題有關，用 `[Topic],[Topic]` 格式}
 ---
 📑[[BootStrap 網格系統]]
 📑[[form-inline、form-group、form-control、control-label]]
+📑[[input-group、input-group-text、input-group-prepend、input-group-append]]
 📑[[input-group、input-group-text、btn-group]]
 📑[[Flexbox 佈局]]
 📑[[設定 Padding]]
@@ -50,16 +51,24 @@ Topics :: {筆記跟什麼主題有關，用 `[Topic],[Topic]` 格式}
 		<div class="col-md-6">
 			<div class="form-group form-inline"> <!-- form-line 有包含 d-flex 的功能 -->
 				<div class="input-group flex-fill">
-					<span class="input-group-text rounded-0">https：//</span>
+					<div class="input-group-prepend">
+						<span class="input-group-text rounded-0">https：//</span>
+					</div>
 					<input type="text" id="txtURI" class="form-control" placeholder="網站名稱">
-					<span class="input-group-text rounded-0">.com</span>
+					<div class="input-group-append">
+						<span class="input-group-text rounded-0">.com</span>
+					</div>
 				</div>
 				<input type="button" value="搜尋" class="btn btn-primary ml-1">
 				<!--
 				<div class="input-group w-100">				
-					<span class="input-group-text rounded-0">https：//</span>
+					<div class="input-group-prepend">
+						<span class="input-group-text rounded-0">https：//</span>
+					</div>
 					<input type="text" id="txtURI" class="form-control" placeholder="網站名稱">
-					<span class="input-group-text rounded-0">.com</span>
+					<div class="input-group-append">
+						<span class="input-group-text rounded-0">.com</span>
+					</div>
 					<input type="button" value="搜尋" class="btn btn-primary ml-1">
 				</div>
 				-->
