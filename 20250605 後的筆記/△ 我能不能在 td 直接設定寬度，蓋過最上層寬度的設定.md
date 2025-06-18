@@ -1,8 +1,21 @@
 ---
-title: △ 我能不能在 td 直接設定寬度，蓋過最上層寬度的設定
+date: 2025-06-18 09:54
+aliases: 
 tags:
-  - HTML
+  - 入庫
+  - CSS
 ---
+
+# Metadata
+Status :: 🌱
+Note Type :: 📰
+Source URL :: {文章 URL}
+Author :: {作者名稱}
+Topics :: {筆記跟什麼主題有關，用 `[Topic],[Topic]` 格式}
+
+---
+
+內文開始
 
 讓我解釋為什麼單純設定 td 的寬度可能不夠，以及如何正確地實現這個目標。
 
