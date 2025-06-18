@@ -52,18 +52,18 @@ Topics :: {筆記跟什麼主題有關，用 `[Topic],[Topic]` 格式}
 			<div class="form-group form-inline"> <!-- form-line 有包含 d-flex 的功能 -->
 				<div class="input-group flex-fill">
 					<div class="input-group-prepend">
-						<span class="input-group-text rounded-0">https：//</span>
+						<span class="input-group-text">https：//</span>
 					</div>
 					<input type="text" id="txtURI" class="form-control" placeholder="網站名稱">
 					<div class="input-group-append">
-						<span class="input-group-text rounded-0">.com</span>
+						<span class="input-group-text">.com</span>
 					</div>
 				</div>
 				<input type="button" value="搜尋" class="btn btn-primary ml-1">
 				<!--
 				<div class="input-group w-100">				
 					<div class="input-group-prepend">
-						<span class="input-group-text rounded-0">https：//</span>
+						<span class="input-group-text">https：//</span>
 					</div>
 					<input type="text" id="txtURI" class="form-control" placeholder="網站名稱">
 					<div class="input-group-append">
@@ -87,4 +87,4 @@ Topics :: {筆記跟什麼主題有關，用 `[Topic],[Topic]` 格式}
 <div>
 ```
 
-![[Pasted image 20250615233912.png]]
+![[Pasted image 20250618124138.png]]
