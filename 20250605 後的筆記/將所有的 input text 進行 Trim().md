@@ -1,10 +1,20 @@
 ---
-title: 將所有的 input type="text" 的輸入值進行 Trim() 方法
-tags: [jQuery, 技術文件]
+date: 2025-06-24 10:25
+aliases: 
+tags:
+  - jQuery
+---
+
+# Metadata
+Status :: 🌱
+Note Type :: 📰
+Source URL :: {文章 URL}
+Author :: {作者名稱}
+Topics :: {筆記跟什麼主題有關，用 `[Topic],[Topic]` 格式}
 
 ---
 
-```javascript=
+```javascript
 $("form").submit(function() {
     $("input[type='text']").each(function() {
         $(this).val($.trim($(this).val()));
