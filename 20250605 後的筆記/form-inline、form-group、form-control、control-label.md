@@ -28,6 +28,7 @@ Topics :: {筆記跟什麼主題有關，用 `[Topic],[Topic]` 格式}
 ## form-control
 
 - 應用於表單輸入元素（input、textarea、select），提供統一的樣式設計，包括邊框、內距、焦點效果等。
+- 會套用 [[display block、display inline-block|display: block]]，讓元素變成區塊級元素，佔據整行寬度，強制換行
 - ==預設會讓元件 width: 100%==
 ## control-label
 
