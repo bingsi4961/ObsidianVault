@@ -30,15 +30,14 @@ Topics :: {筆記跟什麼主題有關，用 `[Topic],[Topic]` 格式}
 <div class="container mt-2">
 	<div class="row">
 		<div class="col-md-6">
-			<div class="form-group"> <!-- form-group 會讓元件保持適當的間距，及以垂直方向排列 -->
+			<div class="form-group">
 				<label for="txtIdentity" class="control-label">身份證號碼：</label>
 				<input type="text" id="txtIdentity" placeholder="身份證號碼" class="form-control">
 				<input type="button" value="搜尋" class="btn btn-primary mt-1">
 				<!-- button 不應該用 form-control -->
 			</div>
 		</div>
-		<div class="col-md-6">
-			<!-- 因 form-group 會讓元件以垂直方向排列，故使用 form-inline 讓元件再以水平方向排列 -->
+		<div class="col-md-6">			
 			<div class="form-group form-inline">
 				<label for="txtIdentity" class="control-label">身份證號碼：</label>
 				<input type="text" id="txtIdentity" placeholder="身份證號碼" class="form-control">

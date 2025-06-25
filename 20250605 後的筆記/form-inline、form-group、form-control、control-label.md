@@ -19,17 +19,37 @@ Topics :: {筆記跟什麼主題有關，用 `[Topic],[Topic]` 格式}
 - 只在 768px 以上 的螢幕寬度才會生效。這是 Bootstrap 的響應式設計，在小螢幕（手機）上會自動變回垂直排列。
 - 確保父容器有足夠寬度容納所有表單元素
 - 包含了 d-flex 的功能
-- 📑 [[form-inline 應該包在 form-group 外面]]
+
+> [!NOTE] 重要!!
+> ．div (p、form、h、ul、li) 元素是區塊級元素，本身的寬度會佔滿整個版面，造成與相鄰的元素垂直排列
+> ．如果在 div 外面包一層 form-inline，div 就會取消區塊級元素，與相鄰的元素水平排列
+> ．另外，在 form-inline 內的元素，==所有==區塊級元素都會被取消
+
+📑 [[form-inline 應該包在 form-group 外面]]
+
 ## form-group
 
-- 用於包裝表單控制項和標籤，提供適當的==間距==和結構。這是 Bootstrap 表單的基本容器單位。
-- 會讓裡面的表單元件以==垂直方向排列==（換行顯示）
-- 📑 [[不是說 form-group 會讓裡面的表單元件保持適當距離嗎？]]
+- 用於包裝表單控制項和標籤，這是 Bootstrap 表單的基本容器單位。
+- ==不會讓內部元素垂直排列==，讓 form-group 與後面的元素之間有適當的間距
+
+```css
+.form-group {
+	margin-bottom: 1rem;
+}
+```
+
 ## form-control
 
 - 應用於表單輸入元素（input、textarea、select），提供統一的樣式設計，包括邊框、內距、焦點效果等。
 - 會套用 [[display block、display inline-block|display: block]]，讓元素變成區塊級元素，==佔據整行寬度，強制換行==
 - ==預設會讓元件 width: 100%==
+
+```css
+.form-control { 
+	display: block; /* 這個讓 input 獨佔一行 */ 
+	width: 100%; /* 其他樣式... */ 
+}
+```
 ## control-label
 
 - 用於表單標籤的樣式類別，確保標籤與表單控制項有適當的對齊和間距。
