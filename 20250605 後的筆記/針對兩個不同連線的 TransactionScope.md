@@ -6,7 +6,6 @@ tags:
   - Entity_Framework_6
   - Entity_Framework_Core
 ---
-
 # Metadata
 Status :: 🌱
 Note Type :: 📰

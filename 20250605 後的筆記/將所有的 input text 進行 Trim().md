@@ -4,7 +4,6 @@ aliases:
 tags:
   - jQuery
 ---
-
 # Metadata
 Status :: 🌱
 Note Type :: 📰

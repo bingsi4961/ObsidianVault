@@ -5,7 +5,6 @@ tags:
   - BootStrap
   - BootStrap_3
 ---
-
 # Metadata
 Status :: 🌱
 Note Type :: 📰

@@ -4,7 +4,6 @@ aliases:
 tags:
   - CSharp_語法
 ---
-
 # Metadata
 Status :: 🌱
 Note Type :: 📰

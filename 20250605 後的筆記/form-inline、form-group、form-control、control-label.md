@@ -5,7 +5,6 @@ tags:
   - BootStrap
   - BootStrap_3
 ---
-
 # Metadata
 Status :: 🌱
 Note Type :: 📰
@@ -16,7 +15,7 @@ Topics :: {筆記跟什麼主題有關，用 `[Topic],[Topic]` 格式}
 ---
 ## form-inline
 
-- 用於創建水平排列的表單元素，讓表單控制項在同一行顯示。
+- 應用在 `<form>` 元素上的 CSS 類別，用來讓表單控制項，以水平排列的方式在同一行顯示。
 - 只在 768px 以上 的螢幕寬度才會生效。這是 Bootstrap 的響應式設計，在小螢幕（手機）上會自動變回垂直排列。
 - 確保父容器有足夠寬度容納所有表單元素
 - 包含了 d-flex 的功能

@@ -4,7 +4,6 @@ aliases:
 tags:
   - BootStrap
 ---
-
 # Metadata
 Status :: 🌱
 Note Type :: 📰
