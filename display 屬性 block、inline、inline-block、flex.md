@@ -95,6 +95,8 @@ body {
 </div>
 ```
 
+^068061
+
 
 ![[Pasted image 20250627103330.png]]
 
@@ -129,8 +131,6 @@ body {
 	<div class="inline-block-item" style="display: inline-block;"> 行內區塊元素，結合兩者特性3 </div>
 </div>
 ```
-
-### 📑 [[display 屬性 block、inline、inline-block]]
 
 
 ![[Pasted image 20250627103536.png]]
