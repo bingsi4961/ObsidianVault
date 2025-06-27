@@ -85,6 +85,18 @@ Topics :: {筆記跟什麼主題有關，用 `[Topic],[Topic]` 格式}
 
 
 > [!NOTE] 記憶
-> justify-content：主軸對齊方式
-> align-items：交叉軸對齊方式
-> flex-direction：排列方向（row、column 等）
+> justify-content：主軸對齊方式（不一定是水平對齊）
+> align-items：交叉軸對齊方式（不一定是垂直對齊）
+
+
+> [!NOTE] justify-content 主軸屬性值
+> justify-content: flex-start;	(預設) 置左/置頂
+> justify-content: center;		置中
+> justify-content: flex-end 		置右/置底
+> justify-content: space-between;	兩端對齊
+
+> [!NOTE] align-items 交叉軸屬性值
+> align-items: flex-start	置左/置頂
+> align-items: center		置中
+> align-items: flex-end	置右/置底
+> align-items: stretch	(預設) 拉伸填滿
