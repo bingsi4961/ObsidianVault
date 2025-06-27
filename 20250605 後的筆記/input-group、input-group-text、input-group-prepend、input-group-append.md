@@ -32,7 +32,7 @@ Bootstrap 的 input-group 功能讓你可以在 ==輸入欄位== 前後加上文
 **`.input-group`**
 
 - 包裹整個輸入群組的容器
-- 使用 [[flexbox 佈局]]，讓內部元素水平排列
+- 使用 [[BootStrap Flexbox 佈局]]，讓內部元素水平排列
 - 包含了 display: flex 的樣式設定
 
 **`.input-group-text`**

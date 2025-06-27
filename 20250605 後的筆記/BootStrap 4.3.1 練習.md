@@ -17,7 +17,7 @@ Topics :: {筆記跟什麼主題有關，用 `[Topic],[Topic]` 格式}
 📑[[form-inline、form-group、form-control、control-label]]
 📑[[input-group、input-group-text、input-group-prepend、input-group-append]]
 📑[[input-group、input-group-text、btn-group]]
-📑[[Flexbox 佈局]]
+📑[[BootStrap Flexbox 佈局]]
 📑[[設定 Padding]]
 📑[[寬度設定 w-number]]
 
