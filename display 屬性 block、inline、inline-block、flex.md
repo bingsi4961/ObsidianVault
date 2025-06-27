@@ -131,7 +131,8 @@ body {
 ```
 
 
-![[Pasted image 20250627103536.png]]
+![[Pasted image 20250627103536.png]] 
+^fbe7f4
 ```html
 <div class="demo-box">
 	<h3>display: flex (彈性佈局)</h3>

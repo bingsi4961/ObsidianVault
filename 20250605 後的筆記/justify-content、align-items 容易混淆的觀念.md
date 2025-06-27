@@ -18,7 +18,7 @@ Topics :: {筆記跟什麼主題有關，用 `[Topic],[Topic]` 格式}
 
 ### 軸線系統
 
-- **主軸 (Main Axis)**: 由 ==flex-direction== 決定的主要排列方向
+- **主軸 (Main Axis)**: 由 [[flex-direction 屬性]] 決定的主要排列方向
 - **交叉軸 (Cross Axis)**: 與主軸垂直的方向
 
 ### 對齊屬性
