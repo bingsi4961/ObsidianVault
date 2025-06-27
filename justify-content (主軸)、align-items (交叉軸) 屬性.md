@@ -100,3 +100,57 @@ Topics :: {筆記跟什麼主題有關，用 `[Topic],[Topic]` 格式}
 > align-items: center		置中
 > align-items: flex-end	置右/置底
 > align-items: stretch	(預設) 拉伸填滿
+
+
+### justify-content (主軸對齊)
+### flex-direction 預設值 row
+### justify-content 預設值 flex-start
+
+![[Pasted image 20250627115543.png]]
+
+```html
+<h4>flex-start (預設)</h4>
+<div class="code-3">
+	<div>display: flex;</div>
+	<div>justify-content: flex-start;</div>
+</div>
+<div class="note-3">
+	<div>flex-direction 預設值是 row</div>
+	<div>align-items 預設值是 stretch</div>
+</div>	
+<div class="flex-container-3" style="display: flex; justify-content: flex-start;">
+	<div class="flex-item-3">1</div>
+	<div class="flex-item-3">2</div>
+	<div class="flex-item-3">3</div>
+</div>
+```
+
+![[Pasted image 20250627115617.png]]
+
+```html
+<h4>center (置中)</h4>
+<div class="code-3">
+	<div>display: flex;</div>
+	<div>justify-content: center;</div>
+</div>
+<div class="flex-container-3" style="display: flex; justify-content: center;">
+	<div class="flex-item-3">1</div>
+	<div class="flex-item-3">2</div>
+	<div class="flex-item-3">3</div>
+</div>
+```
+
+![[Pasted image 20250627115654.png]]
+
+```html
+<h4>center (置右)</h4>
+<div class="code-3">
+	<div>display: flex;</div>
+	<div>justify-content: flex-end;</div>
+</div>
+<div class="flex-container-3" style="display: flex; justify-content: flex-end;">
+	<div class="flex-item-3">1</div>
+	<div class="flex-item-3">2</div>
+	<div class="flex-item-3">3</div>
+</div>
+```
