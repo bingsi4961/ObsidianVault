@@ -3,6 +3,7 @@ date: 2025-06-27 11:25
 aliases: 
 tags:
   - CSS
+  - Flexbox
 ---
 # Metadata
 Status :: 🌱
@@ -67,6 +68,8 @@ Topics :: {筆記跟什麼主題有關，用 `[Topic],[Topic]` 格式}
 
 </style>
 ```
+
+### ⭐📑 [[CSS Flexbox 對齊屬性觀念]]
 
 ## 預設行為（flex-wrap: nowrap）	
 ### 當容器寬度縮小時：

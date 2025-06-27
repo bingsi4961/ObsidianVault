@@ -3,6 +3,7 @@ date: 2025-06-27 10:02
 aliases: 
 tags:
   - CSS
+  - Flexbox
 ---
 # Metadata
 Status :: 🌱
@@ -129,7 +130,7 @@ body {
 </div>
 ```
 
-📑 [[display 屬性 block、inline、inline-block]]
+### 📑 [[display 屬性 block、inline、inline-block]]
 
 
 ![[Pasted image 20250627103536.png]]

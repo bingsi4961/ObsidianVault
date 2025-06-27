@@ -3,6 +3,7 @@ date: 2025-06-26 10:15
 aliases: 
 tags:
   - CSS
+  - Flexbox
 ---
 # Metadata
 Status :: 🌱
