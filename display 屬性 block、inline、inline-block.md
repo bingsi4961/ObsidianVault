@@ -129,6 +129,8 @@ body {
 </div>
 ```
 
+📑 [[display 屬性 block、inline、inline-block]]
+
 
 ![[Pasted image 20250627103536.png]]
 ```html

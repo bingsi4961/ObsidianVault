@@ -208,6 +208,7 @@ Topics :: {筆記跟什麼主題有關，用 `[Topic],[Topic]` 格式}
 
 
 ![[Pasted image 20250627122334.png]]
+
 ```html
 <h4>center (垂直置中)</h4>
 <div class="code-3">
@@ -232,5 +233,20 @@ Topics :: {筆記跟什麼主題有關，用 `[Topic],[Topic]` 格式}
 <div class="flex-container-3" style="display: flex; align-items: flex-end;">
 	<div class="flex-item-3">項目 1</div>
 	<div class="flex-item-3">項目 2</div>
+</div>
+```
+
+
+![[Pasted image 20250627122826.png]]
+
+```html
+<h4>stretch (拉伸填滿) (預設值)</h4>
+<div class="code-3">
+	<div>display: flex;</div>
+	<div>align-items: stretch;</div>
+</div>
+<div class="flex-container-3" style="display: flex; align-items: stretch;">
+	<div class="flex-item-3">拉伸項目</div>
+	<div class="flex-item-3">拉伸項目</div>
 </div>
 ```
