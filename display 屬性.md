@@ -94,3 +94,74 @@ body {
 </div>
 ```
 
+
+![[Pasted image 20250627103330.png]]
+
+```html
+<div class="demo-box">
+	<h3>display: inline (行內元素)</h3>
+	<div class="code">display: inline;</div>
+	<div class="note">
+		<div>依內容決定 div 寬度</div>
+		<div>容器較小時，直接 <font color="red"><b>文字截斷換行</b></font>，div不會換行</div>
+		<div>width、heigh、min-width、margin-top、margin-bottom 都無效</div>		
+	</div>
+	<div class="inline-item" style="display: inline;">行內元素，只佔據內容所需的寬度1</div>
+	<div class="inline-item" style="display: inline;">行內元素，只佔據內容所需的寬度2</div>
+	<div class="inline-item" style="display: inline;">行內元素，只佔據內容所需的寬度3</div>
+</div>
+```
+
+
+![[Pasted image 20250627103418.png]]
+
+```html
+<div class="demo-box">
+	<h3>display: inline-block (行內區塊)</h3>
+	<div class="code">display: inline-block;</div>
+	<div class="note">
+		<div>依內容決定 div 寬度</div>
+		<div>容器較小時，div 元素會換行</div>
+	</div>
+	<div class="inline-block-item" style="display: inline-block;"> 行內區塊元素，結合兩者特性1 </div>
+	<div class="inline-block-item" style="display: inline-block;"> 行內區塊元素，結合兩者特性2 </div>
+	<div class="inline-block-item" style="display: inline-block;"> 行內區塊元素，結合兩者特性3 </div>
+</div>
+```
+
+![[Pasted image 20250627103536.png]]
+```html
+<div class="demo-box">
+	<h3>display: flex (彈性佈局)</h3>
+	<div class="code">display: flex;</div>
+	<div class="note">
+		<div>注意 display: flex 是設定在容器。</div>
+		<div>★ 子元素會水平排列。容器縮小時，子元素會自動調整寬度，不會換行。</div>
+	</div>	
+	
+	<div class="flex-container" style="display: flex;">
+		<div class="flex-item">彈性盒子佈局1彈性盒子佈局1彈性盒子佈局1</div>
+		<div class="flex-item">彈性盒子佈局2彈性盒子佈局2彈性盒子佈局2</div>
+		<div class="flex-item">彈性盒子佈局3彈性盒子佈局3彈性盒子佈局3</div>
+	</div>
+</div>
+```
+
+![[Pasted image 20250627103614.png]]
+
+```html
+<div class="demo-box">
+	<h3>display: flex (彈性佈局) (設定 min-width)</h3>
+	<div class="code">
+		<div>display: flex;</div>
+		<div>min-width: 200px;</div>
+	</div>
+	<div class="note">flex-item div 若有設定 min-width，則元素不會自動調整寬度，元素也不會換行</div>
+	
+	<div class="flex-container" style="display: flex;">
+		<div class="flex-item" style="min-width: 200px;">彈性盒子佈局1</div>
+		<div class="flex-item" style="min-width: 200px;">彈性盒子佈局2</div>
+		<div class="flex-item" style="min-width: 200px;">彈性盒子佈局3</div>
+	</div>
+</div>
+```
