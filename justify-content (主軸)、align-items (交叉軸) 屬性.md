@@ -88,7 +88,6 @@ Topics :: {筆記跟什麼主題有關，用 `[Topic],[Topic]` 格式}
 > justify-content：主軸對齊方式（不一定是水平對齊）
 > align-items：交叉軸對齊方式（不一定是垂直對齊）
 
-
 > [!NOTE] justify-content 主軸屬性值
 > justify-content: flex-start;	(預設) 置左/置頂
 > justify-content: center;		置中
@@ -100,7 +99,6 @@ Topics :: {筆記跟什麼主題有關，用 `[Topic],[Topic]` 格式}
 > align-items: center		置中
 > align-items: flex-end	置右/置底
 > align-items: stretch	(預設) 拉伸填滿
-
 
 ### justify-content (主軸對齊)
 - #### flex-direction 預設值 row
@@ -125,6 +123,7 @@ Topics :: {筆記跟什麼主題有關，用 `[Topic],[Topic]` 格式}
 </div>
 ```
 
+
 ![[Pasted image 20250627115617.png]]
 
 ```html
@@ -139,6 +138,7 @@ Topics :: {筆記跟什麼主題有關，用 `[Topic],[Topic]` 格式}
 	<div class="flex-item-3">3</div>
 </div>
 ```
+
 
 ![[Pasted image 20250627115654.png]]
 
@@ -155,6 +155,7 @@ Topics :: {筆記跟什麼主題有關，用 `[Topic],[Topic]` 格式}
 </div>
 ```
 
+
 ![[Pasted image 20250627121004.png]]
 
 ```html
@@ -170,7 +171,9 @@ Topics :: {筆記跟什麼主題有關，用 `[Topic],[Topic]` 格式}
 	</div>
 ```
 
+
 ![[Pasted image 20250627121039.png]]
+
 ```html
 <h4>space-between (兩端對齊 && 空間平均分配)</h4>
 <div class="code-3">
@@ -182,5 +185,52 @@ Topics :: {筆記跟什麼主題有關，用 `[Topic],[Topic]` 格式}
 	<div class="flex-item-3" style="flex:1">1</div>
 	<div class="flex-item-3" style="flex:1">2</div>
 	<div class="flex-item-3" style="flex:1">3</div>
+</div>
+```
+
+### align-items (交叉軸對齊)
+- #### flex-direction 預設值 row
+- #### align-items 預設值 stretch
+
+![[Pasted image 20250627122217.png]]
+
+```html
+<h4>flex-start (頂部對齊)</h4>
+<div class="code-3">
+	<div>display: flex;</div>
+	<div>align-items: flex-start;</div>
+</div>
+<div class="flex-container-3" style="display: flex; align-items: flex-start;">
+	<div class="flex-item-3">項目 1</div>
+	<div class="flex-item-3">項目 2</div>
+</div>
+```
+
+
+![[Pasted image 20250627122334.png]]
+```html
+<h4>center (垂直置中)</h4>
+<div class="code-3">
+	<div>display: flex;</div>
+	<div>align-items: center;</div>
+</div>
+<div class="flex-container-3" style="display: flex; align-items: center;">
+	<div class="flex-item-3">項目 1</div>
+	<div class="flex-item-3">項目 2</div>
+</div>
+```
+
+
+![[Pasted image 20250627122443.png]]
+
+```html
+<h4>center (底部對齊)</h4>
+<div class="code-3">
+	<div>display: flex;</div>
+	<div>align-items: flex-end;</div>
+</div>
+<div class="flex-container-3" style="display: flex; align-items: flex-end;">
+	<div class="flex-item-3">項目 1</div>
+	<div class="flex-item-3">項目 2</div>
 </div>
 ```
