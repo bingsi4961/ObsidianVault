@@ -4,7 +4,6 @@ date: 2025-06-25 15:26
 aliases: 
 tags:
   - CSS
-  - Flexbox
 ---
 # Metadata
 Status :: 🌱
@@ -58,7 +57,7 @@ Topics :: {筆記跟什麼主題有關，用 `[Topic],[Topic]` 格式}
 結果：兩個元素會水平並排
 
 ### 📑[[display 屬性 block、inline、inline-block、flex]]
-[[display 屬性 block、inline、inline-block、flex#^068061]]
+
 
 ## 實際應用場景
 
