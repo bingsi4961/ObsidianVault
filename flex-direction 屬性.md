@@ -1,11 +1,9 @@
 ---
-date : 2025-06-27 13:12
-aliases:
-  - 別名測試1
-  - 別名測試2
+date: 2025-06-27 13:12
+aliases: 
 tags:
-  - 標籤測試1
-  - 標籤測試2
+  - CSS
+  - Flexbox
 ---
 # Metadata
 Status :: 🌱
@@ -93,15 +91,17 @@ Topics :: {筆記跟什麼主題有關，用 `[Topic],[Topic]` 格式}
 
 ```html
 <h4>column (垂直排列)</h4>
-	<div class="code-3">
-		<div>display: flex;</div>
-		<div>flex-direction: column;</div>
-		<div>height: 225px;</div>
-	</div>
-	<div class="note-3">因 flex-direction: column，並且 align-items 預設值 stretch，故滿版到最右邊</div>
-	<div class="flex-container-3" style="display: flex; flex-direction: column; height: 225px;">
-		<div class="flex-item-3">1</div>
-		<div class="flex-item-3">2</div>
-		<div class="flex-item-3">3</div>
-	</div>
+<div class="code-3">
+	<div>display: flex;</div>
+	<div>flex-direction: column;</div>
+	<div>height: 225px;</div>
+</div>
+<div class="note-3">因 flex-direction: column，並且 align-items 預設值 stretch，故滿版到最右邊</div>
+<div class="flex-container-3" style="display: flex; flex-direction: column; height: 225px;">
+	<div class="flex-item-3">1</div>
+	<div class="flex-item-3">2</div>
+	<div class="flex-item-3">3</div>
+</div>
 ```
+
+### 📑[[CSS Flexbox 的 justify-content、align-items 容易混淆的觀念]]
