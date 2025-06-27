@@ -71,8 +71,76 @@ Topics :: {筆記跟什麼主題有關，用 `[Topic],[Topic]` 格式}
 
 ---
 
-1. flex-wrap: wrap;		允許換行，元素會移到下一行
-2. flex-wrap: nowrap;		（預設）：不換行，元素會壓縮以適應容器
-3. flex-wrap: wrap-reverse	反向換行，新行出現在上方
+> [!NOTE] 記憶
+> flex-wrap: wrap;		允許換行，項目會移到下一行
+> flex-wrap: nowrap;		（預設）：不換行，項目會壓縮以適應容器
+> flex-wrap: wrap-reverse	反向換行，新行出現在上方
 
 
+![[Pasted image 20250627111756.png]]
+
+```html
+<div class="demo-box-2">
+	<h3>flex-wrap: nowrap (預設值)</h3>
+	<div class="code-2">
+		<div>display: flex;</div>
+		<div>flex-wrap: nowrap;</div>
+	</div>
+	<div class="note-2">
+		<div>項目不會換行，會壓縮以適應容器寬度</div>
+		<div>跟僅有設定 display: flex 是一樣的效果</div>
+	</div>
+	
+	<div class="flex-container-2" style="display: flex; flex-wrap: nowrap;">
+		<div class="flex-item-2">項目 1項目 1項目 1</div>
+		<div class="flex-item-2">項目 2項目 2項目 2</div>
+		<div class="flex-item-2">項目 3項目 3項目 3</div>
+		<div class="flex-item-2">項目 4項目 4項目 4</div>
+		<div class="flex-item-2">項目 5項目 5項目 5</div>
+	</div>
+</div>
+```
+
+
+![[Pasted image 20250627112205.png]]
+
+```html
+<div class="demo-box-2">
+	<h3>flex-wrap: wrap</h3>
+	<div class="code-2">
+		<div>display: flex;</div>
+		<div>flex-wrap: wrap;</div>
+	</div>
+	<div class="note-2">當容器寬度不足時，項目會換到下一行</div>
+	
+	<div class="flex-container-2" style="display: flex; flex-wrap: wrap;">
+		<div class="flex-item-2">項目 1</div>
+		<div class="flex-item-2">項目 2</div>
+		<div class="flex-item-2">項目 3</div>
+		<div class="flex-item-2">項目 4</div>
+		<div class="flex-item-2">項目 5</div>
+	</div>
+</div>
+```
+
+
+![[Pasted image 20250627112306.png]]
+
+```html
+<div class="demo-box-2">
+	<h3>flex-wrap: wrap-reverse</h3>
+	<div class="code-2">
+		<div>display: flex;</div>
+		<div>flex-wrap: wrap-reverse;</div>
+	</div>
+	<div class="note-2">反向換行，新的行會出現在上方</div>
+	
+	<div class="flex-container-2" style="display: flex; flex-wrap: wrap-reverse;">
+		<div class="flex-item-2">項目 1</div>
+		<div class="flex-item-2">項目 2</div>
+		<div class="flex-item-2">項目 3</div>
+		<div class="flex-item-2">項目 4</div>
+		<div class="flex-item-2">項目 5</div>
+	</div>
+</div>
+```
