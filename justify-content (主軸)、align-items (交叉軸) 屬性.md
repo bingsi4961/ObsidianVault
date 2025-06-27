@@ -103,8 +103,8 @@ Topics :: {筆記跟什麼主題有關，用 `[Topic],[Topic]` 格式}
 
 
 ### justify-content (主軸對齊)
-### flex-direction 預設值 row
-### justify-content 預設值 flex-start
+- #### flex-direction 預設值 row
+- #### align-items 預設值 stretch
 
 ![[Pasted image 20250627115543.png]]
 
@@ -152,5 +152,35 @@ Topics :: {筆記跟什麼主題有關，用 `[Topic],[Topic]` 格式}
 	<div class="flex-item-3">1</div>
 	<div class="flex-item-3">2</div>
 	<div class="flex-item-3">3</div>
+</div>
+```
+
+![[Pasted image 20250627121004.png]]
+
+```html
+<h4>space-between (兩端對齊)</h4>
+	<div class="code-3">
+		<div>display: flex;</div>
+		<div>justify-content: space-between;</div>
+	</div>
+	<div class="flex-container-3" style="display: flex; justify-content: space-between;">
+		<div class="flex-item-3">1</div>
+		<div class="flex-item-3">2</div>
+		<div class="flex-item-3">3</div>
+	</div>
+```
+
+![[Pasted image 20250627121039.png]]
+```html
+<h4>space-between (兩端對齊 && 空間平均分配)</h4>
+<div class="code-3">
+	<div>display: flex;</div>
+	<div>justify-content: space-between;</div>
+	<div>flex:1</div>
+</div>
+<div class="flex-container-3" style="display: flex; justify-content: space-between;">
+	<div class="flex-item-3" style="flex:1">1</div>
+	<div class="flex-item-3" style="flex:1">2</div>
+	<div class="flex-item-3" style="flex:1">3</div>
 </div>
 ```
