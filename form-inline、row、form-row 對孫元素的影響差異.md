@@ -40,7 +40,7 @@ Topics :: {筆記跟什麼主題有關，用 `[Topic],[Topic]` 格式}
 }
 
 /* 關鍵：Bootstrap 額外定義子元素行為 */
-.form-inline .form-control,
+.form-inline .form-control, /* .form-line 下層的 .form-control */
 .form-inline .form-group,
 .form-inline .input-group,
 .form-inline .form-check {
@@ -74,7 +74,7 @@ Topics :: {筆記跟什麼主題有關，用 `[Topic],[Topic]` 格式}
 
 **特點：**
 
-- 只影響直接子元素（通常是 col-* 類別）
+- 只影響直接子元素（通常是 col-md-* 類別）
 - 15px 的標準間距
 - 子元素內部保持垂直排列
 - 通用的網格佈局容器
@@ -92,39 +92,51 @@ Topics :: {筆記跟什麼主題有關，用 `[Topic],[Topic]` 格式}
 
 **特點：**
 
-- 只影響直接子元素
+- 只影響直接子元素（通常是 col-* 類別）
 - 5px 的較小間距，專為表單設計
 - 子元素內部保持垂直排列
 - 專門用於表單的網格佈局
 
 ## 實際範例對比
 
+```javascript
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">	
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+```
+
 ### form-inline 範例
 
 ```html
 <form class="form-inline">
-    <div class="form-group">
-        <label>姓名</label>                    <!-- 水平排列 -->
-        <input type="text" class="form-control"> <!-- 水平排列 -->
-        <small class="form-text">提示</small>    <!-- 水平排列 -->
-    </div>
+	<div class="form-group mr-3">
+	    <label for="email" class="mr-2">Email:</label>
+	    <input type="email" class="form-control" id="email">
+	</div>
+	<div class="form-group mr-3">
+	    <label for="password" class="mr-2">Password:</label>
+	    <input type="password" class="form-control" id="password">
+	</div>
+	<button type="submit" class="btn btn-primary">Submit</button>
 </form>
 ```
 
+![[Pasted image 20250628091215.png]]
 ### row / form-row 範例
 
 ```html
-<div class="form-row"> <!-- 或使用 row -->
-    <div class="col-md-6">
-        <label>姓名</label>                    <!-- 垂直排列 -->
-        <input type="text" class="form-control"> <!-- 垂直排列 -->
-        <small class="form-text">提示</small>    <!-- 垂直排列 -->
-    </div>
-    <div class="col-md-6">
-        <label>電話</label>                    <!-- 垂直排列 -->
-        <input type="text" class="form-control"> <!-- 垂直排列 -->
-    </div>
-</div>
+<form class="form-row">
+	<div class="form-group mr-3">
+	    <label for="email" class="mr-2">Email:</label>
+	    <input type="email" class="form-control" id="email">
+	</div>
+	<div class="form-group mr-3">
+	    <label for="password" class="mr-2">Password:</label>
+	    <input type="password" class="form-control" id="password">
+	</div>
+	<button type="submit" class="btn btn-primary">Submit</button>
+</form>
 ```
 
 ## 關鍵差異總結
