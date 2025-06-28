@@ -37,6 +37,7 @@ Topics :: {筆記跟什麼主題有關，用 `[Topic],[Topic]` 格式}
 
 1. `form-inline` 是應用在 `<form>` 元素上的 CSS 類別，用來讓整個表單以水平排列的方式顯示
 2. `form-group` 是用來包裝個別的表單控制項（label + input）📑 [[form-inline、form-group、form-control、control-label#form-group]]
-3. 當 `form-inline` 套用在父層的 `<form>` 上時，它會影響內部所有 `form-group` 的排列方式
+3. 當 `form-inline` 套用在父層的 `<form>` 上時，它會影響內部所有 `form-group` 的排列方式 。
+   [[form-inline、row、form-row 對孫元素的影響差異]]
 
 如果你把 `form-inline` 放在 `form-group` 裡面，會破壞 Bootstrap 預期的 DOM 結構，可能導致樣式無法正確套用。

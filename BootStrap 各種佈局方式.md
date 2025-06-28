@@ -41,7 +41,7 @@ Topics :: {筆記跟什麼主題有關，用 `[Topic],[Topic]` 格式}
 </div>
 ```
 
-## 2. form-row + col-*
+## 2. [[form-row + col|form-row + col-*]]
 
 這是專門為表單設計的佈局系統：
 
@@ -125,3 +125,5 @@ Topics :: {筆記跟什麼主題有關，用 `[Topic],[Topic]` 格式}
 - 簡單的單行表單
 - 搜尋框或登入框
 - 表單元素很少且希望水平排列
+
+#### 📑 [[form-inline、row、form-row 對孫元素的影響差異]]
