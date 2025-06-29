@@ -127,3 +127,4 @@ Topics :: {筆記跟什麼主題有關，用 `[Topic],[Topic]` 格式}
 - 表單元素很少且希望水平排列
 
 #### 📑 [[form-inline、row、form-row 對孫元素的影響差異]]
+#### 📑 [[col-6 與 col-md-6 的差異]]
