@@ -40,6 +40,7 @@ Topics :: {筆記跟什麼主題有關，用 `[Topic],[Topic]` 格式}
 				pagingType: "full_numbers", // 設定分頁樣式
 				pageLength: 3, 				// 每頁顯示筆數（為了展示分頁效果）
 				lengthMenu: [3,6,9,12],		// 可選擇的每頁筆數
+				lengthChange: true,			// 顯示「顯示 xxx 筆資料」下拉選單
 				language: {
 					url: 'https://cdn.datatables.net/plug-ins/1.13.7/i18n/zh-HANT.json'
 				},							// 將表格的介面語言設定為繁體中文
