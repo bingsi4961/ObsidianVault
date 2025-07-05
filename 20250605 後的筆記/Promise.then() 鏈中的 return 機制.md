@@ -161,7 +161,7 @@ Promise.reject('錯誤')
 
 ## 總結
 
-- 每個 `.then()` 都會返回一個新的 Promise
+- 每個 `.then()` ==都會返回一個新的 Promise==
 - 如果沒有明確 `return`，就是 `return undefined`
 - `undefined` 會被自動包裝成 `Promise.resolve(undefined)`
 - 這是一個**成功狀態**的 Promise，只是承載的值是 `undefined`
