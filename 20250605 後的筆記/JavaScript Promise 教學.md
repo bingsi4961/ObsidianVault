@@ -43,7 +43,7 @@ Promise 有三種可能的狀態：
 
 ```javascript
 // 建立一個基本的 Promise
-// 建立 Promise 後，就立即執行內容了
+// ★★★ 建立 Promise 後，就立即執行內容了
 const myPromise = new Promise((resolve, reject) => {
     // 這裡放你的異步操作
     const success = true; // 假設這是某種條件判斷
@@ -224,7 +224,7 @@ function fetchWithTimeout(url, timeout = 5000) {
 }
 
 fetchWithTimeout('/api/slow-endpoint', 3000)
-    .then(response => response.json())
+    .then(response => response.json())  // response => { return response.json(); }
     .then(data => console.log("資料載入成功：", data))
     .catch(error => console.error("載入失敗或逾時：", error));
 ```
@@ -273,10 +273,132 @@ function robustDataFetch(endpoint) {
 }
 ```
 
+## 練習範例
+
+```html
+<script type="text/javascript">
+	
+	// 觸發 Promise
+	function LaunchPromise() {
+		
+		console.log('LaunchPromise() 開始');
+		var myPromise = createPromise();
+		
+		myPromise
+			.then((result) => {
+				console.log('成功：', result);
+				
+				// 這裡返回的字串會被自動包裝成已解決（resolved）的 Promise，然後傳遞給下一個 .then()
+				// 相當於 return Promise.resolve('處理後的資料-XXX');
+				// 如果沒有 return，就會自動變成 return Promise.resolve(undefined);
+				// 每個 .then() 一定都會返回一個新的 Promise
+				return '處理後的資料-XXX';	
+			})
+			.then((newResult)=> {
+				console.log('進一步處理：', newResult);
+			})
+			.catch((error) => {
+				console.log('錯誤：', error);
+			})
+			.finally(() => {
+				console.log('清理工作完成');
+				// 清除(停止) progressInterval
+				clearInterval(progressInterval);
+			});
+		
+		// 秒數計數，是異步作業
+		var processCount = 0;
+		var progressInterval = setInterval(() => {
+			processCount++;
+			console.log(`Promise 處理中 (${processCount}秒) ...`);
+		}, 1000);		
+	}
+	
+	// 建立 Promise
+	function createPromise() {
+		return new Promise((resolve, reject) => {
+			var success;
+			setTimeout(function () {
+				success = true;
+				if(success) {
+					resolve('資料處理完成!!');					
+				} else {
+					resolve('資料處理失敗!!');
+				}				
+			},3000);
+		});
+	}
+</script>
+
+<input type="button" value="啟動 Promise" onclick="LaunchPromise()" style="margin: 10px;">
+```
+
+![[Pasted image 20250705233900.png]]
+
+```html
+<script type="text/javascript">
+	
+	function loginUser(credentials) {
+		return new Promise((resolve, reject) => {
+			// 模擬登入 API 呼叫
+			setTimeout(() => {
+				if (credentials.userName && credentials.passWord) {
+					resolve({ token: "abc123", userId: 456 });
+				} else {
+					reject(new Error("登入資訊不完整"));
+				}
+			}, 2000);
+		});
+	}
+
+	function fetchUserProfile(token, userId) {
+		return new Promise((resolve, reject) => {
+			// 模擬取得使用者資料的 API 呼叫
+			setTimeout(() => {
+				resolve({
+					id: userId,
+					name: "張小明",
+					department: "IT部門"
+				});
+			}, 2000);
+		});
+	}
+
+	function LaunchChaining() {	
+				
+		// 秒數計數, 是異步作業
+		var processCount = 0;
+		var progressInterval = setInterval(() => {
+			processCount++;
+			console.log(`Promise 處理中 (${processCount}秒) ...`);
+		}, 1000);
+		
+		console.log('LaunchPromise() 開始', `(${processCount}秒)`);		
+		
+		// 鏈接多個 Promise
+		loginUser({ userName: "user", passWord: "pass" })
+			.then((loginResult) => {
+				console.log("登入成功，Token:", loginResult.token , `(${processCount}秒)`);
+				// 回傳下一個 Promise 給下一個 .then()				
+				return fetchUserProfile(loginResult.token, loginResult.userId);
+			})
+			.then((userProfile) => {
+				console.log("使用者資料載入完成：", userProfile, `(${processCount}秒)`);				
+				// updateUserInterface(userProfile);
+				clearInterval(progressInterval);
+			})
+			.catch((error) => {
+				console.error("操作過程發生錯誤：", error);				
+			});
+	}	
+
+</script>
+
+<input type="button" value="Promise 的鏈接" onclick="LaunchChaining()" style="margin: 10px;">
+```
+
+![[Pasted image 20250705234123.png]]
+
 ## 與 C# 的對比思考
 
 作為 C# 開發者，你可能會發現 JavaScript Promise 與 C# 的 `Task` 和 `async/await` 有相似之處。JavaScript 的 Promise 就像 C# 的 Task，都代表一個異步操作的未來結果。在下一個階段的學習中，我們會探討 JavaScript 的 `async/await` 語法，它會讓你感覺更像在寫 C# 異步程式碼。
-
-現在，試著在你的 Portal 或 GTS 系統中找一個現有的 AJAX 呼叫，嘗試將它改寫為使用 Promise 的形式。這會幫助你更深入理解這個概念。
-
-你對 Promise 的哪個部分最感興趣，或是有什麼特定的使用情境想要深入探討嗎？

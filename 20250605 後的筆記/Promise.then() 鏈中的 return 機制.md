@@ -55,6 +55,7 @@ return Promise.resolve('處理後的資料-XXX');
 ```javascript
 .then((result) => {
     return '普通字串';  // 被包裝成 resolved Promise
+    // 等於 return Promise.resolve('普通字串');
 })
 ```
 
@@ -71,6 +72,7 @@ return Promise.resolve('處理後的資料-XXX');
 ```javascript
 .then((result) => {
     throw new Error('發生錯誤');  // 被包裝成 rejected Promise，跳到 catch
+    // 等於 return Promise.reject(new Error('發生錯誤'));
 })
 ```
 
@@ -80,6 +82,7 @@ return Promise.resolve('處理後的資料-XXX');
 .then((result) => {
     console.log('處理中...');
     // 沒有 return 語句
+    // 等於 return Promise.resolve(undefined);
 })
 ```
 
@@ -89,6 +92,7 @@ return Promise.resolve('處理後的資料-XXX');
 .then((result) => {
     console.log('處理中...');
     return undefined;  // 隱含的 return undefined
+    // 等於 return Promise.resolve(undefined);
 })
 ```
 
@@ -100,6 +104,80 @@ return Promise.resolve('處理後的資料-XXX');
     return Promise.resolve(undefined);  // 自動包裝成成功的 Promise
 })
 ```
+
+## 鏈式中的最後一個 `then()` 回傳 Promise 給呼叫的 function
+
+無論鏈式中的最後一個 `.then()` 有沒有 `return`，整個 Promise 鏈都會回傳一個 Promise 給呼叫的 function。
+
+**情況分析：**
+```javascript
+// 情況 1：最後一個 then 有 return
+function myFunction() {
+    return Promise.resolve('開始')
+        .then(result => {
+            console.log('處理中...');
+            return '完成';  // 明確回傳值
+        });
+    // 整個鏈式回傳 Promise.resolve('完成')
+}
+
+// 情況 2：最後一個 then 沒有 return
+function myFunction() {
+    return Promise.resolve('開始')
+        .then(result => {
+            console.log('處理中...');
+            // 隱式回傳 undefined
+        });
+    // 整個鏈式回傳 Promise.resolve(undefined)
+}
+```
+
+**重要概念：**
+
+-  `.then()` 永遠回傳一個新的 Promise
+-  鏈式中的最後一個 `.then()` 決定整個鏈式的最終回傳值
+-  無論有沒有明確 `return`，都會回傳 Promise 給呼叫的 function
+
+## `catch()` 也會回傳 Promise 給呼叫的 function
+
+執行到 .catch() 時，無論有沒有 return，整個 Promise 鏈都會回傳一個 Promise 給呼叫的 function。
+
+**情況分析：**
+```javascript
+// 情況 1：catch 有 return
+function myFunction() {
+    return Promise.resolve('開始')
+        .then(result => {
+            throw new Error('發生錯誤');
+        })
+        .catch(error => {
+            console.log('捕獲錯誤:', error.message);
+            return '錯誤已處理';  // 明確回傳值
+        });
+    // 整個鏈式回傳 Promise.resolve('錯誤已處理')
+    // ★★ 注意是 resolve 喔!!
+}
+
+// 情況 2：catch 沒有 return
+function myFunction() {
+    return Promise.resolve('開始')
+        .then(result => {
+            throw new Error('發生錯誤');
+        })
+        .catch(error => {
+            console.log('捕獲錯誤:', error.message);
+            // 隱式回傳 undefined
+        });
+    // 整個鏈式回傳 Promise.resolve(undefined)
+    // ★★ 注意是 resolve 喔!!
+}
+```
+
+**重要概念：**
+
+-  `.catch()` 也會回傳一個新的 Promise
+-  如果 `.catch()` 正常執行（不拋出錯誤），會回傳 ==**resolved Promise**==
+-  如果 `.catch()` 中又拋出錯誤，會回傳 ==**rejected Promise**==
 
 ## 重要觀念
 
