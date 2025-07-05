@@ -16,6 +16,7 @@ Topics :: {筆記跟什麼主題有關，用 `[Topic],[Topic]` 格式}
 
 #### 📑 [[Promise.then() 鏈中的 return 機制]]
 
+
 JavaScript 的 Promise 是現代網頁開發中處理非同步操作的核心概念，我來為你詳細解說這個重要的主題。
 
 ## 什麼是 Promise？
