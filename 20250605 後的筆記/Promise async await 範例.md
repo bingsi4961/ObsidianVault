@@ -93,7 +93,7 @@ async function changeGens() {
 }
 
 // 依據所勾選的 Vendor，重新產生 Gen 選項
-// ★★ async 都會回傳 Promise
+// 🔥 async 都會回傳 Promise
 async function performChangeGens() {
 
     const $cbxVendors = $('input:checkbox[id^="cbxVendor_"]');
