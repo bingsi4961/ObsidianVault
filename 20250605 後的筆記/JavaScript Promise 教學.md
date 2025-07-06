@@ -110,7 +110,7 @@ JavaScript 的 Promise 就像 C# 的 Task，必須有明確的「完成」信號
 
 ```javascript
 // 建立一個基本的 Promise
-// ★★★ 建立 Promise 後，就立即執行內容了
+// 🔥🔥 建立 Promise 後，就立即執行內容了
 const myPromise = new Promise((resolve, reject) => {
     // 這裡放你的異步操作
     const success = true; // 假設這是某種條件判斷
@@ -239,7 +239,7 @@ loginUser({ username: "user", password: "pass" })
         updateUserInterface(userProfile);
     })
     .catch((error) => {
-        // ★★ 會捕捉到整個 Promise 鏈中任何一個環節發生的錯誤。
+        // 🔥🔥 會捕捉到整個 Promise 鏈中任何一個環節發生的錯誤。
         console.error("操作過程發生錯誤：", error);
         showErrorMessage(error.message);
     });
