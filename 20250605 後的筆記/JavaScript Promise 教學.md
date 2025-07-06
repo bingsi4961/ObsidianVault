@@ -26,17 +26,83 @@ Promise 就像是一個「承諾」或「約定」，它代表一個異步操作
 
 Promise 特別重要，因為它們可以幫助你更優雅地處理 AJAX 請求、檔案讀取等異步操作，而不會陷入「回調地獄」的困境。
 
+## 什麼是 Promise？
+
+Promise 就像是一個「承諾」或「約定」，它代表一個異步操作的最終完成或失敗。想像一下你在餐廳點餐，服務生給你一個號碼牌，這個號碼牌就像是一個 Promise - 它承諾你的餐點會準備好，但不知道確切的時間，也不確定是否會成功完成。
+
+Promise 特別重要，因為它們可以幫助你更優雅地處理 AJAX 請求、檔案讀取等異步操作，而不會陷入「回調地獄」的困境。
+
 ## Promise 的三種狀態
 
-Promise 有三種可能的狀態：
+Promise 有三種可能的狀態，就像一個任務的進行狀態：
 
 **Pending（等待中）**：初始狀態，操作尚未完成也未失敗。就像你剛點完餐，廚師還在準備。
 
-**Fulfilled（已實現）**：操作成功完成。餐點準備好了，你可以享用。
+**Fulfilled（已實現）**：操作成功完成，當呼叫 resolve() 時，Promise 變成這個狀態。餐點準備好了，你可以享用。
 
-**Rejected（已拒絕）**：操作失敗。可能廚房沒有食材，無法完成你的訂單。
+**Rejected（已拒絕）**：操作失敗，當呼叫 reject() 時，Promise 變成這個狀態。可能廚房沒有食材，無法完成你的訂單。
 
 重要的是，Promise 一旦從 pending 狀態轉換到 fulfilled 或 rejected，就無法再改變狀態。
+
+## Promise 的執行機制
+
+這是理解 Promise 運作的關鍵：**Promise 的 .then() 方法只有在 Promise 被 resolve 時才會執行，.catch() 方法只有在 Promise 被 reject 時才會執行。**
+
+### 執行流程的關鍵
+
+當你建立一個 Promise 時，裡面的程式碼會立即執行，但是：
+
+- 如果沒有呼叫 resolve() 或 reject()，Promise 會永遠停留在 Pending 狀態
+- 只有當 resolve() 被呼叫時，.then() 才會執行
+- 只有當 reject() 被呼叫時，.catch() 才會執行
+- .finally() 無論如何都會執行（只要 Promise 不是 Pending 狀態）
+
+讓我用一個簡單的例子來示範：
+
+javascript
+
+```javascript
+// 這個 Promise 會永遠卡在 Pending 狀態
+function neverResolvePromise() {
+    return new Promise((resolve, reject) => {
+        console.log('Promise 內部程式碼執行了！');
+        // 注意：這裡沒有呼叫 resolve() 或 reject()
+        // 所以 Promise 會永遠停留在 Pending 狀態
+    });
+}
+
+neverResolvePromise()
+    .then(() => {
+        console.log('這行永遠不會執行'); // 永遠不會看到這個
+    })
+    .catch(() => {
+        console.log('這行也永遠不會執行'); // 永遠不會看到這個
+    });
+
+// 你只會在 console 看到：'Promise 內部程式碼執行了！'
+```
+
+這個例子清楚地展示了 Promise 必須透過 resolve() 或 reject() 來改變狀態，才能觸發後續的 .then() 或 .catch() 方法。
+
+## 類比 C# 的 Task
+
+這個概念其實和你熟悉的 C# Task 很相似。在 C# 中：
+
+csharp
+
+```csharp
+// 類似的概念
+var task = Task.Run(() => {
+    // 如果這個方法沒有 return 或 throw exception
+    // 呼叫者的 await 就會一直等待
+});
+
+// 只有當 task 完成時，await 後面的程式碼才會執行
+await task;
+Console.WriteLine("Task 完成了");
+```
+
+JavaScript 的 Promise 就像 C# 的 Task，必須有明確的「完成」信號（resolve/reject），後續的處理（.then/.catch）才會被觸發。
 
 ## 基礎語法與建立 Promise
 
@@ -162,15 +228,18 @@ function fetchUserProfile(token, userId) {
 loginUser({ username: "user", password: "pass" })
     .then((loginResult) => {
         console.log("登入成功，Token:", loginResult.token);
-        // 回傳下一個 Promise
+        // 回傳下一個 Promise 給下一個 .then()
         return fetchUserProfile(loginResult.token, loginResult.userId);
     })
+    // Promise 鏈自動解析結果給 userProfile
     .then((userProfile) => {
+	    // userProfile 不是 Promise 物件，而是 { id: userId, name: "張小明", department: "IT部門" }
         console.log("使用者資料載入完成：", userProfile);
         // 更新頁面顯示
         updateUserInterface(userProfile);
     })
     .catch((error) => {
+        // ★★ 會捕捉到整個 Promise 鏈中任何一個環節發生的錯誤。
         console.error("操作過程發生錯誤：", error);
         showErrorMessage(error.message);
     });
