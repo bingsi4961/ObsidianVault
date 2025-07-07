@@ -366,7 +366,7 @@ function robustDataFetch(endpoint) {
 				// 每個 .then() 一定都會返回一個新的 Promise
 				return '處理後的資料-XXX';	
 			})
-			.then((newResult)=> {
+			.then((newResult) => {
 				console.log('進一步處理：', newResult);
 			})
 			.catch((error) => {
