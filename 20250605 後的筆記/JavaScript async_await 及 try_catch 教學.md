@@ -1,12 +1,9 @@
 ---
-date : 2025-07-07 22:15
-aliases:
-  - 別名測試1
-  - 別名測試2
+date: 2025-07-07 22:15
+aliases: 
 tags:
-  - 標籤測試1
-  - 標籤測試2
-
+  - JavaScript
+  - async/await
 ---
 # Metadata
 Status :: 🌱
@@ -17,8 +14,8 @@ Topics :: {筆記跟什麼主題有關，用 `[Topic],[Topic]` 格式}
 
 ---
 # 連結筆記
-##### 📑 [[$.ajax() deferred (Promise-like)  vs  Javascript Promise (學得很混淆)]]
-##### 📑 [[歡迎]]
+##### 📑 [[JavaScript Promise 教學]]
+##### 📑 [[Promise async await 範例]]
 
 ---
 
@@ -62,6 +59,7 @@ function fetchUserDataWithPromise(userId) {
         .catch(error => {
             console.error("發生錯誤：", error);
             throw error; // return Promise.reject(error);
+            // 🔥🔥 若沒有寫 throw error，則系統認為您已將錯誤理處好了，自動 return Promise.resolve(undefined)
         });
 }
 
@@ -82,6 +80,7 @@ async function fetchUserDataWithAsync(userId) {
     } catch (error) {
         console.error("發生錯誤：", error);
         throw error; // return Promise.reject(error)
+        // 🔥🔥 若沒有寫 throw error，則系統認為您已將錯誤理處好了，自動 return Promise.resolve(undefined)
     }
 }
 ```
@@ -287,84 +286,63 @@ async function robustApiCall(endpoint, data) {
 
 ## 並行處理：當你不需要等待時
 
-有時候你有多個獨立的異步操作，不需要按順序執行。這時候你可以結合 `Promise.all` 和 async/await：
+有時候你有多個獨立的異步操作，不需要按順序執行。 這時候你可以結合 `Promise.all` 和 async/await：
+#### 📑 [[Promise 中 resolve reject 與 catch 觸發機制筆記]]
 
 ```javascript
+function ajaxPromise(options) {
+	return new Promise((resolve, reject) => {			
+		$.ajax(options)
+			.done((result) => {
+				resolve(result);
+			})
+			.fail((jqXHR) => {
+				const errorMessage = `Ajax Error: ${jqXHR.status} ${jqXHR.statusText}`;
+				const error = new Error(errorMessage);
+				error.jqXHR = jqXHR;
+				reject(error);
+			});
+	});
+}
+
 async function loadDashboardData(userId) {
-    try {
-        // 這些資料可以同時載入，因為它們互不依賴
-        const [userData, notifications, statistics, recentActivities] = await Promise.all([
-            ajaxPromise({ url: `/api/users/${userId}`, method: 'GET' }),
-            ajaxPromise({ url: `/api/notifications/${userId}`, method: 'GET' }),
-            ajaxPromise({ url: `/api/statistics/${userId}`, method: 'GET' }),
-            ajaxPromise({ url: `/api/activities/${userId}`, method: 'GET' })
-        ]);
-        
-        // 當所有資料都載入完成後，更新不同的頁面區域
-        updateUserSection(userData);
-        updateNotificationSection(notifications);
-        updateStatisticsSection(statistics);
-        updateActivitiesSection(recentActivities);
-        
-        console.log("儀表板所有資料載入完成");
-        
-    } catch (error) {
-        console.error("載入儀表板資料失敗：", error);
-        showDashboardErrorMessage();
-        throw error;  // return Promise.reject(error);
-    }
-}
-```
-
-這種方式比依序等待每個請求完成要快得多，因為所有請求是同時發出的。
-
-## 實用的模式：條件性異步操作
-
-在實際開發中，你經常需要根據某些條件來決定是否執行異步操作：
-
-```javascript
-async function smartUserDataLoader(userId, options = {}) {
-    try {
-        // 先檢查快取
-        let userData = getCachedUserData(userId);
-        
-        if (!userData || options.forceRefresh) {
-            console.log("從伺服器載入使用者資料...");
-            userData = await ajaxPromise({
-                url: `/api/users/${userId}`,
-                method: 'GET',
-                dataType: 'json'
-            });
-            
-            // 將資料存入快取
-            setCachedUserData(userId, userData);
-        } else {
-            console.log("使用快取的使用者資料");
-        }
-        
-        // 如果需要載入額外的詳細資料
-        if (options.includeDetails) {
-            const detailsData = await ajaxPromise({
-                url: `/api/users/${userId}/details`,
-                method: 'GET',
-                dataType: 'json'
-            });
-            
-            userData.details = detailsData;
-        }
-        
-        return userData;
-        
-    } catch (error) {
-        console.error("載入使用者資料失敗：", error);
-        throw error;
-    }
+	try {
+		// 這些資料可以同時載入，因為它們互不依賴
+		const [posts, users, post] = await Promise.all([
+			ajaxPromise({ url: 'https://jsonplaceholder.typicode.com/posts', method: 'GET' }),
+			ajaxPromise({ url: 'https://jsonplaceholder.typicode.com/users', method: 'GET' }),
+			ajaxPromise({ url: `https://jsonplaceholder.typicode.com/posts/${userId}`, method: 'GET' })
+		]);
+		
+		console.log(posts);
+		console.log(users);
+		console.log(post);			
+		console.log('儀表板所有資料載入完成');
+		
+	} catch (error) {
+		console.log('載入儀表板資料失敗：', error);
+		throw error;	// return Promise.reject(error);
+	}
 }
 
-// 使用方式
-const basicUserData = await smartUserDataLoader(123);
-const detailedUserData = await smartUserDataLoader(123, { includeDetails: true });
-const freshUserData = await smartUserDataLoader(123, { forceRefresh: true });
+async function launchLoadDashboardData() {		
+	try {
+		await loadDashboardData(1);
+		🔥🔥🔥
+		// 如果沒有加 await，就不會等待 loadDashboardData()，直接完成函式
+		// 等 loadDashboardData() 完成後，外部也捕捉不到例外了			
+		// 關鍵概念：try-catch 只能捕獲同步錯誤，或是有 await 的非同步錯誤
+		
+		// 沒有 await，就是沒有接收 loadDashboardData()
+		// 真正的「接收」 => 等待 Promise 完成，如果成功，取得結果；如果失敗，拋出錯誤給 catch
+		// await 就像 「我等你做完，告訴我結果」
+		// 沒有 await 就像 「我知道你在做事，但我不等你」，我要去做後面的事了						
+	} catch (error) {
+		console.log('外部 Catch 觸發!!', error);			
+	}		
+}
+
+launchLoadDashboardData();
 ```
 
 ## 避免常見的陷阱
@@ -410,11 +388,3 @@ async function fastWay(userIds) {
     return results;
 }
 ```
-
-## 與你的開發環境整合
-
-在你的 GTS 系統（使用較舊的 jQuery 1.10.2）中，你可能需要考慮瀏覽器相容性。async/await 在較舊的瀏覽器中可能不被支援，但你可以使用 Babel 等工具來轉換程式碼，或者在支援的環境中逐步採用。
-
-現在我想問你一個思考問題：在你目前的專案中，有沒有哪些地方使用了很多巢狀的回調函式或者複雜的 Promise 鏈？這些地方可能是應用 async/await 的絕佳候選。
-
-你是否想要嘗試將某個現有的功能改寫為使用 async/await？或者你對某個特定的使用情境有疑問？我們可以一起來探討具體的實作方式。

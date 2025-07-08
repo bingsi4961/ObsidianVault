@@ -19,6 +19,7 @@ Topics :: {筆記跟什麼主題有關，用 `[Topic],[Topic]` 格式}
 #### 📑 [[Promise async await 範例]]
 #### 📑 [[$.ajax() deferred (Promise-like)  vs  Javascript Promise (學得很混淆)]]
 #### 📑 [[Promise 中 resolve reject 與 catch 觸發機制筆記]]
+#### 📑 [[JavaScript async_await 及 try_catch 教學]]
 
 
 JavaScript 的 Promise 是現代網頁開發中處理非同步操作的核心概念，我來為你詳細解說這個重要的主題。
