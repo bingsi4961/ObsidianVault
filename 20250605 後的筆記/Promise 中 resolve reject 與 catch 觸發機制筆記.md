@@ -93,6 +93,23 @@ function ajaxPromise(options) {
             });
     });
 }
+
+// 這種寫法比較簡單
+async function ajaxPromise(options) {
+	try {
+		// ajax() 回傳 deferred.resolve(result) 時，透過 await 取得 result
+		var result = await $.ajax(options); 
+		// return Promise.resolve(result)
+		return result;
+	} catch (jqXHR) {
+		// ajax() 回傳 deferred.reject(jqXHR) 時觸發
+		const errorMessage = `Ajax Error: ${jqXHR.status} ${jqXHR.statusText}`;
+		const error = new Error(errorMessage);
+		error.jqXHR = jqXHR;
+		throw error;
+	}
+}
+
 ```
 
 ## 關鍵要點
