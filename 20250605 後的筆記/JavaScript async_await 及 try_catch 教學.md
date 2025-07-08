@@ -288,6 +288,7 @@ async function robustApiCall(endpoint, data) {
 
 有時候你有多個獨立的異步操作，不需要按順序執行。 這時候你可以結合 `Promise.all` 和 async/await：
 #### 📑 [[Promise 中 resolve reject 與 catch 觸發機制筆記]]
+#### 📑 [[$.ajax() 與 await 運作機制筆記]]
 
 ```javascript
 /*
