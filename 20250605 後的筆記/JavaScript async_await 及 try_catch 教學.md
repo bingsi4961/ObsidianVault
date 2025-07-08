@@ -290,6 +290,7 @@ async function robustApiCall(endpoint, data) {
 #### 📑 [[Promise 中 resolve reject 與 catch 觸發機制筆記]]
 
 ```javascript
+/*
 function ajaxPromise(options) {
 	return new Promise((resolve, reject) => {			
 		$.ajax(options)
@@ -304,6 +305,23 @@ function ajaxPromise(options) {
 			});
 	});
 }
+*/
+
+async function ajaxPromise(options) {
+	try {
+		// ajax() 回傳 Promise.resolve(result) 時，透過 await 取得 result
+		var result = await $.ajax(options); 
+		// return Promise.resolve(result)
+		return result;
+	} catch (jqXHR) {
+		// ajax() 回傳 Promise.reject() 時觸發
+		const errorMessage = `Ajax Error: ${jqXHR.status} ${jqXHR.statusText}`;
+		const error = new Error(errorMessage);
+		error.jqXHR = jqXHR;
+		throw error;
+	}
+}
+
 
 async function loadDashboardData(userId) {
 	try {
