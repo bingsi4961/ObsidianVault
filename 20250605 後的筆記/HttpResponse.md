@@ -27,12 +27,15 @@ fetch('https://jsonplaceholder.typicode.com/posts')
 		console.log('response 是否為 Object 實例:', response instanceof Object);
 		
 		// response 是否成功： true
+		// 表示 HTTP 狀態碼是否在 200-299 範圍內
 		console.log('response 是否成功：', response.ok);
 		
 		// response 狀態碼： 200
+		// HTTP 狀態碼（如 200、404、500）
 		console.log('response 狀態碼：', response.status);
 		
 		// response.statusText：
+		// HTTP 狀態訊息（如 "OK"、"Not Found"）
 		console.log('response.statusText：', response.statusText);
 		
 		//
@@ -40,7 +43,10 @@ fetch('https://jsonplaceholder.typicode.com/posts')
 		
 		// response.body
 		console.log('response.body：', response.body);
-				
+
+		// 取得回應內容：從 Response 物件中讀取 HTTP 回應的 body 內容
+	    // 解析 JSON：將回應內容（通常是 JSON 字串）解析成 JavaScript 物件
+	    // 回傳 Promise：這是一個非同步操作，所以回傳 Promise
 		var jsResponse = response.json();
 		
 		// response.json() 的型別： object
