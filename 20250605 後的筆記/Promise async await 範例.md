@@ -1,5 +1,5 @@
 ---
-date: 2025-07-06 11:12
+date: 2025-07-08 15:35
 aliases: 
 tags:
   - JavaScript
@@ -12,6 +12,11 @@ Note Type :: 📰
 Source URL :: {文章 URL}
 Author :: {作者名稱}
 Topics :: {筆記跟什麼主題有關，用 `[Topic],[Topic]` 格式}
+
+---
+# 連結筆記
+#### 📑 [[Promise 中 resolve reject 與 catch 觸發機制筆記]]
+#### 📑 [[歡迎]]
 
 ---
 
