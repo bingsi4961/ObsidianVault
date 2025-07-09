@@ -284,6 +284,31 @@ async function robustApiCall(endpoint, data) {
 }
 ```
 
+```javascript
+async function safeDataFetch(url) { 
+	try { 
+		const response = await fetch('https://jsonplaceholder.typicode.com/posts'); 
+		
+		try {
+			// 先嘗試解析為 JSON
+			const jsonData = await response.json(); 
+			return { type: 'json', data: jsonData }; 
+		} catch (jsonError) { 
+			// 如果 JSON 解析失敗,改用 text
+			const textData = await response.text(); 
+			return { type: 'text', data: textData };
+			// 如果內部 catch 發生錯誤，會把錯誤丟給外部 catch
+			// 🚨 注意這裡不是 return Promise.reject(error) 
+			// 🚨 因為只有在「整個函式執行完畢」時，系統才會決定返回 Promise.resolve 或 Promise.reject
+		} 
+	} catch (error) { 
+		console.log('外部cath開始');
+		throw new Error(`載入失敗: ${error.message}`); 
+		// 🚨 這裡才會 return Promise.reject(new Error(`載入失敗: ${error.message}`));
+	} 
+}
+```
+
 ## 並行處理：當你不需要等待時
 
 有時候你有多個獨立的異步操作，不需要按順序執行。 這時候你可以結合 `Promise.all` 和 async/await：
