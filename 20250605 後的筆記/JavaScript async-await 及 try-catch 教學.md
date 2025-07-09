@@ -182,6 +182,7 @@ jQuery 本身並不直接支援 Promise，但我們可以輕鬆地將 jQuery AJA
 
 ```javascript
 // 建立一個輔助函式，將 jQuery AJAX 轉換為 Promise
+/*
 function ajaxPromise(options) {
     return new Promise((resolve, reject) => {
         $.ajax(options)
@@ -190,6 +191,22 @@ function ajaxPromise(options) {
             .fail(reject);  // 失敗時拒絕 Promise
             // .fail((jqXHR, textStatus, errorThrown) => { reject(jqXHR, textStatus, errorThrown); })
     });
+}
+*/
+// 這種寫法比較簡單
+async function ajaxPromise(options) {
+	try {
+		// ajax() 回傳 deferred.resolve(result) 時，透過 await 取得 result
+		var result = await $.ajax(options); 
+		// return Promise.resolve(result)
+		return result;
+	} catch (jqXHR) {
+		// ajax() 回傳 deferred.reject(jqXHR) 時觸發
+		const errorMessage = `Ajax Error: ${jqXHR.status} ${jqXHR.statusText}`;
+		const error = new Error(errorMessage);
+		error.jqXHR = jqXHR;
+		throw error;  // 自動轉成 return Promise.reject(error);
+	}
 }
 
 // 現在你可以在 Portal 系統中使用 async/await
