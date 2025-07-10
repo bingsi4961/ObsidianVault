@@ -1,11 +1,26 @@
 ---
-title: Include 和 ThenInclude 的差別
-tags: [.Entity Framework Core]
+date : 2025-07-10 10:14
+aliases:
+  - 別名測試1
+  - 別名測試2
+tags:
+  - 標籤測試1
+  - 標籤測試2
 
 ---
+# Metadata
+Status :: 🌱
+Note Type :: 📰
+Source URL :: {文章 URL}
+Author :: {作者名稱}
+Topics :: {筆記跟什麼主題有關，用 `[Topic],[Topic]` 格式}
 
-# Include 和 ThenInclude 的差別
+---
+# 連結筆記
+#### 📑 [[歡迎]]
+#### 📑 [[歡迎]]
 
+---
 ## Include
 
 - **直接關聯載入**：用於載入與當前實體直接關聯的實體
@@ -123,10 +138,6 @@ Order {
 - 使用 `ThenInclude`：Product 資訊已經載入，不需要再查詢資料庫
 
 這就是為什麼雖然可能返回相同的訂單筆數，但資料的完整性和後續操作的效率會有很大差異。
-
-
-
-
 
 ## 總結
 
