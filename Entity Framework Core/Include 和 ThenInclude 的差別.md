@@ -1,12 +1,9 @@
 ---
-date : 2025-07-10 10:14
-aliases:
-  - 別名測試1
-  - 別名測試2
+date: 2025-07-10 10:14
+aliases: 
 tags:
-  - 標籤測試1
-  - 標籤測試2
-
+  - Entity_Framework
+  - Entity_Framework_Core
 ---
 # Metadata
 Status :: 🌱
