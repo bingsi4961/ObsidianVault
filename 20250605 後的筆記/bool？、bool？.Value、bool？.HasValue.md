@@ -1,9 +1,24 @@
 ---
-title: 'C# 中【bool?】vs【bool?.Value】vs【bool?.HasValue】'
-tags: ['C# 程式']
+date: 2025-07-15 17:44
+aliases: 
+tags:
+  - CSharp_語法
+---
+# Metadata
+Status :: 🌱
+Note Type :: 📰
+Source URL :: {文章 URL}
+Author :: {作者名稱}
+Topics :: {筆記跟什麼主題有關，用 `[Topic],[Topic]` 格式}
+
+---
+# 連結筆記
+#### 📑 [[]]
+#### 📑 [[]]
 
 ---
 
+內文開始
 # bool? 和 bool?.Value 的差別
 
 在 C# 中，`p.IsValid` 和 `p.IsValid.Value` 之間有著重要的區別，這關係到可空值類型(Nullable Value Types)的概念。
@@ -36,7 +51,7 @@ tags: ['C# 程式']
 
 ## 實際應用例子
 
-```csharp
+```CSharp
 bool? isValid = null;
 
 // 安全的使用方式
@@ -58,7 +73,7 @@ try {
 
 ## 可空類型與 HasValue 屬性
 
-在 C# 中，`int?` 是一個可空整數類型（Nullable<int>），這表示它可以存儲整數值或 `null`。`HasValue` 是所有可空類型都具有的屬性，用來檢查該可空類型是否包含有效值。
+在 C# 中，`int?` 是一個可空整數類型 (Nullable< int>)，這表示它可以存儲整數值或 `null`。`HasValue` 是所有可空類型都具有的屬性，用來檢查該可空類型是否包含有效值。
 
 ### HasValue 的基本概念
 

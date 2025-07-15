@@ -200,13 +200,13 @@ public class CustomersController : ControllerBase
 
 2. **序列化和反序列化比較**
 
-| 操作類型 | Newtonsoft.Json | System.Text.Json |
-|----------|-----------------|------------------|
-| 序列化 | `JsonConvert.SerializeObject()` | `JsonSerializer.Serialize()` |
-| 反序列化 | `JsonConvert.DeserializeObject<T>()` | `JsonSerializer.Deserialize<T>()` |
-| 效能 | 較慢 | 較快 |
-| 功能豐富度 | 高 | 中 |
-| 使用難度 | 簡單 | 中等 |
+| 操作類型  | Newtonsoft.Json                      | System.Text.Json                  |
+| ----- | ------------------------------------ | --------------------------------- |
+| 序列化   | `JsonConvert.SerializeObject()`      | `JsonSerializer.Serialize()`      |
+| 反序列化  | `JsonConvert.DeserializeObject<T>()` | `JsonSerializer.Deserialize<T>()` |
+| 效能    | 較慢                                   | 較快                                |
+| 功能豐富度 | 高                                    | 中                                 |
+| 使用難度  | 簡單                                   | 中等                                |
 
 3. **建議使用情境**
 
