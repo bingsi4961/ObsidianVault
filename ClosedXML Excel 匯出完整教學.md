@@ -197,11 +197,10 @@ worksheet.Range("A1:C1").Merge();
 worksheet.Range(1, 1, 1, 3).Merge();
 ```
 
-### 5.3 動態範圍計算和 lastCellUsed.Address.ColumnNumber 說明
+### 5.3 動態範圍計算
 
 ##### 📑 [[ClosedXML 範圍處理筆記]]
 
-![[ClosedXML 範圍處理筆記]]
 
 ## 6. 列和欄操作
 
