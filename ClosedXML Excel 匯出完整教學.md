@@ -68,7 +68,6 @@ public IActionResult ExportToExcel(int id)
 ### 2.2 基本儲存格操作
 
 ```csharp
-// 兩個版本通用
 var worksheet = workbook.Worksheets.Add("資料表");
 
 // 設定單一儲存格值
@@ -89,7 +88,6 @@ var cellValue = worksheet.Cell(1, 1).Value;
 ### 3.1 RichText 部分文字加粗
 
 ```csharp
-// 兩個版本通用
 var cell = worksheet.Cell(1, 1);
 
 // 基本用法
@@ -111,7 +109,6 @@ cell.RichText.AddText("一般文字")
 ### 3.2 儲存格內換行
 
 ```csharp
-// 兩個版本通用
 var cell = worksheet.Cell(1, 1);
 
 // 方法一：使用 Environment.NewLine
@@ -131,7 +128,6 @@ cell.Style.Alignment.WrapText = true;
 ### 4.1 字體樣式
 
 ```csharp
-// 兩個版本通用
 var cell = worksheet.Cell(1, 1);
 
 // 字體設定
@@ -148,7 +144,6 @@ cell.Style.Fill.BackgroundColor = XLColor.FromArgb(255, 255, 0); // 自訂顏色
 ### 4.2 對齊方式
 
 ```csharp
-// 兩個版本通用
 var cell = worksheet.Cell(1, 1);
 
 // 水平對齊
@@ -165,7 +160,6 @@ cell.Style.Alignment.Vertical = XLAlignmentVerticalValues.Bottom;
 ### 4.3 邊框設定
 
 ```csharp
-// 兩個版本通用
 var cell = worksheet.Cell(1, 1);
 
 // 單一儲存格邊框
@@ -183,7 +177,6 @@ range.Style.Border.InsideBorder = XLBorderStyleValues.Thin;
 ### 5.1 建立和操作範圍
 
 ```csharp
-// 兩個版本通用
 // 建立範圍
 var range1 = worksheet.Range("A1:C3");
 var range2 = worksheet.Range(1, 1, 3, 3); // 列1行1 到 列3行3
@@ -199,29 +192,22 @@ range1.Style.Fill.BackgroundColor = XLColor.LightGray;
 ### 5.2 合併儲存格
 
 ```csharp
-// 兩個版本通用
 // 合併指定範圍
 worksheet.Range("A1:C1").Merge();
 worksheet.Range(1, 1, 1, 3).Merge();
-
-// 條件式合併
-if (itemCount > 1)
-{
-    worksheet.Range(startRow, 1, startRow + itemCount - 1, 1).Merge();
-}
 ```
 
 ### 5.3 動態範圍計算和 lastCellUsed.Address.ColumnNumber 說明
 
 ```csharp
-// 兩個版本通用
 // 取得已使用的範圍
 var usedRange = worksheet.RangeUsed();
 
-// 計算最大欄位
+// 計算最大的欄位編號
 int maxColumn = 1;
 for (int row = 1; row <= usedRange.RowCount(); row++)
 {
+	// 遍歷每一列，找出該列最後一個有資料的儲存格
     var lastCellUsed = worksheet.Row(row).LastCellUsed();
     if (lastCellUsed != null)
     {
@@ -233,6 +219,12 @@ for (int row = 1; row <= usedRange.RowCount(); row++)
         maxColumn = Math.Max(maxColumn, lastCellUsed.Address.ColumnNumber);
     }
 }
+
+// 實際應用情境，假設你有一個 Excel 檔案：
+// 第1列：A1 到 E1 有資料
+// 第2列：A2 到 C2 有資料
+// 第3列：A3 到 G3 有資料
+// 執行後 `maxColumn` 會是 **7**（對應 G 欄），因為 G 欄是所有列中最右邊有資料的欄位。
 
 // 使用計算出的範圍設定樣式
 var dataRange = worksheet.Range(1, 1, usedRange.RowCount(), maxColumn);
