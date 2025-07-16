@@ -242,8 +242,9 @@ worksheet.Column(2).Unhide();
 
 ### 7.1 使用反射自動填入資料
 
+##### 📑 [[CSharp Reflection：GetType、typeof、GetProperties、GetProperty、GetValue]]
+
 ```csharp
-// 兩個版本通用
 using (var workbook = new XLWorkbook())
 using (var ms = new MemoryStream())
 {
@@ -255,33 +256,35 @@ using (var ms = new MemoryStream())
         var properties = typeof(T).GetProperties();
         
         // 建立標題列
-        for (int i = 0; i < properties.Length; i++)
-        {
-            var property = properties[i];
-            
-            // 取得 DisplayName 屬性
-            string displayName = property.Name;
-            var displayNameAttr = property.GetCustomAttribute(typeof(DisplayNameAttribute)) as DisplayNameAttribute;
-            if (displayNameAttr != null)
-            {
-                displayName = displayNameAttr.DisplayName;
-            }
-            
-            worksheet.Cell(1, i + 1).Value = displayName;
-            worksheet.Cell(1, i + 1).Style.Font.Bold = true;
-        }
-        
-        // 填入資料
-        for (int rowIndex = 0; rowIndex < data.Count; rowIndex++)
-        {
-            var item = data[rowIndex];
-            
-            for (int colIndex = 0; colIndex < properties.Length; colIndex++)
-            {
-                var value = properties[colIndex].GetValue(item);
-                worksheet.Cell(rowIndex + 2, colIndex + 1).Value = value?.ToString() ?? "";
-            }
-        }
+		int colIndex = 1;
+		foreach (var property in properties)
+		{
+		    // 取得 DisplayName 屬性
+		    string displayName = property.Name;
+		    var displayNameAttr = property.GetCustomAttribute(typeof(DisplayNameAttribute)) as DisplayNameAttribute;
+		    if (displayNameAttr != null)
+		    {
+		        displayName = displayNameAttr.DisplayName;
+		    }
+		    
+		    worksheet.Cell(1, colIndex).Value = displayName;
+		    worksheet.Cell(1, colIndex).Style.Font.Bold = true;
+		    colIndex++;
+		}
+		
+		// 填入資料
+		int rowIndex = 2;
+		foreach (var item in data)
+		{
+		    colIndex = 1;
+		    foreach (var property in properties)
+		    {
+		        var value = property.GetValue(item);
+		        worksheet.Cell(rowIndex, colIndex).Value = value?.ToString() ?? "";
+		        colIndex++;
+		    }
+		    rowIndex++;
+		}
     }
     
     workbook.SaveAs(ms);

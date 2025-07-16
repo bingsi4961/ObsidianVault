@@ -41,7 +41,7 @@ tags: [ASP.NET MVC 5]
 )
 ```
 
-```htmlembedded
+```html
 /Product/Search/18?category=Electronics&price=100&sort=desc
 ```
 
