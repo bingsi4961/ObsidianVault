@@ -199,37 +199,9 @@ worksheet.Range(1, 1, 1, 3).Merge();
 
 ### 5.3 動態範圍計算和 lastCellUsed.Address.ColumnNumber 說明
 
-```csharp
-// 取得已使用的範圍
-var usedRange = worksheet.RangeUsed();
+##### 📑 [[ClosedXML 範圍處理筆記]]
 
-// 計算最大的欄位編號
-int maxColumn = 1;
-for (int row = 1; row <= usedRange.RowCount(); row++)
-{
-	// 遍歷每一列，找出該列最後一個有資料的儲存格
-    var lastCellUsed = worksheet.Row(row).LastCellUsed();
-    if (lastCellUsed != null)
-    {
-        // lastCellUsed.Address.ColumnNumber 說明：
-        // - lastCellUsed.Address 取得儲存格的位址資訊
-        // - ColumnNumber 屬性回傳該儲存格的欄位編號（數字）
-        // - 例如：A欄 = 1, B欄 = 2, C欄 = 3 ... Z欄 = 26, AA欄 = 27
-        // - 這樣可以用數字來比較和計算欄位位置
-        maxColumn = Math.Max(maxColumn, lastCellUsed.Address.ColumnNumber);
-    }
-}
-
-// 實際應用情境，假設你有一個 Excel 檔案：
-// 第1列：A1 到 E1 有資料
-// 第2列：A2 到 C2 有資料
-// 第3列：A3 到 G3 有資料
-// 執行後 `maxColumn` 會是 **7**（對應 G 欄），因為 G 欄是所有列中最右邊有資料的欄位。
-
-// 使用計算出的範圍設定樣式
-var dataRange = worksheet.Range(1, 1, usedRange.RowCount(), maxColumn);
-dataRange.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
-```
+![[ClosedXML 範圍處理筆記]]
 
 ## 6. 列和欄操作
 
