@@ -216,6 +216,7 @@ worksheet.Rows(1, 3).Height = 20;
 worksheet.RowHeight = 20;
 
 // 自動調整欄寬
+// 🚨合併儲存格是無效 (決策問題，已確認)
 worksheet.Columns().AdjustToContents();
 
 // 設定特定欄寬
