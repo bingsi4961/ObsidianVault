@@ -2,7 +2,6 @@
 date: 2025-06-15 22:46
 aliases: 
 tags:
-  - BootStrap
   - BootStrap_4_3_1
 ---
  Metadata

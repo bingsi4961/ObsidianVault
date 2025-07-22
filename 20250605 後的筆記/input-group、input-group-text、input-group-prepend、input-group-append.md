@@ -1,8 +1,7 @@
 ---
 date: 2025-06-18 10:37
-aliases: []
+aliases: 
 tags:
-  - BootStrap
   - BootStrap_4_3_1
 ---
 # Metadata

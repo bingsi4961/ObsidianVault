@@ -2,7 +2,7 @@
 date: 2025-07-15 17:31
 aliases: 
 tags:
-  - NetCoreMVC
+  - NetCore_MVC
   - MVC5
 ---
 # Metadata
