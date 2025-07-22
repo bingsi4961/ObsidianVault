@@ -114,15 +114,15 @@ foreach (IGrouping<string, Product> group in groupedProducts)
 
 ### 3.1 重載方法總覽
 
-| 重載 | 參數 | 功能說明 |
-|------|------|----------|
-| 1 | keySelector | 基本分組功能 |
-| 2 | keySelector, comparer | 使用指定的比較器進行分組 |
-| 3 | keySelector, elementSelector | 轉換分組中的元素 |
-| 4 | keySelector, elementSelector, comparer | 結合元素轉換與鍵比較 |
-| 5 | keySelector, resultSelector | 直接將分組轉換為結果 |
-| 6 | keySelector, elementSelector, resultSelector | 結合元素轉換與結果轉換 |
-| 7 | keySelector, elementSelector, resultSelector, comparer | 最完整的功能組合 |
+| 重載  | 參數                                                     | 功能說明         |
+| --- | ------------------------------------------------------ | ------------ |
+| 1   | keySelector                                            | 基本分組功能       |
+| 2   | keySelector, comparer                                  | 使用指定的比較器進行分組 |
+| 3   | keySelector, elementSelector                           | 轉換分組中的元素     |
+| 4   | keySelector, elementSelector, comparer                 | 結合元素轉換與鍵比較   |
+| 5   | keySelector, resultSelector                            | 直接將分組轉換為結果   |
+| 6   | keySelector, elementSelector, resultSelector           | 結合元素轉換與結果轉換  |
+| 7   | keySelector, elementSelector, resultSelector, comparer | 最完整的功能組合     |
 
 ### 3.2 重載方法詳解
 
