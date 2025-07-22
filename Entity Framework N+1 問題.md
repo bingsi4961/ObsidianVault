@@ -131,67 +131,21 @@ var orderData = context.Orders
     .ToList();
 ```
 
-## 如何檢測 N+1 問題
+**產生的 SQL：**
 
-### 1. 啟用 SQL 日誌
-
-```csharp
-// 在 Program.cs 或 Startup.cs
-builder.Services.AddDbContext<YourDbContext>(options =>
-    options.UseSqlServer(connectionString)
-           .LogTo(Console.WriteLine));
-```
-
-### 2. DbContext 層級的日誌
-
-```csharp
-protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-{
-    optionsBuilder.LogTo(Console.WriteLine, Microsoft.Extensions.Logging.LogLevel.Information);
-}
-```
-
-### 3. 觀察症狀
-
-- 程式執行很慢
-- 資料庫連線數過多
-- 日誌中看到大量重複的查詢
-
-## 在專案中的應用
-
-### Portal 系統 (.NET Core 3.1)
-
-```csharp
-// API 回傳資料
-public async Task<IActionResult> GetOrderSummary()
-{
-    var data = await _context.Orders
-        .Select(o => new {
-            o.Id,
-            o.OrderDate,
-            CustomerName = o.Customer.Name,
-            TotalAmount = o.OrderItems.Sum(oi => oi.Price * oi.Quantity)
-        })
-        .ToListAsync();
-    
-    return Json(data);
-}
-```
-
-### GTS 系統 (.NET Framework 4.8)
-
-```csharp
-// 報表資料
-public List<OrderReportDto> GetOrderReport()
-{
-    return context.Orders
-        .Select(o => new OrderReportDto {
-            OrderId = o.Id,
-            CustomerName = o.Customer.Name,
-            OrderDate = o.OrderDate
-        })
-        .ToList();
-}
+```sql
+SELECT [o].[Id] AS [OrderId],
+       [c].[Name] AS [CustomerName],
+       [a].[City] AS [CustomerCity],
+       [a].[Country] AS [CustomerCountry],
+       (
+           SELECT COUNT(*)
+           FROM [OrderItems] AS [oi]
+           WHERE [oi].[OrderId] = [o].[Id]
+       ) AS [OrderItemCount]
+FROM [Orders] AS [o]
+INNER JOIN [Customers] AS [c] ON [o].[CustomerId] = [c].[Id]
+LEFT JOIN [Addresses] AS [a] ON [c].[AddressId] = [a].[Id]
 ```
 
 ## Select 投影的優勢
@@ -201,6 +155,7 @@ public List<OrderReportDto> GetOrderReport()
     - 單一查詢：避免多次資料庫往返
     - 減少資料傳輸：只取需要的欄位
     - 記憶體效率：不載入完整的實體物件
+    
 2. **完全避免 N+1 問題**
     
     - 只產生一次 SQL 查詢
@@ -213,4 +168,3 @@ public List<OrderReportDto> GetOrderReport()
 - **N+1 問題 = 1 次主查詢 + N 次懶載入查詢**
 - **解決關鍵：預先載入相關資料，避免在迴圈中觸發額外查詢**
 - **推薦使用 Select 投影，特別適合 API 和報表場景**
-- **在 Portal 系統 和 GTS 系統中都需要注意此問題**
