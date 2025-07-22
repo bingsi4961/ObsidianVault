@@ -26,7 +26,7 @@ foreach (var group in groups)
 
 ### 1.2 核心元素與結構關係
 
-```
+```csharp
 原始集合 (collection)
 [
     { Category: "電子", Name: "手機", Price: 15000 },
