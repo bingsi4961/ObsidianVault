@@ -1,7 +1,9 @@
 ---
 date: 2025-07-22 23:25
 aliases: 
-tags: []
+tags:
+  - EntityFramework_6
+  - EntityFramework_Core
 ---
 # Metadata
 Status :: 🌱
