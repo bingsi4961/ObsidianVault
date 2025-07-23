@@ -23,7 +23,7 @@ Topics :: {筆記跟什麼主題有關，用 `[Topic],[Topic]` 格式}
 - **第一層關係**：僅能載入與查詢實體有直接關係的實體
 - **語法**：`context.Entity.Include(e => e.RelatedEntity)`
 
-## ThenInclude
+## ThenInclude (僅限 EF Core)
 
 - **深層關聯載入**：用於載入間接關聯的實體（關聯的關聯）
 - **多層次關係**：能夠在 `Include` 之後繼續深入到下一層關係
