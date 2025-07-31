@@ -594,17 +594,7 @@ public IActionResult UpdateProfile(string username, List<string> hobbies, string
         if (hobbies != null && hobbies.Count > 0)
         {
             Console.WriteLine($"興趣愛好: {string.Join(", ", hobbies)}");
-            
-            // 可以進一步處理每個興趣
-            foreach (var hobby in hobbies)
-            {
-                Console.WriteLine($"  - {hobby}");
-            }
-        }
-        else
-        {
-            Console.WriteLine("沒有提供興趣愛好");
-        }
+        }        
         
         // 3. preferences 是 JSON 字串，需要反序列化
         var preferencesObj = JsonSerializer.Deserialize<UserPreferences>(preferences);
@@ -626,12 +616,7 @@ public IActionResult UpdateProfile(string username, List<string> hobbies, string
         
         return Ok(new { 
             success = true, 
-            message = "資料更新成功",
-            data = new {
-                username = username,
-                hobbies = hobbies,
-                preferences = preferencesObj,
-                hasPhoto = profilePhoto != null
+            message = "資料更新成功"
             }
         });
     }
