@@ -479,7 +479,10 @@ Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0g
 ```
 
 所以我們要設定 `contentType: false`，讓瀏覽器自動處理。
-🚨 因為 7MA4YWxkTrZu0gW，是瀏覽器產生，我們自已沒辦法
+
+🚨 因為 7MA4YWxkTrZu0gW，是瀏覽器產生，我們自已沒辦法處理
+
+**為什麼要設定 `processData: false`？** [[$.ajax() 的 processData 及 traditional]]
 
 ### 3.3 重要限制：檔案上傳不能用 JSON
 
@@ -552,6 +555,8 @@ public IActionResult SaveUser(UserModel user)
         message = "儲存成功",
         userId = 123
     });
+    
+    // 自動設定 Content-Type: application/json
 }
 ```
 
@@ -820,7 +825,7 @@ User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/91.0.4472.124
 Content-Type: application/json; charset=utf-8
 ```
 
-**用途**：說明請求 Body 的資料格式
+**用途**：<mark style="background: #FFF3A3A6;">說明請求 Body 的資料格式</mark>
 
 ##### Content-Length
 
@@ -840,7 +845,7 @@ Cookie: sessionId=abc123; userPreference=darkMode
 
 ### 5.4 Request Body（請求主體）
 
-只有 POST、PUT、PATCH 等方法才會有 Body。
+<mark style="background: #FFF3A3A6;">只有 POST、PUT、PATCH 等方法才會有 Body。</mark>
 
 #### application/x-www-form-urlencoded 格式
 
