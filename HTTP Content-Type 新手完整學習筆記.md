@@ -515,7 +515,7 @@ $.ajax({
 1. JSON 只能包含文字資料（字串、數字、布林值、陣列、物件）
 2. 檔案是二進位資料，無法用 JSON 表示
 
-#### 解決方案：使用 FormData
+#### 解決方案：使用 FormData (同時上傳 欄位值、JSON、檔案)
 
 ```javascript
 // ✅ 正確做法：使用 FormData
@@ -541,6 +541,52 @@ $.ajax({
     contentType: false  // multipart/form-data
 });
 ```
+
+#### 後端接收
+
+```csharp
+[HttpPost]
+public IActionResult UpdateProfile(string username, string preferences, IFormFile profilePhoto)
+{
+    try
+    {
+        // 1. username 直接可用
+        Console.WriteLine($"使用者名稱: {username}");
+        
+        // 2. preferences 是 JSON 字串，需要反序列化
+        var preferencesObj = JsonSerializer.Deserialize<UserPreferences>(preferences);
+        Console.WriteLine($"主題: {preferencesObj.Theme}, 語言: {preferencesObj.Language}");
+        
+        // 3. 處理上傳檔案
+        if (profilePhoto != null && profilePhoto.Length > 0)
+        {
+            var fileName = Path.GetFileName(profilePhoto.FileName);
+            var filePath = Path.Combine("uploads", fileName);
+            
+            using (var stream = new FileStream(filePath, FileMode.Create))
+            {
+                profilePhoto.CopyTo(stream);  // 改成同步版本
+            }
+        }
+        
+        return Ok(new { success = true });
+    }
+    catch (Exception ex)
+    {
+        return BadRequest(new { success = false, message = ex.Message });
+    }
+}
+```
+
+### 總結規則
+
+|情況|contentType 設定|實際 Content-Type|
+|---|---|---|
+|一般表單資料|不設定 (預設)|`application/x-www-form-urlencoded`|
+|JSON 資料|`'application/json'`|`application/json`|
+|檔案上傳|`false`|`multipart/form-data; boundary=...`|
+
+記住：**有檔案就用 FormData + contentType: false + processData: false** 
 
 ### 3.4 接收伺服器回應（Response）
 
