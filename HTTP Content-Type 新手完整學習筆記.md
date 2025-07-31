@@ -1,7 +1,9 @@
 ---
 date: 2025-07-31 14:37
 aliases: 
-tags: []
+tags:
+  - HTML
+  - jQuery
 ---
 # Metadata
 Status :: 🌱
@@ -40,8 +42,11 @@ Topics :: {筆記跟什麼主題有關，用 `[Topic],[Topic]` 格式}
 ```html
 <!-- 瀏覽器發送表單時自動設定 -->
 <form method="post" action="/submit">
-    <input name="username" value="john" />
+    <input type="text" name="username" value="john" />
+    <input type="text" name="age" value="45" />
+    
     <!-- 瀏覽器自動設定 Content-Type: application/x-www-form-urlencoded -->
+    <!-- Http Body => username=john&age=45 -->
 </form>
 ```
 
@@ -188,6 +193,7 @@ public IActionResult Submit(string username, string email)
 當表單包含檔案上傳時，**必須**使用這種格式：
 
 ```html
+<!-- Content-Type: multipart/form-data; boundary=----WebKitFormBoundary...-->
 <form method="post" action="/upload" enctype="multipart/form-data">
     <input type="text" name="username" value="john" />
     <input type="file" name="uploadFile" />
@@ -1191,24 +1197,6 @@ public IActionResult ForceDownload(string fileName)
 2. 篩選「XHR」只顯示 AJAX 請求
 3. 點擊請求查看詳細資訊
 
-#### 檢查 CSS 是否生效
-
-```javascript
-// Console 中執行
-var element = document.querySelector('.container');
-var styles = window.getComputedStyle(element);
-console.log('顏色:', styles.color);
-console.log('字體大小:', styles.fontSize);
-```
-
-#### 檢查 JavaScript 是否載入
-
-```javascript
-// Console 中執行
-console.log('jQuery:', typeof $);
-console.log('載入的腳本數量:', document.scripts.length);
-```
-
 ## 第九章：常見錯誤和解決方案
 
 ### 9.1 Content-Type 相關錯誤
@@ -1310,23 +1298,6 @@ function loadEmployeeData(empId) {
 }
 ```
 
-#### Bootstrap 4.3.1 表單提交
-
-```html
-<form method="post" action="/employee/save">
-    <div class="form-group">
-        <input name="Name" class="form-control" required />
-    </div>
-    <div class="form-group">
-        <select name="Department" class="form-control">
-            <option value="IT">資訊部</option>
-            <option value="HR">人資部</option>
-        </select>
-    </div>
-    <button type="submit" class="btn btn-primary">儲存</button>
-</form>
-```
-
 #### ClosedXML 0.95.2 Excel 匯出
 
 ```csharp
@@ -1357,283 +1328,6 @@ public IActionResult ExportEmployee()
 }
 ```
 
-### 10.2 GTS 系統 (.NET Framework 4.8)
-
-#### jQuery 1.10.2 相容性注意事項
-
-```javascript
-// 舊版 jQuery 語法
-$(document).ready(function() {
-    // 不支援 arrow function
-    $('#btn').click(function() {
-        // 使用 function 而不是 () => {}
-        var data = $(this).data('value');
-        processData(data);
-    });
-});
-
-// 舊版 AJAX 語法
-$.post('/api/save', { name: 'john' }, function(response) {
-    // 回調函數處理
-    if (response.success) {
-        alert('儲存成功');
-    }
-});
-```
-
-#### Bootstrap 3.0.0 CSS 類別差異
-
-```html
-<!-- Bootstrap 3 的按鈕樣式 -->
-<button class="btn btn-default">預設按鈕</button>
-<button class="btn btn-primary">主要按鈕</button>
-
-<!-- Bootstrap 3 的表格樣式 -->
-<table class="table table-striped table-bordered">
-    <thead>
-        <tr>
-            <th>姓名</th>
-            <th>部門</th>
-        </tr>
-    </thead>
-    <tbody>
-        <tr>
-            <td>John</td>
-            <td>IT</td>
-        </tr>
-    </tbody>
-</table>
-```
-
-#### ClosedXML 0.95.4 注意事項
-
-```csharp
-// GTS 系統中的 Excel 處理
-public ActionResult GenerateReport()
-{
-    using (var workbook = new XLWorkbook())
-    {
-        var worksheet = workbook.Worksheets.Add("報表");
-        
-        // 舊版語法，注意版本相容性
-        worksheet.Cell(1, 1).Value = "標題";
-        worksheet.Cell(1, 1).Style.Font.Bold = true;
-        
-        // 填入資料
-        var data = dataService.GetReportData();
-        int row = 2;
-        foreach (var item in data)
-        {
-            worksheet.Cell(row, 1).Value = item.Name;
-            worksheet.Cell(row, 2).Value = item.Value;
-            row++;
-        }
-        
-        using (var stream = new MemoryStream())
-        {
-            workbook.SaveAs(stream);
-            var fileName = $"報表_{DateTime.Now:yyyyMMdd}.xlsx";
-            
-            return File(stream.ToArray(), 
-                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", 
-                fileName);
-        }
-    }
-}
-```
-
-## 第十一章：實用測試和驗證方法
-
-### 11.1 建立測試頁面
-
-#### 完整的 Content-Type 測試頁面
-
-```html
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Content-Type 測試頁面</title>
-    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
-<body>
-    <div class="container mt-4">
-        <h1>HTTP Content-Type 測試</h1>
-        
-        <!-- 表單提交測試 -->
-        <div class="card mt-3">
-            <div class="card-header">1. 表單提交測試 (application/x-www-form-urlencoded)</div>
-            <div class="card-body">
-                <form method="post" action="/test/form">
-                    <div class="form-group">
-                        <input name="username" class="form-control" placeholder="使用者名稱" value="john" />
-                    </div>
-                    <div class="form-group">
-                        <input name="email" class="form-control" placeholder="電子信箱" value="john@asus.com" />
-                    </div>
-                    <button type="submit" class="btn btn-primary">提交表單</button>
-                </form>
-            </div>
-        </div>
-        
-        <!-- 檔案上傳測試 -->
-        <div class="card mt-3">
-            <div class="card-header">2. 檔案上傳測試 (multipart/form-data)</div>
-            <div class="card-body">
-                <form method="post" action="/test/upload" enctype="multipart/form-data">
-                    <div class="form-group">
-                        <input name="description" class="form-control" placeholder="檔案描述" value="測試檔案" />
-                    </div>
-                    <div class="form-group">
-                        <input name="file" type="file" class="form-control-file" />
-                    </div>
-                    <button type="submit" class="btn btn-success">上傳檔案</button>
-                </form>
-            </div>
-        </div>
-        
-        <!-- AJAX JSON 測試 -->
-        <div class="card mt-3">
-            <div class="card-header">3. AJAX JSON 測試 (application/json)</div>
-            <div class="card-body">
-                <button class="btn btn-info" onclick="sendJsonData()">發送 JSON 資料</button>
-                <button class="btn btn-secondary" onclick="loadHtmlFragment()">載入 HTML 片段</button>
-                <div id="result" class="mt-3"></div>
-            </div>
-        </div>
-    </div>
-    
-    <script>
-        function sendJsonData() {
-            $.ajax({
-                url: '/test/json',
-                type: 'POST',
-                contentType: 'application/json',
-                data: JSON.stringify({
-                    name: 'John',
-                    department: 'IT',
-                    skills: ['C#', 'JavaScript', 'SQL']
-                }),
-                success: function(response) {
-                    $('#result').html('<div class="alert alert-success">JSON 資料發送成功！</div>');
-                },
-                error: function(xhr, status, error) {
-                    $('#result').html('<div class="alert alert-danger">發送失敗：' + error + '</div>');
-                }
-            });
-        }
-        
-        function loadHtmlFragment() {
-            $.ajax({
-                url: '/test/html',
-                type: 'GET',
-                success: function(response) {
-                    $('#result').html('<div class="alert alert-info">載入的 HTML 片段：</div>' + response);
-                }
-            });
-        }
-    </script>
-</body>
-</html>
-```
-
-#### 對應的 Controller
-
-```csharp
-public class TestController : Controller
-{
-    // 表單提交測試
-    [HttpPost]
-    public IActionResult Form(string username, string email)
-    {
-        Console.WriteLine($"收到表單資料 - 使用者: {username}, 信箱: {email}");
-        return Json(new { success = true, message = "表單資料接收成功" });
-    }
-    
-    // 檔案上傳測試
-    [HttpPost]
-    public IActionResult Upload(string description, IFormFile file)
-    {
-        Console.WriteLine($"檔案描述: {description}");
-        
-        if (file != null && file.Length > 0)
-        {
-            Console.WriteLine($"檔案名稱: {file.FileName}");
-            Console.WriteLine($"檔案大小: {file.Length} bytes");
-            
-            return Json(new { 
-                success = true, 
-                message = "檔案上傳成功",
-                fileName = file.FileName,
-                fileSize = file.Length
-            });
-        }
-        
-        return Json(new { success = false, message = "沒有選擇檔案" });
-    }
-    
-    // JSON 資料測試
-    [HttpPost]
-    public IActionResult Json([FromBody] dynamic data)
-    {
-        Console.WriteLine($"收到 JSON 資料: {data}");
-        return Json(new { 
-            success = true, 
-            message = "JSON 資料接收成功",
-            timestamp = DateTime.Now
-        });
-    }
-    
-    // HTML 片段測試
-    [HttpGet]
-    public IActionResult Html()
-    {
-        var html = $@"
-            <div class='card'>
-                <div class='card-body'>
-                    <h5 class='card-title'>動態 HTML 片段</h5>
-                    <p class='card-text'>這是從伺服器載入的 HTML 內容。</p>
-                    <small class='text-muted'>載入時間: {DateTime.Now:yyyy-MM-dd HH:mm:ss}</small>
-                </div>
-            </div>";
-        
-        return Content(html, "text/html");
-    }
-}
-```
-
-### 11.2 驗證 Content-Type 的方法
-
-#### 使用瀏覽器開發者工具驗證
-
-```javascript
-// 在 Console 中執行，檢查載入的資源
-console.log('=== 載入的樣式表 ===');
-for (let i = 0; i < document.styleSheets.length; i++) {
-    const sheet = document.styleSheets[i];
-    console.log(`樣式表 ${i}: ${sheet.href}`);
-}
-
-console.log('\n=== 載入的腳本 ===');
-for (let i = 0; i < document.scripts.length; i++) {
-    const script = document.scripts[i];
-    console.log(`腳本 ${i}: ${script.src || '內嵌腳本'}`);
-}
-
-console.log('\n=== 檢查 AJAX 回應類型 ===');
-$.ajax({
-    url: '/test/json',
-    type: 'POST',
-    contentType: 'application/json',
-    data: JSON.stringify({ test: 'data' }),
-    success: function(response, textStatus, xhr) {
-        console.log('回應類型:', typeof response);
-        console.log('Content-Type:', xhr.getResponseHeader('Content-Type'));
-        console.log('回應內容:', response);
-    }
-});
-```
-
 ## 總結：重要觀念回顧
 
 ### Content-Type 核心概念
@@ -1661,26 +1355,6 @@ $.ajax({
 2. **JavaScript 載入**：立即執行程式碼，存在全域作用域，可能修改 HTML
 3. **原始碼不變**：資源載入不會改變 HTML 原始碼，只能在開發者工具中看到
 
-### HTTP 請求結構
-
-1. **Request Line**：方法 + 路徑 + HTTP版本
-2. **Request Headers**：額外資訊，如 Content-Type、User-Agent 等
-3. **Empty Line**：分隔 Headers 和 Body
-4. **Request Body**：實際資料內容（POST、PUT 等方法才有）
-
-### 開發除錯技巧
-
-1. **F12 Network**：檢查所有 HTTP 請求和回應
-2. **檢查 Headers**：確認 Content-Type 是否正確設定
-3. **Console 輸出**：前後端都加入除錯訊息
-4. **逐步檢查**：從請求發送到回應接收，逐步確認每個環節
-
-### Portal 和 GTS 系統實際應用
-
-1. **Portal (.NET Core 3.1)**：使用 jQuery 3.3.1、Bootstrap 4.3.1、ClosedXML 0.95.2
-2. **GTS (.NET Framework 4.8)**：使用 jQuery 1.10.2、Bootstrap 3.0.0、ClosedXML 0.95.4
-3. **版本差異**：注意 jQuery 語法相容性、Bootstrap CSS 類別差異
-
 ### 最重要的實務原則
 
 1. **有檔案上傳就用 multipart/form-data**，不能用 JSON
@@ -1688,5 +1362,3 @@ $.ajax({
 3. **檔案上傳的 AJAX 要設定 contentType: false**
 4. **遇到問題先檢查 F12 Network 標籤**
 5. **後端正確設定回應的 Content-Type**
-
-這些知識對於在華碩進行 C# 開發工作非常重要，特別是在處理表單提交、檔案上傳、AJAX 呼叫、Excel 匯出等常見功能時。掌握這些觀念可以避免大部分與 Content-Type 相關的問題，提高開發效率。
