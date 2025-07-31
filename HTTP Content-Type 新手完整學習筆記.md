@@ -217,23 +217,24 @@ public IActionResult Submit(string username, string email)
 
 #### 實際傳送的內容
 
-**HTTP Request**：
+**HTTP Request**：( 瀏覽器負責產生和組織格式：包含 boundary 的產生 )
 
 ```
 POST /upload HTTP/1.1
 Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
 Content-Length: 2048
 
-------WebKitFormBoundary7MA4YWxkTrZu0gW
-Content-Disposition: form-data; name="username"
+------WebKitFormBoundary7MA4YWxkTrZu0gW				← 開始標記
+Content-Disposition: form-data; name="username"		← 欄位資訊
 
-john
-------WebKitFormBoundary7MA4YWxkTrZu0gW
+john												← 文字欄位的值
+------WebKitFormBoundary7MA4YWxkTrZu0gW				← 分隔標記
 Content-Disposition: form-data; name="uploadFile"; filename="report.pdf"
-Content-Type: application/pdf
+Content-Type: application/pdf						← 檔案類型
 
 [這裡是 PDF 檔案的實際二進位內容]
-------WebKitFormBoundary7MA4YWxkTrZu0gW--
+
+------WebKitFormBoundary7MA4YWxkTrZu0gW--			← 結束標記 (注意最後有兩個--)
 ```
 
 #### boundary 分隔符的作用
@@ -250,6 +251,9 @@ Content-Type: application/pdf
 [HttpPost]
 public IActionResult Upload(string username, IFormFile uploadFile)
 {
+	// .NET Core 自動處理 multipart/form-data 的解析
+	// 你不需要手動處理 boundary
+
     Console.WriteLine($"使用者: {username}");
     
     if (uploadFile != null && uploadFile.Length > 0)
