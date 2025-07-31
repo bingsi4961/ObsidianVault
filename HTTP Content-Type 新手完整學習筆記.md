@@ -524,6 +524,10 @@ var formData = new FormData();
 // 一般資料
 formData.append('username', 'john');
 
+// 陣列資料 
+formData.append('hobbies[]', 'reading'); 
+formData.append('hobbies[]', 'coding');
+
 // JSON 資料（轉成字串）
 formData.append('preferences', JSON.stringify({
     theme: 'dark',
@@ -538,26 +542,75 @@ $.ajax({
     type: 'POST',
     data: formData,
     processData: false,
-    contentType: false  // multipart/form-data
+    contentType: false  🚨 // multipart/form-data
 });
+```
+
+#### Http Body
+
+```
+POST /api/updateProfile HTTP/1.1
+Host: localhost:44301
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Length: 1234
+
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="username"
+
+john
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="hobbies[]"
+
+reading
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="hobbies[]"
+
+coding
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="preferences"
+
+{"theme":"dark","language":"zh-TW"}
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="profilePhoto"; filename="avatar.jpg"
+Content-Type: image/jpeg
+
+[二進位檔案內容 - 實際的圖片資料]
+
+------WebKitFormBoundary7MA4YWxkTrZu0gW--
 ```
 
 #### 後端接收
 
 ```csharp
 [HttpPost]
-public IActionResult UpdateProfile(string username, string preferences, IFormFile profilePhoto)
+public IActionResult UpdateProfile(string username, List<string> hobbies, string preferences, IFormFile profilePhoto)
 {
     try
     {
         // 1. username 直接可用
         Console.WriteLine($"使用者名稱: {username}");
         
-        // 2. preferences 是 JSON 字串，需要反序列化
+        // 2. 處理 hobbies 陣列
+        if (hobbies != null && hobbies.Count > 0)
+        {
+            Console.WriteLine($"興趣愛好: {string.Join(", ", hobbies)}");
+            
+            // 可以進一步處理每個興趣
+            foreach (var hobby in hobbies)
+            {
+                Console.WriteLine($"  - {hobby}");
+            }
+        }
+        else
+        {
+            Console.WriteLine("沒有提供興趣愛好");
+        }
+        
+        // 3. preferences 是 JSON 字串，需要反序列化
         var preferencesObj = JsonSerializer.Deserialize<UserPreferences>(preferences);
         Console.WriteLine($"主題: {preferencesObj.Theme}, 語言: {preferencesObj.Language}");
         
-        // 3. 處理上傳檔案
+        // 4. 處理上傳檔案
         if (profilePhoto != null && profilePhoto.Length > 0)
         {
             var fileName = Path.GetFileName(profilePhoto.FileName);
@@ -565,14 +618,26 @@ public IActionResult UpdateProfile(string username, string preferences, IFormFil
             
             using (var stream = new FileStream(filePath, FileMode.Create))
             {
-                profilePhoto.CopyTo(stream);  // 改成同步版本
+                profilePhoto.CopyTo(stream);
             }
+            
+            Console.WriteLine($"檔案已上傳: {fileName}");
         }
         
-        return Ok(new { success = true });
+        return Ok(new { 
+            success = true, 
+            message = "資料更新成功",
+            data = new {
+                username = username,
+                hobbies = hobbies,
+                preferences = preferencesObj,
+                hasPhoto = profilePhoto != null
+            }
+        });
     }
     catch (Exception ex)
     {
+        Console.WriteLine($"錯誤: {ex.Message}");
         return BadRequest(new { success = false, message = ex.Message });
     }
 }
