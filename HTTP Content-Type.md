@@ -1104,17 +1104,17 @@ return File(fileBytes, "application/octet-stream", "file.zip");
 
 ### 6.2 Content-Type 對應表
 
-|Content-Type|用於|瀏覽器行為|
-|---|---|---|
-|`text/html`|回應|渲染網頁|
-|`text/css`|回應|套用樣式|
-|`application/javascript`|回應|執行程式碼|
-|`application/json`|請求/回應|解析 JSON|
-|`text/plain`|回應|顯示純文字|
-|`image/jpeg`|回應|顯示圖片|
-|`image/png`|回應|顯示圖片|
-|`application/pdf`|回應|顯示 PDF|
-|`application/octet-stream`|回應|強制下載|
+| Content-Type               | 用於    | 瀏覽器行為   |
+| -------------------------- | ----- | ------- |
+| `text/html`                | 回應    | 渲染網頁    |
+| `text/css`                 | 回應    | 套用樣式    |
+| `application/javascript`   | 回應    | 執行程式碼   |
+| `application/json`         | 請求/回應 | 解析 JSON |
+| `text/plain`               | 回應    | 顯示純文字   |
+| `image/jpeg`               | 回應    | 顯示圖片    |
+| `image/png`                | 回應    | 顯示圖片    |
+| `application/pdf`          | 回應    | 顯示 PDF  |
+| `application/octet-stream` | 回應    | 強制下載    |
 
 ## 第七章：.NET Core 後端處理
 
