@@ -579,7 +579,7 @@ Content-Type: image/jpeg
 ------WebKitFormBoundary7MA4YWxkTrZu0gW--
 ```
 
-#### 後端接收
+#### 後端接收 (.Net Core)
 
 ```csharp
 [HttpPost]
@@ -1115,6 +1115,17 @@ return File(fileBytes, "application/octet-stream", "file.zip");
 | `image/png`                | 回應    | 顯示圖片    |
 | `application/pdf`          | 回應    | 顯示 PDF  |
 | `application/octet-stream` | 回應    | 強制下載    |
+
+### 6.3 常見的 Content-Type 優先順序
+
+##### 在你的開發中，使用頻率大概是：
+
+-  **application/json** - API 開發最常用
+-  **application/x-www-form-urlencoded** - 表單提交
+-  **multipart/form-data** - 檔案上傳
+-  **text/html** - 網頁回應
+-  **application/vnd.openxmlformats-officedocument.spreadsheetml.sheet** - Excel 下載
+-  **application/octet-stream** - 檔案下載
 
 ## 第七章：.NET Core 後端處理
 
