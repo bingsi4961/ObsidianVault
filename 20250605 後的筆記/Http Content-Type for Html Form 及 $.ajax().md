@@ -480,7 +480,7 @@ $.ajax({
 });
 ```
 
-**為什麼要設定 `contentType: false`？**
+==> **為什麼要設定 `contentType: false`？**
 
 瀏覽器會自動產生完整的 Content-Type：
 
@@ -492,7 +492,7 @@ Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0g
 
 🚨 因為 7MA4YWxkTrZu0gW，是瀏覽器產生，我們自已沒辦法處理
 
-**為什麼要設定 `processData: false`？** [[$.ajax() 的 processData 及 traditional]]
+==> **為什麼要設定 `processData: false`？** [[$.ajax() 的 processData 及 traditional]]
 
 ### 3.3 重要限制：檔案上傳不能用 JSON
 
@@ -1106,17 +1106,18 @@ return File(fileBytes, "application/octet-stream", "file.zip");
 
 ### 6.2 Content-Type 對應表
 
-| Content-Type               | 用於    | 瀏覽器行為   |
-| -------------------------- | ----- | ------- |
-| `text/html`                | 回應    | 渲染網頁    |
-| `text/css`                 | 回應    | 套用樣式    |
-| `application/javascript`   | 回應    | 執行程式碼   |
-| `application/json`         | 請求/回應 | 解析 JSON |
-| `text/plain`               | 回應    | 顯示純文字   |
-| `image/jpeg`               | 回應    | 顯示圖片    |
-| `image/png`                | 回應    | 顯示圖片    |
-| `application/pdf`          | 回應    | 顯示 PDF  |
-| `application/octet-stream` | 回應    | 強制下載    |
+|Content-Type|主要用於|說明|
+|---|---|---|
+|`application/x-www-form-urlencoded`|**請求**|HTML 表單預設格式|
+|`multipart/form-data`|**請求**|檔案上傳必須用|
+|`application/json`|**兩者**|API 資料交換|
+|`text/plain`|**回應**|顯示純文字|
+|`text/html`|**回應**|網頁內容|
+|`text/css`|**回應**|樣式表檔案|
+|`application/javascript`|**回應**|JavaScript 檔案|
+|`application/pdf`|**回應**|PDF 檔案|
+|`application/octet-stream`|**回應**|檔案下載|
+|`image/png, image/jpeg`|**回應**|圖片檔案|
 
 ### 6.3 常見的 Content-Type 優先順序
 
