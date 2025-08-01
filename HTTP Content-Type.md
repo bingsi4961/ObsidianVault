@@ -711,11 +711,13 @@ $.ajax({
     url: '/api/getUserCard',
     data: { userId: 123 },
     success: function(response) {
+	    🚨 // $.ajax() 對 text/html 的處理是：不會自動解析成 DOM 物件，而是保持為字串。
         // response 是 HTML 字串
         console.log(typeof response);  // "string"
         
         // 直接插入到頁面中，jQuery 會自動解析 HTML
         $('#userContainer').html(response);
+        // $('#userContainer').get(0).innerHTML = response;
     }
 });
 ```
