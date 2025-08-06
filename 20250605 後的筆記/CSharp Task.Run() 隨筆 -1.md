@@ -84,129 +84,148 @@ _ = Task.Run(async () => {
 - Fire-and-Forget 操作的例外會被吞沒
 - 需要在 `Task.Run` 內部建立完整的例外處理機制
 
-## 4. Task.Run 委派中的控制流問題
+## 4. Task.Run 永遠不會自動等待
 
-### 錯誤寫法：非同步方法沒有 await
+**核心概念**：`Task.Run()` 在任何情況下都會立即回傳 Task 物件，不會等待委派函式完成。
+
+## 5. Task.Run 的基本行為
+
+### 所有這些寫法都不會等待：
+
+```csharp
+// ❌ 不會等待 - 立即回傳 Task
+Task.Run(() => ProcessSoaBomInBackground(unProcessPartsLists));
+
+// ❌ 不會等待 - 立即回傳 Task  
+Task.Run(() => { 
+    ProcessSoaBomInBackground(unProcessPartsLists); 
+});
+
+// ❌ 不會等待 - 立即回傳 Task
+Task.Run(() => {
+    return ProcessSoaBomInBackground(unProcessPartsLists);
+});
+
+// ❌ 不會等待 - 立即回傳 Task
+Task.Run(async () => { 
+    await ProcessSoaBomInBackground(unProcessPartsLists); 
+});
+```
+
+### 會等待的正確寫法：
+
+```csharp
+// ✅ 會等待 - 明確等待 Task 完成
+var task = Task.Run(() => ProcessSoaBomInBackground(unProcessPartsLists));
+task.Wait();
+
+// ✅ 會等待 - 使用 GetAwaiter().GetResult()
+Task.Run(async () => { 
+    await ProcessSoaBomInBackground(unProcessPartsLists); 
+}).GetAwaiter().GetResult();
+
+// ✅ 會等待 - 直接等待非同步方法
+ProcessSoaBomInBackground(unProcessPartsLists).GetAwaiter().GetResult();
+
+// ✅ 會等待 - 在 async 方法中使用 await
+await Task.Run(() => ProcessSoaBomInBackground(unProcessPartsLists));
+```
+
+## 6. Console 應用程式的特殊問題
+
+### 問題根源
+
+```csharp
+static void Main(string[] args)
+{
+    // 啟動背景 Task，但沒有等待
+    Task.Run(() => SomeAsyncMethod());
+    
+    // Main 方法結束，整個 Console 應用程式終止
+    // 背景 Task 被強制停止
+}
+```
+
+### 執行順序
+
+1. `Task.Run()` 立即回傳 Task 物件
+2. 主執行緒繼續執行
+3. `Main()` 方法結束
+4. Console 應用程式終止
+5. **所有背景執行緒被強制停止**
+
+## 7. Lambda 表達式語法的真相
+
+### Expression Body vs Statement Body
+
+```csharp
+// Expression Body - 自動 return
+() => ProcessMethod()
+// 編譯器轉換為：
+() => { return ProcessMethod(); }
+
+// Statement Body - 需要明確 return
+() => { 
+    ProcessMethod(); // 沒有 return，回傳 void
+}
+```
+
+### 重要澄清：返回值類型不影響 Task.Run 的等待行為
+
+```csharp
+// 這兩種寫法在等待行為上完全相同 - 都不會等待
+Task.Run(() => ProcessMethod());           // 返回 Task
+Task.Run(() => { ProcessMethod(); });      // 返回 void
+
+// Task.Run 永遠立即回傳，不管委派函式返回什麼
+```
+
+## 8. 委派中的控制流問題
+
+### 錯誤寫法：遺棄非同步方法
 
 ```csharp
 Task.Run(() => { 
     serviceClient.ProcessSoaBomServiceAsync(unProcessPartsLists); // 沒有 await
-    // 其他程式碼...
+    // 其他程式碼立即執行
 });
 ```
 
-**控制流問題**：
+**問題**：
 
-1. 呼叫 `ProcessSoaBomServiceAsync`，返回 `Task`
-2. **控制流立即跳出**非同步方法，繼續執行後面流程
-3. 委派快速完成，`Task.Run` 結束
-4. 但是 `ProcessSoaBomServiceAsync` 的實際工作可能還在進行
-5. **結果**：非同步方法被「遺棄」，可能被提早終止
+- `ProcessSoaBomServiceAsync` 回傳的 Task 被忽略
+- 委派立即完成，但非同步方法可能還在執行
+- 非同步方法可能被提早終止
 
-### 正確寫法：非同步方法加上 await
+### 正確寫法：等待非同步方法完成
 
 ```csharp
 Task.Run(async () => { 
     await serviceClient.ProcessSoaBomServiceAsync(unProcessPartsLists); // 有 await
-    // 其他程式碼...
+    // 等待非同步方法完全結束後才執行
 });
 ```
 
-**控制流修正**：
+**但是**：<mark style="background: #FFF3A3A6;">Task.Run 本身仍然不會等待這個 async lambda 完成！</mark>
 
-1. 呼叫 `ProcessSoaBomServiceAsync`
-2. **控制流暫時跳出** `Task.Run`，但委派尚未完成
-3. 等待非同步方法完全結束
-4. **控制流回到** `Task.Run`，繼續執行後續流程
-5. 委派真正完成，`Task.Run` 結束
 
-## 5. Task.Run 的委派返回值機制
+## 10. 重點摘要
 
-### Lambda 表達式的兩種語法
+### 核心原則
 
-#### Expression Body（表達式主體）- 自動 return
-
-```csharp
-() => ProcessSoaBomInBackground(unProcessPartsLists)
-```
-
-**編譯器自動轉換為**：
-
-```csharp
-() => {
-    return ProcessSoaBomInBackground(unProcessPartsLists); // 自動加 return
-}
-```
-
-#### Statement Body（語句主體）- 需要明確 return
-
-```csharp
-() => { 
-    ProcessSoaBomInBackground(unProcessPartsLists); // 沒有 return
-    // 隱含 return void
-}
-```
-
-### Task.Run 的行為差異
-
-#### 委派返回 Task - Task.Run 會等待
-
-```csharp
-// 返回 Task，Task.Run 會等待這個 Task 完成
-Task.Run(() => ProcessSoaBomInBackground(unProcessPartsLists));
-
-// 等同於
-Task.Run(() => {
-    return ProcessSoaBomInBackground(unProcessPartsLists);
-});
-```
-
-**Task.Run 使用重載**：`Task.Run(Func<Task> function)`
-
-#### 委派返回 void - Task.Run 立即完成
-
-```csharp
-// 返回 void，Task.Run 立即完成
-Task.Run(() => { 
-    ProcessSoaBomInBackground(unProcessPartsLists); // Task 被忽略
-});
-```
-
-**Task.Run 使用重載**：`Task.Run(Action action)`
-
-## 6. 實戰建議
-
-### 背景執行的最佳實踐
-
-```csharp
-// 方法 A：使用 Expression Body
-_ = Task.Run(() => ProcessSoaBomInBackground(unProcessPartsLists));
-
-// 方法 B：使用 Statement Body 但明確 return
-_ = Task.Run(() => {
-    return ProcessSoaBomInBackground(unProcessPartsLists);
-});
-
-// 方法 C：使用 async/await
-_ = Task.Run(async () => {
-    try
-    {
-        using (var serviceClient = new SoaBomServiceClient())
-        {
-            await serviceClient.ProcessSoaBomServiceAsync(unProcessPartsLists);
-        }
-    }
-    catch (Exception ex)
-    {
-        HandleException(ex);
-    }
-});
-```
+- **Task.Run 永遠立即回傳**，不會等待委派執行完成
+- **Console 應用程式在主執行緒結束後立即終止**
+- **必須明確等待 Task 才能確保背景工作完成**
 
 ### 記住的口訣
 
-- **有大括號 `{}`**：需要明確 `return`，否則返回 `void`
-- **沒有大括號**：編譯器自動加 `return`
-- **委派返回 Task**：`Task.Run` 會等待
-- **委派返回 void**：`Task.Run` 立即完成
-- **背景例外**：必須在 `Task.Run` 內部處理
+- <mark style="background: #FFF3A3A6;">Task.Run 不等待：永遠立即回傳 Task 物件</mark>
+- **Console 會終止**：主執行緒結束後整個應用程式結束
+- **背景會中斷**：未完成的背景任務會被強制停止
+- **必須明確等**：使用 Wait()、GetAwaiter().GetResult() 或 await
+
+### Web vs Console 差異
+
+- <mark style="background: #FFF3A3A6;">Web 應用程式：伺服器持續運行，背景 Task 有機會完成</mark>
+- <mark style="background: #FFF3A3A6;">Console 應用程式：主執行緒結束後立即終止，背景 Task 被強制停止</mark>
+- <mark style="background: #FFF3A3A6;">Task.Run 行為完全相同：在兩種環境中都立即回傳，不會等待</mark>
