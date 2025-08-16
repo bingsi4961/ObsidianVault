@@ -1,119 +1,675 @@
-# KP彙整表測試資料與報表預覽（稀疏矩陣正確版）
+```csharp
+// 在 Bom90ReportGenerator.cs 中新增以下內容
 
-## 測試資料來源 (bom90CompsList)
+/// <summary>
+/// 產生 KP彙整表 Sheet
+/// </summary>
+private void GenerateKpSummarySheet(XLWorkbook workBook)
+{
+    var workSheet = workBook.Worksheets.Add("KP彙整");
+    var summaryGenerator = new KpSummarySheetGenerator();
+    summaryGenerator.Generate(workSheet, _bom90CompsList);
+}
 
-假設我們有以下 5 個 90料號的資料：
+/// <summary>
+/// KP彙整表 Sheet 產生器
+/// </summary>
+public class KpSummarySheetGenerator
+{
+    private readonly KpSummaryHeaderConfig _headerConfig;
 
-### 90料號: 90NB1202-T00010 (Part90Quantity: 2)
+    public KpSummarySheetGenerator()
+    {
+        _headerConfig = new KpSummaryHeaderConfig();
+    }
 
-**主板**: 60NB1200-MB1121, M6500XU, Qty: 1, IS_SUB: false **CPU**:
+    /// <summary>
+    /// 產生 KP彙整表 內容
+    /// </summary>
+    public void Generate(IXLWorksheet workSheet, List<Bom90ComponentsModel> bom90CompsList)
+    {
+        // 建立標題列
+        CreateHeaderRow(workSheet);
 
-- 01002-01411200, 100-000000963, Qty: 1, IS_SUB: false
-- 02004-00751100, C.S GN21-X2-K1-A1 FCBGA1358//NVIDIA GB5C-128 AD107-750-K1-A1, Qty: 1, IS_SUB: false **VRAM**: 03014-00021500, K4ZAF325BC-SC16, Qty: 15, IS_SUB: false **SSD**: SSD料號123, 512GB, Qty: 3, IS_SUB: false **WLAN**: 0C011-00250100, Qty: 3, IS_SUB: false **Battery**: 0B200-03750000, SMP/CA436981G/3S1P/11.55V/50WH, X321 BATT/COS POLY/C31N1905, Qty: 2, IS_SUB: false **VGA**: 60PD1234-VGA001, RTX4060/8GB/GDDR6, Qty: 1, IS_SUB: false
+        // 從所有 90料號 中提取並彙整零件資料
+        var kpSummaryData = ExtractAndGroupKpData(bom90CompsList);
 
-### 90料號: 90NB1202-T00020 (Part90Quantity: 1)
+        // 產生資料列
+        GenerateDataRows(workSheet, kpSummaryData);
 
-**主板**: 60NB1200-MB1011, M6500XU, Qty: 1, IS_SUB: false **CPU**:
+        // 設定欄寬和樣式
+        SetColumnWidthAndStyle(workSheet);
+    }
 
-- 01002-01411200, 100-000000963, Qty: 1, IS_SUB: false (相同規格)
-- 02046-00020200, C.S AU6465RB63-GCF-GR QFN28//ALCOR USB2.0 FLASH CARD READER, Qty: 1, IS_SUB: false **VRAM**: 03014-00021500, K4ZAF325BC-SC16, Qty: 15, IS_SUB: false (相同規格) **SSD**: SSD料號456, 1TB, Qty: 4, IS_SUB: false (不同容量) **WLAN**: 0C011-00280000, Qty: 2, IS_SUB: false (不同料號) **Battery**: 0B200-04140200, SMP/576981/3S1P/11.61V/70W, K3402ZA BAT/ATL POLY/C31N2105, Qty: 4, IS_SUB: false (不同料號+廠商+規格) **VGA**: 60PD1234-VGA001, RTX4060/8GB/GDDR6, Qty: 1, IS_SUB: false (相同料號+規格)
+    /// <summary>
+    /// 建立標題列
+    /// </summary>
+    private void CreateHeaderRow(IXLWorksheet workSheet)
+    {
+        var allHeaders = _headerConfig.GetAllHeaders();
+        var headerColors = _headerConfig.GetHeaderColors();
 
-### 90料號: 90NB1221-T00010 (Part90Quantity: 1)
+        for (int i = 0; i < allHeaders.Length; i++)
+        {
+            var cell = workSheet.Cell(1, i + 1);
+            cell.Value = allHeaders[i];
+            cell.Style.Font.Bold = true;
+            cell.Style.Fill.BackgroundColor = headerColors[i];
+            cell.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+            cell.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
+            cell.Style.Font.FontColor = XLColor.White;
+        }
+    }
 
-**主板**: 60NB1220-MB1030, M1605XA, Qty: 1, IS_SUB: false **CPU**: 01002-01410800, 100-000000954, Qty: 1, IS_SUB: false (不同規格) **VRAM**: 03016-00010400, MICRON, MT60B1G16HC-48B:A=>D8BNK, Qty: 4, IS_SUB: false (不同規格) **SSD**: SSD料號789, 512GB, Qty: 1, IS_SUB: false (與第一個相同容量) **WLAN**: 0C011-00281200, Qty: 1, IS_SUB: false (不同料號) **Battery**: 0B200-03750000, SMP/CA436981G/3S1P/11.55V/50WH, X321 BATT/COS POLY/C31N1905, Qty: 1, IS_SUB: false (與第一個相同料號+廠商+規格)
+    /// <summary>
+    /// 從所有 90料號 中提取並彙整零件資料
+    /// </summary>
+    private KpSummaryMatrix ExtractAndGroupKpData(List<Bom90ComponentsModel> bom90CompsList)
+    {
+        var matrix = new KpSummaryMatrix();
 
-### 90料號: 90NB1241-M00090 (Part90Quantity: 2)
+        // 收集所有零件並按類型分組
+        foreach (var bom90Comps in bom90CompsList)
+        {
+            matrix.AddCpuData(bom90Comps.CPUs, bom90Comps.Part90Quantity);
+            matrix.AddPchData(bom90Comps.PCHs, bom90Comps.Part90Quantity);
+            matrix.AddGpuData(bom90Comps.GPUs, bom90Comps.Part90Quantity);
+            matrix.AddVramData(bom90Comps.VRAMs, bom90Comps.Part90Quantity);
+            matrix.AddDimmData(bom90Comps.DIMMs, bom90Comps.Part90Quantity);
+            matrix.AddSsdData(bom90Comps.SSDs, bom90Comps.Part90Quantity);
+            matrix.AddDdrData(bom90Comps.DDRs, bom90Comps.Part90Quantity);
+            matrix.AddHddData(bom90Comps.HDDs, bom90Comps.Part90Quantity);
+            matrix.AddWlanData(bom90Comps.WLANs, bom90Comps.Part90Quantity);
+            matrix.AddBatteryData(bom90Comps.Batterys, bom90Comps.Part90Quantity);
+            matrix.AddVgaData(bom90Comps.VGAs, bom90Comps.Part90Quantity);
+        }
 
-**主板**: 60NB1240-MB1320, M6500QF, Qty: 2, IS_SUB: false **CPU**:
+        // 進行分組和排序
+        matrix.GroupAndSort();
 
-- 01002-01325000, 100-000000295, Qty: 2, IS_SUB: false (新規格)
-- 02004-00653400, C.S GN20-S7-B-MP-KB-A1 FCBGA1358//NVIDIA GB5B-128 GA107-715-KB-A1, Qty: 2, IS_SUB: false **VRAM**: 03014-00021500, K4ZAF325BC-SC16, Qty: 15, IS_SUB: false (相同規格) **SSD**: SSD料號999, 512GB, Qty: 3, IS_SUB: false (相同容量) **WLAN**: 0C011-00250100, Qty: 3, IS_SUB: false (相同料號) **Battery**: 0B200-03750000, DYNA/CA576981F/3S1P/11.61V/70W, X321 BATT/COS POLY/C31N1905, Qty: 2, IS_SUB: false (相同料號+規格，但不同廠商) **VGA**: 60PD5678-VGA002, RTX4070/12GB/GDDR6X, Qty: 1, IS_SUB: false (不同料號+規格)
+        return matrix;
+    }
 
-### 90料號: 90NB1241-T00030 (Part90Quantity: 1)
+    /// <summary>
+    /// 產生資料列
+    /// </summary>
+    private void GenerateDataRows(IXLWorksheet workSheet, KpSummaryMatrix matrix)
+    {
+        // 計算總列數 = 所有零件類型中最大的 distinct 數量
+        int totalRows = matrix.GetMaxRowCount();
 
-**主板**: 60NB1240-MB1320, M6500QF, Qty: 1, IS_SUB: false **CPU**:
+        for (int rowIndex = 0; rowIndex < totalRows; rowIndex++)
+        {
+            var currentRow = rowIndex + 2; // 從第2列開始（第1列是標題）
+            FillSingleDataRow(workSheet, currentRow, matrix, rowIndex);
+        }
+    }
 
-- 01002-01325000, 100-000000295, Qty: 1, IS_SUB: true (相同規格但替代料)
-- 02004-00751100, C.S GN21-X2-K1-A1 FCBGA1358//NVIDIA GB5C-128 AD107-750-K1-A1, Qty: 1, IS_SUB: true (相同規格但替代料) **VRAM**: 03014-00021500, K4ZAF325BC-SC16, Qty: 15, IS_SUB: true (相同規格但替代料) **SSD**:
-- SSD料號AAA, 512GB, Qty: 1, IS_SUB: true (相同容量但替代料)
-- SSD料號BBB, 2TB, Qty: 1, IS_SUB: false (新容量) **WLAN**: 0C011-00300000, Qty: 1, IS_SUB: false (新料號) **Battery**: 0B200-04140000, DYNA/CA576981F/3S1P/11.61V/70W, K3402 BAT/COS POLY/C31N2105, Qty: 1, IS_SUB: false (新料號+廠商+規格) **VGA**:
-- 60PD1234-VGA001, RTX4060/8GB/GDDR6, Qty: 1, IS_SUB: true (相同料號+規格但替代料)
-- 60PD5678-VGA002, RTX4070/12GB/GDDR6X, Qty: 1, IS_SUB: true (相同料號+規格但替代料)
+    /// <summary>
+    /// 填入單列資料
+    /// </summary>
+    private void FillSingleDataRow(IXLWorksheet workSheet, int rowNum, KpSummaryMatrix matrix, int rowIndex)
+    {
+        int col = 1;
 
----
+        // CPU
+        if (rowIndex < matrix.CpuSummaries.Count)
+        {
+            var cpu = matrix.CpuSummaries[rowIndex];
+            workSheet.Cell(rowNum, col).Value = FormatWithSubIndicator(cpu.Specification, cpu.IsSub);
+            workSheet.Cell(rowNum, col + 1).Value = cpu.TotalQuantity;
+        }
+        col += _headerConfig.CpuHeaders.Length;
 
-## 總表 (Part90Summary) 預覽 (完整5個90料號)
+        // PCH
+        if (rowIndex < matrix.PchSummaries.Count)
+        {
+            var pch = matrix.PchSummaries[rowIndex];
+            workSheet.Cell(rowNum, col).Value = FormatWithSubIndicator(pch.Specification, pch.IsSub);
+            workSheet.Cell(rowNum, col + 1).Value = pch.TotalQuantity;
+        }
+        col += _headerConfig.PchHeaders.Length;
 
-| 90料號            | Qty | 機種名稱    | 主板              | Qty | CPU 料號               | CPU 規格                                                            | Qty | VRAM 料號              | VRAM 廠商 | VRAM 規格                  | Qty | SSD 容量      | Qty | WLAN 料號        | Qty | Battery 料號     | Battery 廠商                     | Battery 規格                    | Qty | VGA 料號                | VGA 規格              | Qty |
-| --------------- | --- | ------- | --------------- | --- | -------------------- | ----------------------------------------------------------------- | --- | -------------------- | ------- | ------------------------ | --- | ----------- | --- | -------------- | --- | -------------- | ------------------------------ | ----------------------------- | --- | --------------------- | ------------------- | --- |
-| 90NB1202-T00010 | 2   | M6500XU | 60NB1200-MB1121 | 2   | 01002-01411200       | 100-000000963                                                     | 2   | 03014-00021500       |         | K4ZAF325BC-SC16          | 30  | 512GB       | 6   | 0C011-00250100 | 6   | 0B200-03750000 | SMP/CA436981G/3S1P/11.55V/50WH | X321 BATT/COS POLY/C31N1905   | 4   | 60PD1234-VGA001       | RTX4060/8GB/GDDR6   | 2   |
-|                 |     |         |                 |     | 02004-00751100       | C.S GN21-X2-K1-A1 FCBGA1358//NVIDIA GB5C-128 AD107-750-K1-A1      | 2   |                      |         |                          |     |             |     |                |     |                |                                |                               |     |                       |                     |     |
-| 90NB1202-T00020 | 1   | M6500XU | 60NB1200-MB1011 | 1   | 01002-01411200       | 100-000000963                                                     | 1   | 03014-00021500       |         | K4ZAF325BC-SC16          | 15  | 1TB         | 4   | 0C011-00280000 | 2   | 0B200-04140200 | SMP/576981/3S1P/11.61V/70W     | K3402ZA BAT/ATL POLY/C31N2105 | 4   | 60PD1234-VGA001       | RTX4060/8GB/GDDR6   | 1   |
-|                 |     |         |                 |     | 02046-00020200       | C.S AU6465RB63-GCF-GR QFN28//ALCOR USB2.0 FLASH CARD READER       | 1   |                      |         |                          |     |             |     |                |     |                |                                |                               |     |                       |                     |     |
-| 90NB1221-T00010 | 1   | M1605XA | 60NB1220-MB1030 | 1   | 01002-01410800       | 100-000000954                                                     | 1   | 03016-00010400       | MICRON  | MT60B1G16HC-48B:A=>D8BNK | 4   | 512GB       | 1   | 0C011-00281200 | 1   | 0B200-03750000 | SMP/CA436981G/3S1P/11.55V/50WH | X321 BATT/COS POLY/C31N1905   | 1   |                       |                     |     |
-| 90NB1241-M00090 | 2   | M6500QF | 60NB1240-MB1320 | 4   | 01002-01325000       | 100-000000295                                                     | 4   | 03014-00021500       |         | K4ZAF325BC-SC16          | 30  | 512GB       | 6   | 0C011-00250100 | 6   | 0B200-03750000 | DYNA/CA576981F/3S1P/11.61V/70W | X321 BATT/COS POLY/C31N1905   | 4   | 60PD5678-VGA002       | RTX4070/12GB/GDDR6X | 2   |
-|                 |     |         |                 |     | 02004-00653400       | C.S GN20-S7-B-MP-KB-A1 FCBGA1358//NVIDIA GB5B-128 GA107-715-KB-A1 | 4   |                      |         |                          |     |             |     |                |     |                |                                |                               |     |                       |                     |     |
-| 90NB1241-T00030 | 1   | M6500QF | 60NB1240-MB1320 | 1   | 01002-01325000 (替代料) | 100-000000295                                                     | 1   | 03014-00021500 (替代料) |         | K4ZAF325BC-SC16          | 15  | 512GB (替代料) | 1   | 0C011-00300000 | 1   | 0B200-04140000 | DYNA/CA576981F/3S1P/11.61V/70W | K3402 BAT/COS POLY/C31N2105   | 1   | 60PD1234-VGA001 (替代料) | RTX4060/8GB/GDDR6   | 1   |
-|                 |     |         |                 |     | 02004-00751100 (替代料) | C.S GN21-X2-K1-A1 FCBGA1358//NVIDIA GB5C-128 AD107-750-K1-A1      | 1   |                      |         |                          |     | 2TB         | 1   |                |     |                |                                |                               |     | 60PD5678-VGA002 (替代料) | RTX4070/12GB/GDDR6X | 1   |
+        // GPU
+        if (rowIndex < matrix.GpuSummaries.Count)
+        {
+            var gpu = matrix.GpuSummaries[rowIndex];
+            workSheet.Cell(rowNum, col).Value = FormatWithSubIndicator(gpu.Specification, gpu.IsSub);
+            workSheet.Cell(rowNum, col + 1).Value = gpu.TotalQuantity;
+        }
+        col += _headerConfig.GpuHeaders.Length;
 
----
+        // VRAM
+        if (rowIndex < matrix.VramSummaries.Count)
+        {
+            var vram = matrix.VramSummaries[rowIndex];
+            workSheet.Cell(rowNum, col).Value = FormatWithSubIndicator(vram.Specification, vram.IsSub);
+            workSheet.Cell(rowNum, col + 1).Value = vram.TotalQuantity;
+        }
+        col += _headerConfig.VramHeaders.Length;
 
-## KP彙整表 (KpSummary) 預覽
+        // On-Board DIMM
+        if (rowIndex < matrix.DimmSummaries.Count)
+        {
+            var dimm = matrix.DimmSummaries[rowIndex];
+            workSheet.Cell(rowNum, col).Value = FormatWithSubIndicator(dimm.Specification, dimm.IsSub);
+            workSheet.Cell(rowNum, col + 1).Value = dimm.TotalQuantity;
+        }
+        col += _headerConfig.DimmHeaders.Length;
 
-**關鍵理解**：每種零件都從第1列開始填入，**所有列都要上背景色**
+        // SSD
+        if (rowIndex < matrix.SsdSummaries.Count)
+        {
+            var ssd = matrix.SsdSummaries[rowIndex];
+            workSheet.Cell(rowNum, col).Value = FormatWithSubIndicator(ssd.Capacity, ssd.IsSub);
+            workSheet.Cell(rowNum, col + 1).Value = ssd.TotalQuantity;
+        }
+        col += _headerConfig.SsdHeaders.Length;
 
-| CPU 規格                                                             | Qty | PCH 規格 | Qty | GPU 規格 | Qty | VRAM 規格                  | Qty | On-Board DIMM 規格 | Qty | SSD 容量      | Qty | DDR 容量 | Qty | HDD 容量 | Qty | WLAN 料號        | Qty | Battery 料號     | Battery 廠商                     | Battery 規格                    | Qty | VGA 料號                | VGA 規格              | Qty |
-| ------------------------------------------------------------------ | --- | ------ | --- | ------ | --- | ------------------------ | --- | ---------------- | --- | ----------- | --- | ------ | --- | ------ | --- | -------------- | --- | -------------- | ------------------------------ | ----------------------------- | --- | --------------------- | ------------------- | --- |
-| 100-000000295                                                      | 4   | 🟣     | 🟣  | 🟦     | 🟦  | K4ZAF325BC-SC16          | 75  | 🔵               | 🔵  | 1TB         | 4   | 🟡     | 🟡  | 🟪     | 🟪  | 0C011-00250100 | 12  | 0B200-03750000 | DYNA/CA576981F/3S1P/11.61V/70W | X321 BATT/COS POLY/C31N1905   | 4   | 60PD1234-VGA001       | RTX4060/8GB/GDDR6   | 3   |
-| 100-000000954                                                      | 1   | 🟣     | 🟣  | 🟦     | 🟦  | MT60B1G16HC-48B:A=>D8BNK | 4   | 🔵               | 🔵  | 2TB         | 1   | 🟡     | 🟡  | 🟪     | 🟪  | 0C011-00280000 | 2   | 0B200-03750000 | SMP/CA436981G/3S1P/11.55V/50WH | X321 BATT/COS POLY/C31N1905   | 5   | 60PD5678-VGA002       | RTX4070/12GB/GDDR6X | 2   |
-| 100-000000963                                                      | 3   | 🟣     | 🟣  | 🟦     | 🟦  | K4ZAF325BC-SC16 (替代料)    | 15  | 🔵               | 🔵  | 512GB       | 13  | 🟡     | 🟡  | 🟪     | 🟪  | 0C011-00281200 | 1   | 0B200-04140000 | DYNA/CA576981F/3S1P/11.61V/70W | K3402 BAT/COS POLY/C31N2105   | 1   | 60PD1234-VGA001 (替代料) | RTX4060/8GB/GDDR6   | 1   |
-| C.S AU6465RB63-GCF-GR QFN28//ALCOR USB2.0 FLASH CARD READER        | 1   | 🟣     | 🟣  | 🟦     | 🟦  | 🔘                       | 🔘  | 🔵               | 🔵  | 512GB (替代料) | 1   | 🟡     | 🟡  | 🟪     | 🟪  | 0C011-00300000 | 1   | 0B200-04140200 | SMP/576981/3S1P/11.61V/70W     | K3402ZA BAT/ATL POLY/C31N2105 | 4   | 60PD5678-VGA002 (替代料) | RTX4070/12GB/GDDR6X | 1   |
-| C.S GN20-S7-B-MP-KB-A1 FCBGA1358//NVIDIA GB5B-128 GA107-715-KB-A1  | 4   | 🟣     | 🟣  | 🟦     | 🟦  | 🔘                       | 🔘  | 🔵               | 🔵  | 🟢          | 🟢  | 🟡     | 🟡  | 🟪     | 🟪  | 🟤             | 🟤  | 🔴             | 🔴                             | 🔴                            | 🔴  | ⚫                     | ⚫                   | ⚫   |
-| C.S GN21-X2-K1-A1 FCBGA1358//NVIDIA GB5C-128 AD107-750-K1-A1       | 2   | 🟣     | 🟣  | 🟦     | 🟦  | 🔘                       | 🔘  | 🔵               | 🔵  | 🟢          | 🟢  | 🟡     | 🟡  | 🟪     | 🟪  | 🟤             | 🟤  | 🔴             | 🔴                             | 🔴                            | 🔴  | ⚫                     | ⚫                   | ⚫   |
-| 100-000000295 (替代料)                                                | 1   | 🟣     | 🟣  | 🟦     | 🟦  | 🔘                       | 🔘  | 🔵               | 🔵  | 🟢          | 🟢  | 🟡     | 🟡  | 🟪     | 🟪  | 🟤             | 🟤  | 🔴             | 🔴                             | 🔴                            | 🔴  | ⚫                     | ⚫                   | ⚫   |
-| C.S GN21-X2-K1-A1 FCBGA1358//NVIDIA GB5C-128 AD107-750-K1-A1 (替代料) | 1   | 🟣     | 🟣  | 🟦     | 🟦  | 🔘                       | 🔘  | 🔵               | 🔵  | 🟢          | 🟢  | 🟡     | 🟡  | 🟪     | 🟪  | 🟤             | 🟤  | 🔴             | 🔴                             | 🔴                            | 🔴  | ⚫                     | ⚫                   | ⚫   |
+        // DDR
+        if (rowIndex < matrix.DdrSummaries.Count)
+        {
+            var ddr = matrix.DdrSummaries[rowIndex];
+            workSheet.Cell(rowNum, col).Value = FormatWithSubIndicator(ddr.Capacity, ddr.IsSub);
+            workSheet.Cell(rowNum, col + 1).Value = ddr.TotalQuantity;
+        }
+        col += _headerConfig.DdrHeaders.Length;
 
-**背景色說明**：
+        // HDD
+        if (rowIndex < matrix.HddSummaries.Count)
+        {
+            var hdd = matrix.HddSummaries[rowIndex];
+            workSheet.Cell(rowNum, col).Value = FormatWithSubIndicator(hdd.Capacity, hdd.IsSub);
+            workSheet.Cell(rowNum, col + 1).Value = hdd.TotalQuantity;
+        }
+        col += _headerConfig.HddHeaders.Length;
 
-- 🟠 **CPU 欄位**：橙色背景 (#F39C12) - 有資料時顯示內容，無資料時顯示空白但保持背景色
-- 🟣 **PCH 欄位**：紫色背景 (#9B59B6) - 這次測試資料中沒有PCH，但所有列都要有背景色
-- 🟦 **GPU 欄位**：青綠色背景 (#1ABC9C) - 這次測試資料中沒有GPU，但所有列都要有背景色
-- 🔘 **VRAM 欄位**：深灰色背景 (#34495E) - 有3筆資料在第1-3列，第4-8列無資料但保持背景色
-- 🔵 **On-Board DIMM 欄位**：青色背景 (#16A085) - 這次測試資料中沒有DIMM，但所有列都要有背景色
-- 🟢 **SSD 欄位**：綠色背景 (#27AE60) - 有4筆資料在第1-4列，第5-8列無資料但保持背景色
-- 🟡 **DDR 欄位**：藍色背景 (#2980B9) - 這次測試資料中沒有DDR，但所有列都要有背景色
-- 🟪 **HDD 欄位**：紫藍色背景 (#8E44AD) - 這次測試資料中沒有HDD，但所有列都要有背景色
-- 🟤 **WLAN 欄位**：橘紅色背景 (#D35400) - 有4筆資料在第1-4列，第5-8列無資料但保持背景色
-- 🔴 **Battery 欄位**：深紅色背景 (#C0392B) - 有4筆資料在第1-4列，第5-8列無資料但保持背景色
-- ⚫ **VGA 欄位**：灰色背景 (#7F8C8D) - 有4筆資料在第1-4列，第5-8列無資料但保持背景色
+        // WLAN
+        if (rowIndex < matrix.WlanSummaries.Count)
+        {
+            var wlan = matrix.WlanSummaries[rowIndex];
+            workSheet.Cell(rowNum, col).Value = FormatWithSubIndicator(wlan.PartNumber, wlan.IsSub);
+            workSheet.Cell(rowNum, col + 1).Value = wlan.TotalQuantity;
+        }
+        col += _headerConfig.WlanHeaders.Length;
 
----
+        // Battery
+        if (rowIndex < matrix.BatterySummaries.Count)
+        {
+            var battery = matrix.BatterySummaries[rowIndex];
+            workSheet.Cell(rowNum, col).Value = FormatWithSubIndicator(battery.PartNumber, battery.IsSub);
+            workSheet.Cell(rowNum, col + 1).Value = battery.Vendor;
+            workSheet.Cell(rowNum, col + 2).Value = battery.Specification;
+            workSheet.Cell(rowNum, col + 3).Value = battery.TotalQuantity;
+        }
+        col += _headerConfig.BatteryHeaders.Length;
 
-## 稀疏矩陣邏輯說明
+        // VGA
+        if (rowIndex < matrix.VgaSummaries.Count)
+        {
+            var vga = matrix.VgaSummaries[rowIndex];
+            workSheet.Cell(rowNum, col).Value = FormatWithSubIndicator(vga.PartNumber, vga.IsSub);
+            workSheet.Cell(rowNum, col + 1).Value = vga.Specification;
+            workSheet.Cell(rowNum, col + 2).Value = vga.TotalQuantity;
+        }
+    }
 
-**各零件 Distinct 結果（完全獨立）**：
+    /// <summary>
+    /// 格式化替代料標示（加上替代料標示）
+    /// </summary>
+    private string FormatWithSubIndicator(string value, bool isSub)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+            return string.Empty;
 
-1. **CPU**: 8筆 → 填入第1-8列的CPU欄位
-2. **PCH**: 0筆 → 無資料，但第1-8列PCH欄位都要有背景色
-3. **GPU**: 0筆 → 無資料，但第1-8列GPU欄位都要有背景色
-4. **VRAM**: 3筆 → 填入第1-3列的VRAM欄位，第4-8列VRAM欄位空白但保持背景色
-5. **DIMM**: 0筆 → 無資料，但第1-8列DIMM欄位都要有背景色
-6. **SSD**: 4筆 → 填入第1-4列的SSD欄位，第5-8列SSD欄位空白但保持背景色
-7. **DDR**: 0筆 → 無資料，但第1-8列DDR欄位都要有背景色
-8. **HDD**: 0筆 → 無資料，但第1-8列HDD欄位都要有背景色
-9. **WLAN**: 4筆 → 填入第1-4列的WLAN欄位，第5-8列WLAN欄位空白但保持背景色
-10. **Battery**: 4筆 → 填入第1-4列的Battery欄位，第5-8列Battery欄位空白但保持背景色
-11. **VGA**: 4筆 → 填入第1-4列的VGA欄位，第5-8列VGA欄位空白但保持背景色
+        return isSub ? $"{value} (替代料)" : value;
+    }
 
-**總列數**: max(8,0,0,3,0,4,0,0,4,4,4) = **8列**
+    /// <summary>
+    /// 設定欄寬和樣式
+    /// </summary>
+    private void SetColumnWidthAndStyle(IXLWorksheet workSheet)
+    {
+        // 自動調整欄寬
+        workSheet.ColumnsUsed().AdjustToContents();
+    }
+}
 
----
+/// <summary>
+/// KP彙整表 標題分組設定 (名稱、背景顏色)
+/// </summary>
+public class KpSummaryHeaderConfig
+{
+    public string[] CpuHeaders { get; } = { "CPU 規格", "Qty" };
+    public string[] PchHeaders { get; } = { "PCH 規格", "Qty" };
+    public string[] GpuHeaders { get; } = { "GPU 規格", "Qty" };
+    public string[] VramHeaders { get; } = { "VRAM 規格", "Qty" };
+    public string[] DimmHeaders { get; } = { "On-Board DIMM 規格", "Qty" };
+    public string[] SsdHeaders { get; } = { "SSD 容量", "Qty" };
+    public string[] DdrHeaders { get; } = { "DDR 容量", "Qty" };
+    public string[] HddHeaders { get; } = { "HDD 容量", "Qty" };
+    public string[] WlanHeaders { get; } = { "WLAN 料號", "Qty" };
+    public string[] BatteryHeaders { get; } = { "Battery 料號", "Battery 廠商", "Battery 規格", "Qty" };
+    public string[] VgaHeaders { get; } = { "VGA 料號", "VGA 規格", "Qty" };
 
-## 最終確認重點
+    /// <summary>
+    /// 取得 KP彙整表 所有標題
+    /// </summary>
+    public string[] GetAllHeaders()
+    {
+        var allHeaders = new List<string>();
 
-1. ✅ **稀疏矩陣獨立性**：每種零件從第1列開始，完全不考慮其他零件
-2. ✅ **背景色完整性**：所有列的所有零件欄位都要有對應背景色
-3. ✅ **排序邏輯**：IS_SUB 優先排序（false在前，true在後）
-4. ✅ **替代料標示**：放在每種零件的第一個欄位
+        allHeaders.AddRange(CpuHeaders);
+        allHeaders.AddRange(PchHeaders);
+        allHeaders.AddRange(GpuHeaders);
+        allHeaders.AddRange(VramHeaders);
+        allHeaders.AddRange(DimmHeaders);
+        allHeaders.AddRange(SsdHeaders);
+        allHeaders.AddRange(DdrHeaders);
+        allHeaders.AddRange(HddHeaders);
+        allHeaders.AddRange(WlanHeaders);
+        allHeaders.AddRange(BatteryHeaders);
+        allHeaders.AddRange(VgaHeaders);
 
-現在這樣的理解應該是完全正確的了！
+        return allHeaders.ToArray();
+    }
+
+    /// <summary>
+    /// 取得 KP彙整表 標題顏色
+    /// </summary>
+    public XLColor[] GetHeaderColors()
+    {
+        var colors = new List<XLColor>();
+
+        // CPU - 橙色
+        colors.AddRange(Enumerable.Repeat(XLColor.FromArgb(243, 156, 18), CpuHeaders.Length));
+
+        // PCH - 紫色
+        colors.AddRange(Enumerable.Repeat(XLColor.FromArgb(155, 89, 182), PchHeaders.Length));
+
+        // GPU - 青綠色
+        colors.AddRange(Enumerable.Repeat(XLColor.FromArgb(26, 188, 156), GpuHeaders.Length));
+
+        // VRAM - 深灰色
+        colors.AddRange(Enumerable.Repeat(XLColor.FromArgb(52, 73, 94), VramHeaders.Length));
+
+        // DIMM - 青色
+        colors.AddRange(Enumerable.Repeat(XLColor.FromArgb(22, 160, 133), DimmHeaders.Length));
+
+        // SSD - 綠色
+        colors.AddRange(Enumerable.Repeat(XLColor.FromArgb(39, 174, 96), SsdHeaders.Length));
+
+        // DDR - 藍色
+        colors.AddRange(Enumerable.Repeat(XLColor.FromArgb(41, 128, 185), DdrHeaders.Length));
+
+        // HDD - 紫藍色
+        colors.AddRange(Enumerable.Repeat(XLColor.FromArgb(142, 68, 173), HddHeaders.Length));
+
+        // WLAN - 橘紅色
+        colors.AddRange(Enumerable.Repeat(XLColor.FromArgb(211, 84, 0), WlanHeaders.Length));
+
+        // Battery - 深紅色
+        colors.AddRange(Enumerable.Repeat(XLColor.FromArgb(192, 57, 43), BatteryHeaders.Length));
+
+        // VGA - 灰色
+        colors.AddRange(Enumerable.Repeat(XLColor.FromArgb(127, 140, 141), VgaHeaders.Length));
+
+        return colors.ToArray();
+    }
+}
+
+/// <summary>
+/// KP彙整表資料矩陣
+/// </summary>
+public class KpSummaryMatrix
+{
+    public List<KpCpuSummary> CpuSummaries { get; private set; } = new List<KpCpuSummary>();
+    public List<KpPchSummary> PchSummaries { get; private set; } = new List<KpPchSummary>();
+    public List<KpGpuSummary> GpuSummaries { get; private set; } = new List<KpGpuSummary>();
+    public List<KpVramSummary> VramSummaries { get; private set; } = new List<KpVramSummary>();
+    public List<KpDimmSummary> DimmSummaries { get; private set; } = new List<KpDimmSummary>();
+    public List<KpSsdSummary> SsdSummaries { get; private set; } = new List<KpSsdSummary>();
+    public List<KpDdrSummary> DdrSummaries { get; private set; } = new List<KpDdrSummary>();
+    public List<KpHddSummary> HddSummaries { get; private set; } = new List<KpHddSummary>();
+    public List<KpWlanSummary> WlanSummaries { get; private set; } = new List<KpWlanSummary>();
+    public List<KpBatterySummary> BatterySummaries { get; private set; } = new List<KpBatterySummary>();
+    public List<KpVgaSummary> VgaSummaries { get; private set; } = new List<KpVgaSummary>();
+
+    // 臨時收集用的字典
+    private Dictionary<string, KpCpuSummary> _cpuDict = new Dictionary<string, KpCpuSummary>();
+    private Dictionary<string, KpPchSummary> _pchDict = new Dictionary<string, KpPchSummary>();
+    private Dictionary<string, KpGpuSummary> _gpuDict = new Dictionary<string, KpGpuSummary>();
+    private Dictionary<string, KpVramSummary> _vramDict = new Dictionary<string, KpVramSummary>();
+    private Dictionary<string, KpDimmSummary> _dimmDict = new Dictionary<string, KpDimmSummary>();
+    private Dictionary<string, KpSsdSummary> _ssdDict = new Dictionary<string, KpSsdSummary>();
+    private Dictionary<string, KpDdrSummary> _ddrDict = new Dictionary<string, KpDdrSummary>();
+    private Dictionary<string, KpHddSummary> _hddDict = new Dictionary<string, KpHddSummary>();
+    private Dictionary<string, KpWlanSummary> _wlanDict = new Dictionary<string, KpWlanSummary>();
+    private Dictionary<string, KpBatterySummary> _batteryDict = new Dictionary<string, KpBatterySummary>();
+    private Dictionary<string, KpVgaSummary> _vgaDict = new Dictionary<string, KpVgaSummary>();
+
+    public void AddCpuData(List<CpuModel> cpus, int part90Quantity)
+    {
+        foreach (var cpu in cpus)
+        {
+            var key = $"{cpu.Specification}|{cpu.IS_SUB}";
+            if (!_cpuDict.ContainsKey(key))
+            {
+                _cpuDict[key] = new KpCpuSummary
+                {
+                    Specification = cpu.Specification,
+                    IsSub = cpu.IS_SUB,
+                    TotalQuantity = 0
+                };
+            }
+            _cpuDict[key].TotalQuantity += part90Quantity * (cpu.Quantity ?? 0);
+        }
+    }
+
+    public void AddPchData(List<PchModel> pchs, int part90Quantity)
+    {
+        foreach (var pch in pchs)
+        {
+            var key = $"{pch.Specification}|{pch.IS_SUB}";
+            if (!_pchDict.ContainsKey(key))
+            {
+                _pchDict[key] = new KpPchSummary
+                {
+                    Specification = pch.Specification,
+                    IsSub = pch.IS_SUB,
+                    TotalQuantity = 0
+                };
+            }
+            _pchDict[key].TotalQuantity += part90Quantity * (pch.Quantity ?? 0);
+        }
+    }
+
+    public void AddGpuData(List<GpuModel> gpus, int part90Quantity)
+    {
+        foreach (var gpu in gpus)
+        {
+            var key = $"{gpu.Specification}|{gpu.IS_SUB}";
+            if (!_gpuDict.ContainsKey(key))
+            {
+                _gpuDict[key] = new KpGpuSummary
+                {
+                    Specification = gpu.Specification,
+                    IsSub = gpu.IS_SUB,
+                    TotalQuantity = 0
+                };
+            }
+            _gpuDict[key].TotalQuantity += part90Quantity * (gpu.Quantity ?? 0);
+        }
+    }
+
+    public void AddVramData(List<VramModel> vrams, int part90Quantity)
+    {
+        foreach (var vram in vrams)
+        {
+            var key = $"{vram.Specification}|{vram.IS_SUB}";
+            if (!_vramDict.ContainsKey(key))
+            {
+                _vramDict[key] = new KpVramSummary
+                {
+                    Specification = vram.Specification,
+                    IsSub = vram.IS_SUB,
+                    TotalQuantity = 0
+                };
+            }
+            _vramDict[key].TotalQuantity += part90Quantity * (vram.Quantity ?? 0);
+        }
+    }
+
+    public void AddDimmData(List<DimmModel> dimms, int part90Quantity)
+    {
+        foreach (var dimm in dimms)
+        {
+            var key = $"{dimm.Specification}|{dimm.IS_SUB}";
+            if (!_dimmDict.ContainsKey(key))
+            {
+                _dimmDict[key] = new KpDimmSummary
+                {
+                    Specification = dimm.Specification,
+                    IsSub = dimm.IS_SUB,
+                    TotalQuantity = 0
+                };
+            }
+            _dimmDict[key].TotalQuantity += part90Quantity * (dimm.Quantity ?? 0);
+        }
+    }
+
+    public void AddSsdData(List<SsdModel> ssds, int part90Quantity)
+    {
+        foreach (var ssd in ssds)
+        {
+            var key = $"{ssd.Capacity}|{ssd.IS_SUB}";
+            if (!_ssdDict.ContainsKey(key))
+            {
+                _ssdDict[key] = new KpSsdSummary
+                {
+                    Capacity = ssd.Capacity,
+                    IsSub = ssd.IS_SUB,
+                    TotalQuantity = 0
+                };
+            }
+            _ssdDict[key].TotalQuantity += part90Quantity * (ssd.Quantity ?? 0);
+        }
+    }
+
+    public void AddDdrData(List<DdrModel> ddrs, int part90Quantity)
+    {
+        foreach (var ddr in ddrs)
+        {
+            var key = $"{ddr.Capacity}|{ddr.IS_SUB}";
+            if (!_ddrDict.ContainsKey(key))
+            {
+                _ddrDict[key] = new KpDdrSummary
+                {
+                    Capacity = ddr.Capacity,
+                    IsSub = ddr.IS_SUB,
+                    TotalQuantity = 0
+                };
+            }
+            _ddrDict[key].TotalQuantity += part90Quantity * (ddr.Quantity ?? 0);
+        }
+    }
+
+    public void AddHddData(List<HddModel> hdds, int part90Quantity)
+    {
+        foreach (var hdd in hdds)
+        {
+            var key = $"{hdd.Capacity}|{hdd.IS_SUB}";
+            if (!_hddDict.ContainsKey(key))
+            {
+                _hddDict[key] = new KpHddSummary
+                {
+                    Capacity = hdd.Capacity,
+                    IsSub = hdd.IS_SUB,
+                    TotalQuantity = 0
+                };
+            }
+            _hddDict[key].TotalQuantity += part90Quantity * (hdd.Quantity ?? 0);
+        }
+    }
+
+    public void AddWlanData(List<WlanModel> wlans, int part90Quantity)
+    {
+        foreach (var wlan in wlans)
+        {
+            var key = $"{wlan.PartNumber}|{wlan.IS_SUB}";
+            if (!_wlanDict.ContainsKey(key))
+            {
+                _wlanDict[key] = new KpWlanSummary
+                {
+                    PartNumber = wlan.PartNumber,
+                    IsSub = wlan.IS_SUB,
+                    TotalQuantity = 0
+                };
+            }
+            _wlanDict[key].TotalQuantity += part90Quantity * (wlan.Quantity ?? 0);
+        }
+    }
+
+    public void AddBatteryData(List<BatteryModel> batterys, int part90Quantity)
+    {
+        foreach (var battery in batterys)
+        {
+            var key = $"{battery.PartNumber}|{battery.Vendor}|{battery.Specification}|{battery.IS_SUB}";
+            if (!_batteryDict.ContainsKey(key))
+            {
+                _batteryDict[key] = new KpBatterySummary
+                {
+                    PartNumber = battery.PartNumber,
+                    Vendor = battery.Vendor,
+                    Specification = battery.Specification,
+                    IsSub = battery.IS_SUB,
+                    TotalQuantity = 0
+                };
+            }
+            _batteryDict[key].TotalQuantity += part90Quantity * (battery.Quantity ?? 0);
+        }
+    }
+
+    public void AddVgaData(List<VgaModel> vgas, int part90Quantity)
+    {
+        foreach (var vga in vgas)
+        {
+            var key = $"{vga.PartNumber}|{vga.Specification}|{vga.IS_SUB}";
+            if (!_vgaDict.ContainsKey(key))
+            {
+                _vgaDict[key] = new KpVgaSummary
+                {
+                    PartNumber = vga.PartNumber,
+                    Specification = vga.Specification,
+                    IsSub = vga.IS_SUB,
+                    TotalQuantity = 0
+                };
+            }
+            _vgaDict[key].TotalQuantity += part90Quantity * (vga.Quantity ?? 0);
+        }
+    }
+
+    /// <summary>
+    /// 進行分組和排序
+    /// </summary>
+    public void GroupAndSort()
+    {
+        // 排序邏輯：IS_SUB(asc) → 其他欄位(asc)
+        CpuSummaries = _cpuDict.Values.OrderBy(x => x.IsSub).ThenBy(x => x.Specification).ToList();
+        PchSummaries = _pchDict.Values.OrderBy(x => x.IsSub).ThenBy(x => x.Specification).ToList();
+        GpuSummaries = _gpuDict.Values.OrderBy(x => x.IsSub).ThenBy(x => x.Specification).ToList();
+        VramSummaries = _vramDict.Values.OrderBy(x => x.IsSub).ThenBy(x => x.Specification).ToList();
+        DimmSummaries = _dimmDict.Values.OrderBy(x => x.IsSub).ThenBy(x => x.Specification).ToList();
+        SsdSummaries = _ssdDict.Values.OrderBy(x => x.IsSub).ThenBy(x => x.Capacity).ToList();
+        DdrSummaries = _ddrDict.Values.OrderBy(x => x.IsSub).ThenBy(x => x.Capacity).ToList();
+        HddSummaries = _hddDict.Values.OrderBy(x => x.IsSub).ThenBy(x => x.Capacity).ToList();
+        WlanSummaries = _wlanDict.Values.OrderBy(x => x.IsSub).ThenBy(x => x.PartNumber).ToList();
+        BatterySummaries = _batteryDict.Values.OrderBy(x => x.IsSub).ThenBy(x => x.PartNumber).ThenBy(x => x.Vendor).ThenBy(x => x.Specification).ToList();
+        VgaSummaries = _vgaDict.Values.OrderBy(x => x.IsSub).ThenBy(x => x.PartNumber).ThenBy(x => x.Specification).ToList();
+    }
+
+    /// <summary>
+    /// 取得最大列數
+    /// </summary>
+    public int GetMaxRowCount()
+    {
+        return new[] {
+            CpuSummaries.Count,
+            PchSummaries.Count,
+            GpuSummaries.Count,
+            VramSummaries.Count,
+            DimmSummaries.Count,
+            SsdSummaries.Count,
+            DdrSummaries.Count,
+            HddSummaries.Count,
+            WlanSummaries.Count,
+            BatterySummaries.Count,
+            VgaSummaries.Count
+        }.Max();
+    }
+}
+
+#region KP彙整表資料模型
+
+public class KpCpuSummary
+{
+    public string Specification { get; set; }
+    public bool IsSub { get; set; }
+    public decimal TotalQuantity { get; set; }
+}
+
+public class KpPchSummary
+{
+    public string Specification { get; set; }
+    public bool IsSub { get; set; }
+    public decimal TotalQuantity { get; set; }
+}
+
+public class KpGpuSummary
+{
+    public string Specification { get; set; }
+    public bool IsSub { get; set; }
+    public decimal TotalQuantity { get; set; }
+}
+
+public class KpVramSummary
+{
+    public string Specification { get; set; }
+    public bool IsSub { get; set; }
+    public decimal TotalQuantity { get; set; }
+}
+
+public class KpDimmSummary
+{
+    public string Specification { get; set; }
+    public bool IsSub { get; set; }
+    public decimal TotalQuantity { get; set; }
+}
+
+public class KpSsdSummary
+{
+    public string Capacity { get; set; }
+    public bool IsSub { get; set; }
+    public decimal TotalQuantity { get; set; }
+}
+
+public class KpDdrSummary
+{
+    public string Capacity { get; set; }
+    public bool IsSub { get; set; }
+    public decimal TotalQuantity { get; set; }
+}
+
+public class KpHddSummary
+{
+    public string Capacity { get; set; }
+    public bool IsSub { get; set; }
+    public decimal TotalQuantity { get; set; }
+}
+
+public class KpWlanSummary
+{
+    public string PartNumber { get; set; }
+    public bool IsSub { get; set; }
+    public decimal TotalQuantity { get; set; }
+}
+
+public class KpBatterySummary
+{
+    public string PartNumber { get; set; }
+    public string Vendor { get; set; }
+    public string Specification { get; set; }
+    public bool IsSub { get; set; }
+    public decimal TotalQuantity { get; set; }
+}
+
+public class KpVgaSummary
+{
+    public string PartNumber { get; set; }
+    public string Specification { get; set; }
+    public bool IsSub { get; set; }
+    public decimal TotalQuantity { get; set; }
+}
+
+#endregion
+```
