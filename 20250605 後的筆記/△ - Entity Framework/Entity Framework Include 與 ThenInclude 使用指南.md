@@ -71,8 +71,8 @@ var orders = context.Orders
 ```csharp
 // 同時載入多個關聯
 var orders = context.Orders
-    .Include(o => o.OrderItems.Select(oi => oi.Product))  // 載入 OrderItems 和 Product
-    .Include(o => o.Customer.Address)
+    .Include(o => o.OrderItems.Select(oi => oi.Product))  // 載入 OrderItems 和 其關聯的 Product
+    .Include(o => o.Customer.Address) // 載入 Customer 和 其關聯的 Address
     .ToList();
 ```
 
@@ -81,7 +81,7 @@ var orders = context.Orders
 ```csharp
 // EF6 的 Select 在 Include 中不是投影，而是關聯導航語法
 .Include(o => o.Items.Select(i => i.Product))
-// 會同時載入：
+// 上述語法會同時載入：
 // 1. Items 集合（完整的 Item 物件）
 // 2. 每個 Item 對應的 Product（完整的 Product 物件）
 
@@ -184,7 +184,7 @@ public class Order
 
 **Collection Navigation 是集合型態，沒有具體的屬性名稱，因此不能在 Collection Navigation 後面直接接 Reference Navigation。**
 
-例如：`List<Order>` 是集合型態，EF Core 無法知道要存取集合中哪個元素的屬性。
+例如：`List<Order>` 是集合型態，這個型別並沒有一個叫做 Items 的屬性，只有 Order 型別才有。因此 EF Core 無法理解 c.Orders.Items 這種寫法。
 
 ### ✅ **情況一：整個路徑都是 Reference Navigation**
 
@@ -219,7 +219,7 @@ var orders = context.Orders
 ```csharp
 // Customer → Orders → Items (中間有 Collection)
 var customers = context.Customers
-    .Include(c => c.Orders.Items)  // ❌ 不能這樣使用！
+    .Include(c => c.Orders.Items)  // ❌ 編譯錯誤！List<Order> 沒有 Items 屬性
     .ToList();
 ```
 
@@ -268,6 +268,7 @@ Order {
 var orders = context.Orders
     .Include(o => o.OrderItems.Select(oi => oi.Product))
     .ToList();
+// 解決 .Include(c => c.OrderItems.Product) 編譯錯誤的問題
 
 // EF Core
 var orders = context.Orders
