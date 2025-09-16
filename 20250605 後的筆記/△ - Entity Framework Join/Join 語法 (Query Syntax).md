@@ -73,3 +73,7 @@ public CommonResponse<List<StageSettingVM>> GetSkuAndStage(int groupId, int devi
     return resp;
 }
 ```
+
+1. Include() 方法會自動根據導航屬性，和外鍵關係來執行 JOIN，不需要手動指定 JOIN 條件。
+
+2. <mark style="background: #FFF3A3A6;">但是 LINQ Query Syntax（查詢語法）中的 join，必須手動指定 equals 條件</mark>。
