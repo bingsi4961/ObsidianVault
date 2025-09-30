@@ -40,7 +40,7 @@ var orderData = context.Orders
 // Include/ThenInclude
 var orders = context.Orders
     .Include(o => o.Customer)
-    .ThenInclude(c => c.Address)
+	    .ThenInclude(c => c.Address)
     .ToList();
 // 結果：orders[0].Customer.Address.City 可以存取
 ```
@@ -86,7 +86,7 @@ public IActionResult GetOrderListBad()
 {
     var orders = context.Orders
         .Include(o => o.Customer)
-        .ThenInclude(c => c.Address)
+	        .ThenInclude(c => c.Address)
         .ToList();
     
     return Json(orders); // 會序列化所有屬性，包含不需要的
@@ -101,7 +101,7 @@ public void ProcessOrder(int orderId)
 {
     var order = context.Orders
         .Include(o => o.Customer)
-        .ThenInclude(c => c.Address)
+	        .ThenInclude(c => c.Address)
         .Include(o => o.OrderItems)
         .FirstOrDefault(o => o.Id == orderId);
     
