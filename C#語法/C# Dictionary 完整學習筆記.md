@@ -16,7 +16,7 @@ tags: ['C# 程式', LINQ]
 
 ### Dictionary 的特點
 - **多筆資料**：可以儲存多個 Key-Value 配對
-- **Key 唯一性**：每個 Key 在 Dictionary 中都是唯一的
+- **Key 唯一性**：<mark style="background: #FFF3A3A6;">每個 Key 在 Dictionary 中都是唯一的</mark>
 - **快速查找**：透過 Key 進行 O(1) 時間複雜度的查找
 - **動態調整**：可以在執行時新增、修改、刪除資料
 
