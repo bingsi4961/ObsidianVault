@@ -744,24 +744,23 @@ public async Task<string> GetData()
 
 ## 學習重點總結
 
-1. **絕對不要在 UI 執行緒上使用 `.Result` 或 `.Wait()`**
-    
+1. **絕對不要在 UI 執行緒上使用 `.Result` 或 `.Wait()`**    
     - 會造成死結或凍結 UI
     - 永遠使用 `async`/`await`
-2. **`await` 會自動捕捉並還原上下文**
-    
+	
+2. **`await` 會自動捕捉並還原上下文**    
     - 在 UI 執行緒呼叫，`await` 之後會自動回到 UI 執行緒
     - 不需要手動使用 `Invoke` 或 `BeginInvoke`
-3. **`ThreadPool.QueueUserWorkItem` 不會等待工作完成**
-    
+	
+3. **`ThreadPool.QueueUserWorkItem` 不會等待工作完成**    
     - 它只是「排程」工作
     - `return tcs.Task` 會立即執行
-4. **`TaskCompletionSource` 是執行緒安全的**
-    
+	
+4. **`TaskCompletionSource` 是執行緒安全的**    
     - 可以在任何執行緒上呼叫 `SetResult`
     - 死結的原因不是 `SetResult` 必須在 UI 執行緒執行
-5. **`ConfigureAwait(false)` 只在共用程式庫中使用**
-    
+	
+5. **`ConfigureAwait(false)` 只在共用程式庫中使用**    
     - UI 應用程式的事件處理常式不要使用
     - ASP.NET Core 中效果不大
 
