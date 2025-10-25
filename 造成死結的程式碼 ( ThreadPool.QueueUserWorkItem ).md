@@ -608,13 +608,12 @@ myLabel.Text = data.ToString();  // ❌ 跨執行緒錯誤
 
 **適用場景**：
 
-1. **在共用程式庫 (Library) 中**
-    
+1. **在共用程式庫 (Library) 中**    
     - 您的程式碼不知道呼叫端是誰（可能是 UI，可能是 Web API，可能是 Console）
     - 不需要回到特定上下文
     - 可以提升效能（避免不必要的上下文切換）
-2. **在不需要存取 UI 的程式碼中**
-    
+	
+2. **在不需要存取 UI 的程式碼中**    
     - 純粹的運算或 I/O 操作
     - 不涉及 UI 控制項的存取
 
@@ -639,11 +638,10 @@ public static class MyLibrary
 **不適用場景**：
 
 1. **在 UI 事件處理常式中**
-    
     - `await` 之後的程式碼需要存取 UI 控制項
     - **必須**回到 UI 執行緒
-2. **在 ASP.NET Core 中**
-    
+	
+2. **在 ASP.NET Core 中**    
     - ASP.NET Core 沒有 `SynchronizationContext`
     - 使用 `ConfigureAwait(false)` 沒有效能提升
     - 反而可能造成混淆
