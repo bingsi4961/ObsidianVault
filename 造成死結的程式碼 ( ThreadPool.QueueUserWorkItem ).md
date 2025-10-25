@@ -142,7 +142,7 @@ public static class MyAwesomeLibrary
 
 > 「一個被阻擋的執行緒（UI Thread），正在等待一個『被排程到自己身上』但自己卻沒空執行的任務（`uiContext.Post` 裡的工作）」
 
-### 3.3 不會死結的版本（但仍是錯誤寫法）
+### 3.3 不會死結的版本（但仍是不好的寫法）
 
 ```csharp
 // UI 事件
@@ -195,9 +195,7 @@ public static class MyAwesomeLibrary
 |7|UI 執行緒|偵測到 `tcs.Task` 已完成，解除阻擋 (Unblock)|恢復執行|
 |8|UI 執行緒|繼續執行 `myLabel.Text = data;`|畫面更新成功|
 
-### 3.5 為什麼這仍是錯誤的寫法
-
-**警告**：不會死結，但依然是「錯誤」的寫法！
+### 3.5 為什麼這仍是不好的寫法
 
 雖然 `GetDataAsync_NoDeadlock()` 這個版本技術上不會造成死結，但它仍然是一個非常糟糕的設計，是我們在開發 UI 應用程式時極力避免的「反模式」(Anti-pattern)。
 
@@ -213,11 +211,11 @@ public static class MyAwesomeLibrary
 
 ### 3.6 關鍵結論
 
-|問題|答案|
-|---|---|
-|`tcs.SetResult` 需要在 UI 執行緒執行嗎？|**不需要**，它是執行緒安全的|
-|為什麼原始版本會死結？|因為同時包含「(A) 在 UI 執行緒等待」+「(B) 把完成訊號貼回 UI 執行緒」這兩個互相衝突的行為。(A) 阻擋了 (B) 的執行，(B) 又是 (A) 解除阻擋的唯一希望|
-|就算不死結，能用 `.Result` 嗎？|**不能**，在 UI 執行緒上使用 `.Result` 同步等待，也會凍結畫面，是應避免的反模式|
+| 問題                             | 答案                                                                                         |
+| ------------------------------ | ------------------------------------------------------------------------------------------ |
+| `tcs.SetResult` 需要在 UI 執行緒執行嗎？ | **不需要**，它是執行緒安全的                                                                           |
+| 為什麼原始版本會死結？                    | 因為同時包含「(A) 在 UI 執行緒等待」+「(B) 把完成訊號貼回 UI 執行緒」這兩個互相衝突的行為。(A) 阻擋了 (B) 的執行，(B) 又是 (A) 解除阻擋的唯一希望 |
+| 就算不死結，能用 `.Result` 嗎？          | **不能**，在 UI 執行緒上使用 `.Result` 同步等待，也會凍結畫面，是應避免的反模式                                          |
 
 **唯一的正確解法**：始終使用 `async` / `await`，它能確保 UI 執行緒在等待期間保持自由，應用程式才能保持回應。
 
@@ -431,11 +429,11 @@ private async Task myButton_Click(object sender, EventArgs e)
 
 ### 5.5 總結
 
-|方法|UI 執行緒行為|是否死結|適用場景|
-|---|---|---|---|
-|`.Result`|阻斷執行緒 (Blocking) 🚫|✅ 會死結|**永遠不要在 UI 執行緒使用**|
-|`.Wait()`|阻斷執行緒 (Blocking) 🚫|✅ 會死結|**永遠不要在 UI 執行緒使用**|
-|`await`|釋放執行緒 (Yielding) ✅|❌ 不會死結|**UI 應用程式的正確做法**|
+| 方法        | UI 執行緒行為            | 是否死結   | 適用場景               |
+| --------- | ------------------- | ------ | ------------------ |
+| `.Result` | 阻斷執行緒 (Blocking) 🚫 | ✅ 會死結  | **永遠不要在 UI 執行緒使用** |
+| `.Wait()` | 阻斷執行緒 (Blocking) 🚫 | ✅ 會死結  | **永遠不要在 UI 執行緒使用** |
+| `await`   | 釋放執行緒 (Yielding) ✅  | ❌ 不會死結 | **UI 應用程式的正確做法**   |
 
 **修正後的版本是使用 C# 非同步程式設計的正確方式。**
 
@@ -485,12 +483,11 @@ private async Task myButton_Click(object sender, EventArgs e)
 
 **await 會做以下事情**：
 
-1. **檢查當前的 `SynchronizationContext.Current`（同步上下文）**
-    
+1. **檢查當前的 `SynchronizationContext.Current`（同步上下文）**    
     - 因為現在是在 UI 執行緒上，所以 `SynchronizationContext.Current` 不是 `null`
     - 它會是 UI 執行緒的那個特定上下文
-2. **「捕捉」並儲存這個 UI 上下文**
-    
+	
+2. **「捕捉」並儲存這個 UI 上下文**    
     - `await` 會**記住**：「我是從 UI 執行緒來的」
 
 #### 步驟 3：await 釋放 UI 執行緒
@@ -503,14 +500,13 @@ private async Task myButton_Click(object sender, EventArgs e)
 
 **await 接著會：**
 
-1. 向 `GetDataAsync()` 這個 Task 註冊一個「待辦事項」(continuation)
-    
+1. 向 `GetDataAsync()` 這個 Task 註冊一個「待辦事項」(continuation)    
     - 這個待辦事項就是 `await` 之後的所有程式碼（包含 `myLabel.Text = ...`）
-2. 註冊完畢後，`await` 會立刻讓 `myButton_Click` 方法返回 (return)
-    
+	
+2. 註冊完畢後，`await` 會立刻讓 `myButton_Click` 方法返回 (return)    
     - 將 UI 執行緒的控制權交還給訊息迴圈
-3. **這就是為什麼 UI 不會卡住的關鍵**
-    
+	
+3. **這就是為什麼 UI 不會卡住的關鍵**    
     - UI 執行緒現在是自由的，可以去處理其他的點擊或畫面更新
 
 #### 步驟 4：Task 在背景完成
