@@ -61,8 +61,19 @@ public static class MyAwesomeLibrary
         // 1. 建立一個 1000ms 後會完成的 Task
         var delayTask = Task.Delay(1000);
         
-        // 2. 串接一個 Continuation (接續工作)
-        //    使用 ContinueWith<TResult> (傳回 Task<string>)
+        // 2. 串接一個 Continuation (接續工作) 
+        // 使用 ContinueWith<TResult> 方法 (傳回 Task<string>) 
+        // 
+        // ContinueWith 的運作原理： 
+        // - 🚨 立刻建立並傳回第二個 Task 物件 (resultTask)
+        // - 🚨 resultTask 的工作內容就是這個 lambda 表達式 
+        // - 在 delayTask 上註冊一個「回呼函式」(Callback) 
+        // - 當 delayTask 完成時，自動執行這個 lambda 
+        // - lambda 執行結果會存在 resultTask.Result 裡 
+        // - TaskContinuationOptions.OnlyOnRanToCompletion 確保只有在前一個任務 "成功" 完成時才執行
+        //
+        // 簡單來說：當 delayTask 成功完成後，會建立第二個 Task 物件， 
+        // 其工作內容就是這個 Lambda 表達式
         Task<string> resultTask = delayTask.ContinueWith(task => 
         {
             // 3. 當 delayTask 完成後，這個 lambda 會被執行
@@ -88,7 +99,7 @@ public static class MyAwesomeLibrary
 
 `ContinueWith` 內的 lambda 程式碼**預設會在哪條執行緒上執行**，並**不是**由「`ContinueWith` 是在哪條執行緒上被_註冊_的」來決定。
 
-而是由「**它所等待的前一個 Task (antecedent task) 是在哪種執行緒上_完成_(Completed)的**」來決定。
+而是由「**<mark style="background: #FFF3A3A6;">它所等待的前一個 Task (antecedent task) 是在哪種執行緒上_完成_(Completed)的</mark>**」來決定。
 
 `Task` 物件本身並不「攜帶」或「綁定」到任何執行緒。它只是一個「未來工作」的憑證。
 
@@ -183,7 +194,7 @@ public static class MyAwesomeLibrary
         
 14. **`uiContext.Post(state => ... , result);`**
     
-    - **執行緒:** **ThreadPool 執行緒**。        
+    - **執行緒:** **ThreadPool 執行緒**。
     - **說明:** ThreadPool 執行緒執行 `Post` 方法。這個方法的作用是把 `state => { ... }` 這個委派 (delegate) 和 `result` 物件，一起「排程」到 `uiContext` (也就是 UI 執行緒) 的訊息佇列中。        
     - 執行完 `Post` 後，這個 ThreadPool 執行緒的任務就結束了。        
 
