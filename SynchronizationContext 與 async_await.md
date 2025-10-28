@@ -1,12 +1,7 @@
 ---
-date : 2025-10-20 17:39
+date: 2025-10-20 17:39
 aliases:
-  - 別名測試1
-  - 別名測試2
 tags:
-  - 標籤測試1
-  - 標籤測試2
-
 ---
 # Metadata
 Status :: 🌱
@@ -37,7 +32,6 @@ Topics :: {筆記跟什麼主題有關，用 `[Topic],[Topic]` 格式}
 - [[#10. 不同環境的 SynchronizationContext 行為]]
 
 ---
-
 ## 1. 核心問題：為什麼需要 SynchronizationContext
 
 ### 生活比喻：餐廳廚房
@@ -88,7 +82,6 @@ Topics :: {筆記跟什麼主題有關，用 `[Topic],[Topic]` 格式}
 > **SynchronizationContext 就是這個「傳送帶」或「傳遞員」！**
 
 ---
-
 ## 2. SynchronizationContext 運作原理
 
 ### 上下文捕獲 (Context Capturing)
@@ -162,7 +155,6 @@ uiContext.Send(state =>
 ```
 
 ---
-
 ## 3. 從手動操作到 async/await 自動化
 
 ### 早期手動操作方式
@@ -238,7 +230,6 @@ private async void button1_Click(object sender, EventArgs e)
 - 背後自動完成所有複雜的工作
 
 ---
-
 ## 4. AspNetSynchronizationContext 的角色
 
 ### 為什麼 ASP.NET 也需要 SynchronizationContext？
@@ -281,7 +272,6 @@ private async void button1_Click(object sender, EventArgs e)
 | **⭐ 重要提醒**   | 由 `async/await` 自動處理，幾乎不需手動操作                 | 在現代化的 **ASP.NET Core** 中，這個機制已被移除，因為它的執行模型不再依賴 `HttpContext.Current` |
 
 ---
-
 ## 5. ConfigureAwait(false) 的重要性
 
 ### ConfigureAwait 的兩種模式
@@ -359,7 +349,6 @@ private async Task button1_Click(object sender, EventArgs e)
 ✅ **你在寫一個可能會被其他專案引用的底層或共用邏輯嗎？** → 務必加上 `.ConfigureAwait(false)`
 
 ---
-
 ## 6. 死結 (Deadlock) 問題與解決方案
 
 ### 經典的死結範例
@@ -521,7 +510,6 @@ public static class MyAwesomeLibrary
 > **async/await 的「非同步的傳染性」**：一旦在底層用了 async，最好一路往上傳播，直到最上層的事件處理常式，把 `void` 改成 `async Task` (或 `async void`)
 
 ---
-
 ## 7. 手動實作：還原 async/await 的語法糖
 
 ### UI 層的手動改寫
@@ -643,7 +631,6 @@ public static class MyAwesomeLibrary
 - 複雜的調度工作
 
 ---
-
 ## 8. ContinueWith 的非阻塞特性
 
 ### ContinueWith 是阻塞式的嗎？
@@ -702,7 +689,6 @@ dataTask.ContinueWith(task =>
     - 可能在不同的執行緒上執行
 
 ---
-
 ## 9. Task.Delay vs Task.Run + Thread.Sleep
 
 ### 核心差異
@@ -869,7 +855,6 @@ await Task.Delay(5000);
 - **結果：** 伺服器運作正常，效能優異
 
 ---
-
 ## 10. 不同環境的 SynchronizationContext 行為
 
 ### await 之後程式碼在哪執行？

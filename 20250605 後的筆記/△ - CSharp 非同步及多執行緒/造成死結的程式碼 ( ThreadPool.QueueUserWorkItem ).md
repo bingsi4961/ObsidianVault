@@ -12,7 +12,7 @@ Topics :: {筆記跟什麼主題有關，用 `[Topic],[Topic]` 格式}
 
 ---
 # 連結筆記
-#### 📑 [[]]
+#### 📑 [[SynchronizationContext 與 async_await]]
 
 ---
 
@@ -217,7 +217,6 @@ public static class MyAwesomeLibrary
 **唯一的正確解法**：始終使用 `async` / `await`，它能確保 UI 執行緒在等待期間保持自由，應用程式才能保持回應。
 
 ---
-
 ## 4. ThreadPool.QueueUserWorkItem 的執行順序
 
 ### 4.1 核心問題
