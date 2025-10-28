@@ -20,13 +20,15 @@ Topics :: {筆記跟什麼主題有關，用 `[Topic],[Topic]` 格式}
 
 ## 目錄
 
-1. [經典死結場景分析](https://claude.ai/chat/a1674804-a26c-4010-bcc9-de7bfe7e04f2#1-%E7%B6%93%E5%85%B8%E6%AD%BB%E7%B5%90%E5%A0%B4%E6%99%AF%E5%88%86%E6%9E%90)
-2. [死結發生的根本原因](https://claude.ai/chat/a1674804-a26c-4010-bcc9-de7bfe7e04f2#2-%E6%AD%BB%E7%B5%90%E7%99%BC%E7%94%9F%E7%9A%84%E6%A0%B9%E6%9C%AC%E5%8E%9F%E5%9B%A0)
-3. [TaskCompletionSource 的執行緒安全性](https://claude.ai/chat/a1674804-a26c-4010-bcc9-de7bfe7e04f2#3-taskcompletionsource-%E7%9A%84%E5%9F%B7%E8%A1%8C%E7%B7%92%E5%AE%89%E5%85%A8%E6%80%A7)
-4. [ThreadPool.QueueUserWorkItem 的執行順序](https://claude.ai/chat/a1674804-a26c-4010-bcc9-de7bfe7e04f2#4-threadpoolqueueuserworkitem-%E7%9A%84%E5%9F%B7%E8%A1%8C%E9%A0%86%E5%BA%8F)
-5. [async/await 如何解決死結](https://claude.ai/chat/a1674804-a26c-4010-bcc9-de7bfe7e04f2#5-asyncawait-%E5%A6%82%E4%BD%95%E8%A7%A3%E6%B1%BA%E6%AD%BB%E7%B5%90)
-6. [await 的上下文捕捉機制](https://claude.ai/chat/a1674804-a26c-4010-bcc9-de7bfe7e04f2#6-await-%E7%9A%84%E4%B8%8A%E4%B8%8B%E6%96%87%E6%8D%95%E6%8D%89%E6%A9%9F%E5%88%B6)
-7. [ConfigureAwait(false) 的使用時機](https://claude.ai/chat/a1674804-a26c-4010-bcc9-de7bfe7e04f2#7-configureawaitfalse-%E7%9A%84%E4%BD%BF%E7%94%A8%E6%99%82%E6%A9%9F)
+[[#1. 經典死結場景分析]]
+[[#2. 死結發生的根本原因]]
+[[#3. TaskCompletionSource 的執行緒安全性]]
+[[#4. ThreadPool.QueueUserWorkItem 的執行順序]]
+[[#5. async/await 如何解決死結]]
+[[#6. await 的上下文捕捉機制]]
+[[#7. ConfigureAwait(false) 的使用時機]]
+[[#附錄：快速查詢表]]
+[[#學習重點總結]]
 
 ---
 ## 1. 經典死結場景分析
