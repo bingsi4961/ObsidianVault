@@ -1,12 +1,8 @@
 ---
-date : 2025-10-29 16:29
+date: 2025-10-29 16:29
 aliases:
-  - 別名測試1
-  - 別名測試2
 tags:
-  - 標籤測試1
-  - 標籤測試2
-
+  - JavaScript
 ---
 # Metadata
 Status :: 🌱
@@ -115,10 +111,12 @@ Number(true)          // → 1
 ```javascript
 // 最嚴格的轉換
 Number(undefined)     // NaN
+Number("null")        // NaN
+Number("true")        // NaN
 Number(null)          // 0
+Number(true)          // 1
 Number("")            // 0
 Number("  ")          // 0
-Number(true)          // 1
 Number("0")           // 0
 Number("123.456")     // 123.456
 Number("  123.456  ") // 123.456
