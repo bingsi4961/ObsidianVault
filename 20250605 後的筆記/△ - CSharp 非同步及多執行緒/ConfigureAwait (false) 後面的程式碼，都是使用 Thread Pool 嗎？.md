@@ -58,16 +58,49 @@ private async Task<Data> GetDataAsync()
 ```csharp
 private async Task<Data> GetDataAsync()
 { 
-    // ▼ 階段 1：在原始 ASP.NET request context
-    
+    // ▼ 階段 1：在原始 ASP.NET request context (請求執行緒 A)
+    // ========================================
+    // 👇 重要！狀態機在「第一個 await」時就捕捉了 SynchronizationContext (SyncCtx-A)
+    //    並將它儲存在狀態機的「背包」中，之後會一直保存著
+    //    就像放了一個 GPS 定位器，指向「請求執行緒 A」
     await Task.Delay(1000).ConfigureAwait(false);
+    // 👆 ConfigureAwait(false) 只影響「這一個」await：
+    //    告訴狀態機：「這次等待結束後，不用回到 SyncCtx-A」
+    //    但注意！狀態機仍然保存著 SyncCtx-A，並沒有清除它
     
-    // ▼ 階段 2：已脫離原始上下文，在執行緒池執行緒
+    // ▼ 階段 2：已脫離原始上下文，在執行緒池執行緒 (執行緒池執行緒 B) 上執行
+    // ========================================
+    // 執行緒 (Thread)：實際執行程式碼的工人
+    // 同步上下文 (SynchronizationContext)：調度員，決定續行 (Continuation) 要派送到哪裡
+    // 
+    // 雖然程式碼現在在「執行緒池執行緒 B」上執行，
+    // 但狀態機的背包裡仍然帶著 SyncCtx-A 的 GPS 定位器！
     
     await Task.Delay(500);  // 預設 ConfigureAwait(true)
+    // 👆 死鎖的關鍵引爆點！
+    //    因為沒有 ConfigureAwait(false)，這個 await 會使用預設的 ConfigureAwait(true)
     
-    // ▼ 階段 3：嘗試回到原始同步上下文
-    //   但原始上下文被 .Result 阻塞 → 死鎖！
+    // ▼ 階段 3：嘗試回到原始同步上下文 → 死鎖發生！
+    // ========================================
+    // 當 500ms 延遲結束後，調度員會：
+    // 1. 從狀態機的「背包」裡拿出之前捕捉並儲存的 SyncCtx-A (GPS 定位器)
+    // 2. 嘗試把後續程式碼 (return new Data();) 的續行派送回 SyncCtx-A 執行
+    // 3. 但發現 SyncCtx-A 正被「請求執行緒 A」的 .Result 呼叫佔用且阻塞中！
+    // 
+    // 形成死鎖：
+    // - 「請求執行緒 A」在等待 Task 完成 (.Result 阻塞)
+    // - Task 的續行程式碼在等待「請求執行緒 A」釋放 SyncCtx-A
+    // → 雙方陷入無限等待循環！
+    // 
+    // 🔑 關鍵觀念：
+    // - SynchronizationContext 的捕捉與「當前在哪個執行緒」無關
+    // - 狀態機從一開始就記住了它應該回去的地方 (SyncCtx-A)
+    // - 無論中途在哪個執行緒上執行，只要遇到沒有 ConfigureAwait(false) 的 await
+    //   就會嘗試回到最初捕捉到的那個上下文
+    // 
+    // 💡 函式庫開發黃金法則：
+    // 「在函式庫的程式碼中，所有 await 都應該加上 .ConfigureAwait(false)」
+    // 因為你永遠不知道呼叫者會不會用 .Result 來阻塞呼叫
     
     return new Data();
 }
