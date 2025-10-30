@@ -30,7 +30,7 @@ console.log("" || 'default')       		// 輸出: "default"
 console.log('' || 'default')       		// 輸出: "default"
 console.log(`` || 'default')       		// 輸出: "default"
 console.log(null || 'default')     		// 輸出: "default"
-console.log(undefined || 'default')           // 輸出: "default"
+console.log(undefined || 'default')     // 輸出: "default"
 console.log(NaN || 'default')     		// 輸出: "default"
 
 if (false)      { console.log('不會執行'); }
