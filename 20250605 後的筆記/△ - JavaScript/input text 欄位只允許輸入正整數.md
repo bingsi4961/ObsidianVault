@@ -18,7 +18,16 @@ Topics :: {筆記跟什麼主題有關，用 `[Topic],[Topic]` 格式}
 ---
 
 ```javascript=
-$(document).on('input','input[name="UnitConsumption"]',function(){
+$(document).on('input','input[name="UnitConsumption"]',function() {
     this.value = this.value.replace(/[^0-9]/g,'').replace(/^0/,'');
 });
+```
+
+```javascript
+// 只允許輸入正整數
+$('table input[type="text"]')
+    .not('[data-field="modulus"]')
+    .on('input', function() {
+        this.value = this.value.replace(/[^0-9]/g, '').replace(/^0/, '');
+    });
 ```

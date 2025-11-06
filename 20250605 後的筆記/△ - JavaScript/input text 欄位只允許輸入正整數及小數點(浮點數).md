@@ -18,7 +18,7 @@ Topics :: {筆記跟什麼主題有關，用 `[Topic],[Topic]` 格式}
 ---
 
 ```javascript=
-$(document).on('input','input[name="UnitConsumption"]',function(){
+$(document).on('input','input[name="UnitConsumption"]',function() {
     this.value = this.value
 	    // 1. 移除所有 "非數字" 和 "非小數點" 的字元
 	    .replace(/[^0-9\.]/g, '')
