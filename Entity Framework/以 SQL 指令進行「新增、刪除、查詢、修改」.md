@@ -58,7 +58,7 @@ int newId = db.Database.SqlQuery<int>(insertSql, parameters.ToArray()).First();
 ```
 
 # 修改
-```sharp=
+```csharp
 string updateSql = @"
     UPDATE Employees 
         SET EmpName = @EmpName,
