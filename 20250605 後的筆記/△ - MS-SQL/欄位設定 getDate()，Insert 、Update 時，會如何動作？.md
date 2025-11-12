@@ -1,6 +1,18 @@
 ---
-title: 欄位設定 getDate()，Insert 、Update 時，會如何動作？
-tags: [MS-SQL 設定, 技術文件]
+date: 2025-11-07 18:34
+aliases:
+tags:
+---
+# Metadata
+Status :: 🌱
+Note Type :: 📰
+Source URL :: {文章 URL}
+Author :: {作者名稱}
+Topics :: {筆記跟什麼主題有關，用 `[Topic],[Topic]` 格式}
+
+---
+# 連結筆記
+#### 📑 [[]]
 
 ---
 
