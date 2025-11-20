@@ -57,7 +57,7 @@ Topics :: {筆記跟什麼主題有關，用 `[Topic],[Topic]` 格式}
     const firstEven = numbers.find(num => num % 2 === 0); // 2
     ```
     
-- **firstIndex → findIndex**：返回第一個符合條件的元素索引
+- **firstIndex → findIndex**：返回 <mark style="background: #FFF3A3A6;">第一個</mark> 符合條件的元素索引
     
     ```javascript
     const numbers = [1, 2, 3, 4];
