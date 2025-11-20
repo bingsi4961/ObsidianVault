@@ -41,7 +41,10 @@ var index = $("#test").index(); // 返回 2
 
 ### 例子 2：選擇器字符串參數
 ```javascript
-// HTML: <div>第一個 div</div><div class="container">第二個 div</div><div>第三個 div</div>
+// HTML: 
+// <div>第一個 div</div>
+// <div class="container">第二個 div</div>
+// <div>第三個 div</div>
 var index = $(".container").index("div"); // 返回 1
 ```
 說明：在所有 div 元素集合中查找 class="container" 的元素的位置。
