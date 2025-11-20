@@ -1,7 +1,7 @@
 ---
 title: siblings() 方法筆記 / 其他找尋元素的方法
-tags: [jQuery]
-
+tags:
+  - jQuery
 ---
 
 
