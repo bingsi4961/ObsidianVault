@@ -170,7 +170,74 @@ FROM SalesReport;
 
 ---
 
-## 四、補充說明
+## 四、ORDER BY (SELECT NULL) 說明
+
+### 這是什麼？
+
+當你使用 `ROW_NUMBER()` 時，`ORDER BY` 子句是**必要的**，但有時候你可能**不在乎排序順序**，只是單純想要給每一行一個編號。這時候就可以使用：
+
+```sql
+ROW_NUMBER() OVER (ORDER BY (SELECT NULL)) AS rn
+```
+
+### 實際行為
+
+- SQL Server 會以**不確定的順序**來編號（通常是資料在資料表中的實體儲存順序，但這不保證）
+- 每次執行結果的編號順序**可能不同**
+- 適合用在「只需要唯一編號，不在乎順序」的情境
+
+### 使用範例
+
+```sql
+-- 情境：只是想給每一行一個唯一編號，不在乎順序
+SELECT 
+    *,
+    ROW_NUMBER() OVER (ORDER BY (SELECT NULL)) AS rn
+FROM NpiLogFileInfo
+
+-- 搭配 PARTITION BY 使用
+SELECT 
+    *,
+    ROW_NUMBER() OVER (PARTITION BY NpilogFileId 
+                       ORDER BY (SELECT NULL)) AS rn
+FROM NpiLogFileInfo
+```
+
+### 其他等效寫法
+
+以下幾種寫法效果相同，都表示「不指定特定排序」：
+
+```sql
+ORDER BY (SELECT NULL)
+ORDER BY (SELECT 0)
+ORDER BY (SELECT 1)
+ORDER BY @@SPID          -- 使用系統變數
+```
+
+### 注意事項
+
+- **結果不穩定**：因為沒有明確排序，相同查詢多次執行可能得到不同的編號結果
+- **不適合需要一致性的場景**：如果你需要「每次都取到相同的那一筆」，還是要指定明確的 `ORDER BY` 欄位
+- **適合場景**：
+    - 單純需要流水號做後續處理
+    - 刪除完全重複的資料（只保留一筆）
+    - 分頁但不在乎順序
+
+### 實際應用：刪除重複資料
+
+```sql
+-- 刪除完全重複的資料，每組只保留一筆
+WITH CTE AS (
+    SELECT *,
+           ROW_NUMBER() OVER (PARTITION BY NpilogFileId, FileName 
+                              ORDER BY (SELECT NULL)) AS rn
+    FROM NpiLogFileInfo
+)
+DELETE FROM CTE WHERE rn > 1;
+```
+
+---
+## 五、補充說明
 
 ### CTE (Common Table Expression) 用法
 
