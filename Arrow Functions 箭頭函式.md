@@ -81,7 +81,9 @@ Topics :: {筆記跟什麼主題有關，用 `[Topic],[Topic]` 格式}
     const numbers = [1, 2, 3, 4];
     const sum = numbers.reduce((total, num) => total + num, 0); // 10
     ```
-    
+
+	- [[JavaScript - reduce( )]]
+
 - **forEach**：對每個元素執行操作（類似於 LINQ 的 ForEach）
     
     ```javascript
