@@ -58,8 +58,6 @@ if (undefined)  { console.log('不會執行'); }
 if (NaN)        { console.log('不會執行'); }
 ```
 
-
-
 空值合併運算符（??）與 falsy 的差異：
 ```javascript
 // || 運算符檢查 falsy
