@@ -1,0 +1,36 @@
+/* VS Code Dark Style for Obsidian Code Blocks */
+/* 適用於閱讀模式 (Reading View) */
+
+.theme-dark {
+  --code-keyword: #569cd6;      /* 關鍵字 (public, class, void) - 藍色 */
+  --code-variable: #9cdcfe;     /* 變數 - 淺藍色 */
+  --code-string: #ce9178;       /* 字串 - 橘褐色 */
+  --code-comment: #6a9955;      /* 註解 - 綠色 */
+  --code-type: #4ec9b0;         /* 類別/介面 (HashSet, List) - 青綠色 */
+  --code-function: #dcdcaa;     /* 方法/函數 - 黃色 */
+  --code-number: #b5cea8;       /* 數字 - 淺綠 */
+}
+
+/* 針對 PrismJS (Obsidian 的渲染引擎) 進行強制覆寫 */
+.markdown-preview-view code[class*="language-"] .token.keyword {
+  color: var(--code-keyword) !important;
+}
+.markdown-preview-view code[class*="language-"] .token.string {
+  color: var(--code-string) !important;
+}
+.markdown-preview-view code[class*="language-"] .token.comment {
+  color: var(--code-comment) !important;
+}
+.markdown-preview-view code[class*="language-"] .token.class-name,
+.markdown-preview-view code[class*="language-"] .token.constant {
+  color: var(--code-type) !important;
+}
+.markdown-preview-view code[class*="language-"] .token.function {
+  color: var(--code-function) !important;
+}
+.markdown-preview-view code[class*="language-"] .token.number {
+  color: var(--code-number) !important;
+}
+.markdown-preview-view code[class*="language-"] .token.operator {
+  color: #d4d4d4 !important; /* 運算子保持灰白，避免太花 */
+}

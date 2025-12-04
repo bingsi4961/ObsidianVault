@@ -22,19 +22,17 @@ HashSet\<T> 是一個專門用來儲存**不重複元素**的集合，底層實�
 
 ### 核心特性
 
-1. **唯一性 (Uniqueness)**：自動過濾重複項目
-    
+1. **唯一性 (Uniqueness)**：自動過濾重複項目    
     - 嘗試加入已存在的元素時，`Add()` 會回傳 `false`
     - 不會拋出錯誤，也不會加入該元素
+
 2. **無序性 (Unordered)**：不保證元素順序，沒有索引 (Index)
     
-3. **極致效能**：
-    
+3. **極致效能**：    
     - 搜尋 (`Contains`)、新增 (`Add`)、移除 (`Remove`) 的時間複雜度平均為 **O(1)**
     - 相比 `List<T>` 的 `Contains` 為 O(n)，當資料量達到萬筆以上時效能差異巨大
 
 ---
-
 ## 二、基本操作
 
 ```csharp
@@ -71,7 +69,6 @@ foreach (var tech in techStack)
 ```
 
 ---
-
 ## 三、集合運算 (Set Operations)
 
 **適用場景**：比對兩組資料（例如：比對「使用者現有權限」與「系統所有權限」）
@@ -109,7 +106,6 @@ result.SymmetricExceptWith(setB);
 ```
 
 ---
-
 ## 四、自定義物件的正確使用方式（重點章節）
 
 ### 4.1 為什麼需要特別處理？核心問題說明
@@ -138,7 +134,6 @@ result.SymmetricExceptWith(setB);
 **IEquatable\<User> 這段程式碼，就是在教 C# 改變判斷標準：不要管卡片是不是同一張，請去檢查上面的「工號」一不一樣。**
 
 ---
-
 ### 4.2 錯誤示範
 
 ```csharp
@@ -160,7 +155,6 @@ Console.WriteLine(users.Count);
 ```
 
 ---
-
 ### 4.3 正確做法：實作 IEquatable\<T>
 
 ```csharp
@@ -205,7 +199,6 @@ Console.WriteLine(users.Count);
 ```
 
 ---
-
 ## 五、深入理解三個方法的作用
 
 ### 5.1 方法一：`Equals(User other)` - VIP 通道（高效能）
@@ -236,7 +229,6 @@ public bool Equals(User other)
 因為編譯器「知道」這是 `User` 類型，可以直接呼叫專屬的比較方法，不需要經過任何轉換。
 
 ---
-
 ### 5.2 方法二：`GetHashCode()` - 分類依據（效能關鍵）
 
 ```csharp
@@ -256,7 +248,6 @@ public override int GetHashCode()
 HashSet 為了效能極快 (O(1))，它不會一開始就去比對 ID（因為太慢）。它會先把物件分類到不同的「桶子」裡。這個「桶子」的編號就是 **HashCode**。
 
 ---
-
 #### 運作流程（兩階段檢查）
 
 **步驟一：先看 GetHashCode()**
@@ -271,7 +262,6 @@ HashSet 為了效能極快 (O(1))，它不會一開始就去比對 ID（因為�
 - 這是為了處理**雜湊碰撞 (Hash Collision)** 的情況
 
 ---
-
 #### 圖解流程
 
 假設你現在要把 `User { Id = 1 }` 加入 HashSet：
@@ -296,7 +286,6 @@ HashSet 為了效能極快 (O(1))，它不會一開始就去比對 ID（因為�
 ```
 
 ---
-
 #### 重要原則
 
 **相同的物件必須回傳相同的 HashCode**
@@ -312,7 +301,6 @@ User u2 = new User { Id = 1 };
 ```
 
 ---
-
 #### 效能陷阱警告
 
 如果 `GetHashCode` 實作很爛（例如全部回傳常數 1）：
@@ -333,7 +321,6 @@ public override int GetHashCode()
 - 完全失去使用 HashSet 的意義
 
 ---
-
 ### 5.3 方法三：`override Equals(object obj)` - 一般通道（相容性）
 
 ```csharp
@@ -354,7 +341,6 @@ public override bool Equals(object obj)
 - **實作方式**：把「一般通道」的請求，轉發給「VIP 通道」處理
 
 ---
-
 #### 為什麼需要這個方法？
 
 `IEquatable<User>` 是給「知道它是 User 的人」用的（VIP 通道）；而 `object.Equals` 是給「不知道它是什麼，只知道它是個物件的人」用的（一般通道）。
@@ -362,7 +348,6 @@ public override bool Equals(object obj)
 如果不覆寫 `object.Equals`，當你的物件被當作「普通物件 (object)」來操作時，你的比較邏輯就會失效。
 
 ---
-
 #### 實際範例：說明為什麼重要
 
 ```csharp
@@ -389,7 +374,6 @@ bool result2 = o1.Equals(o2);
 ```
 
 ---
-
 #### 什麼時候會遇到「被轉型成 object」的情況？
 
 在 .NET Framework 或許多第三方套件的底層，很多時候為了通用性，程式碼是這樣寫的：
@@ -419,7 +403,6 @@ CheckSomething(user1, user2);
 - 導致系統出現奇怪的 Bug（明明 ID 一樣，系統卻說是不同的東西）
 
 ---
-
 #### 總結：兩個通道的比喻
 
 ```
@@ -445,7 +428,6 @@ object.Equals(object obj)  →  一般通道（相容、安全）
 這是非常專業的寫法。
 
 ---
-
 ## 六、完整範例：三個方法如何協同運作
 
 ```csharp
@@ -510,7 +492,6 @@ Console.WriteLine(users.Count); // 輸出: 2 ✓
 ```
 
 ---
-
 ## 七、效能比較：HashSet vs List
 
 |特性|List<T>|HashSet<T>|使用建議|
@@ -522,7 +503,6 @@ Console.WriteLine(users.Count); // 輸出: 2 ✓
 |記憶體|較省|較耗（需維護 Hash bucket）|-|
 
 ---
-
 ### 實務應用場景
 
 **Portal 系統範例**：從資料庫撈出 10 萬筆 Log，過濾出其中有哪些獨特的 UserId
@@ -550,7 +530,6 @@ if (userIdSet.Contains(targetUserId)) // O(1)
 ```
 
 ---
-
 ## 八、查詢效能原理：為什麼是 O(1)？
 
 ### 8.1 雜湊運作原理（像置物櫃系統）
@@ -572,7 +551,6 @@ HashSet\<T> 就像是一個有編號的「置物櫃系統」。
 ```
 
 ---
-
 #### 查詢資料的過程
 
 當你呼叫 `HashSet.Contains(target)` 時：
@@ -590,7 +568,6 @@ HashSet\<T> 就像是一個有編號的「置物櫃系統」。
 ```
 
 ---
-
 #### 為什麼快？
 
 這個過程就像你拿著鑰匙去開置物櫃：
@@ -602,7 +579,6 @@ HashSet\<T> 就像是一個有編號的「置物櫃系統」。
 這就是為什麼 HashSet 的查詢效能是 **O(1)**。
 
 ---
-
 ### 8.2 視覺化比較
 
 ```
@@ -628,7 +604,6 @@ HashSet<T> 的 Contains (O(1)):
 ```
 
 ---
-
 ### 8.3 注意事項：雜湊碰撞 (Hash Collision)
 
 雖然說是 O(1)，但如果有發生**雜湊碰撞**（即兩個不同的物件算出一樣的 HashCode）：
@@ -657,7 +632,6 @@ User user2 = new User { Id = 17 }; // HashCode 剛好也是 1024
 - 平均仍視為 **O(1)**
 
 ---
-
 ## 九、常見陷阱與注意事項
 
 ### 9.1 不要在 foreach 中修改集合
@@ -692,7 +666,6 @@ foreach (var user in toRemove)
 ```
 
 ---
-
 ### 9.2 不保證順序
 
 ```csharp
@@ -713,7 +686,6 @@ foreach (var num in numbers)
 - 考慮使用 `List<T>` + `Distinct()` 或自行實作
 
 ---
-
 ### 9.3 GetHashCode 實作很重要
 
 ```csharp
@@ -737,7 +709,6 @@ public override int GetHashCode()
 ```
 
 ---
-
 ### 9.4 多個屬性的 GetHashCode 實作
 
 如果你需要根據多個屬性來判斷重複（例如：ID + 部門代號）：
@@ -776,7 +747,6 @@ public class Employee : IEquatable<Employee>
 ```
 
 ---
-
 ## 十、總結
 
 ### 10.1 何時使用 HashSet
@@ -796,7 +766,6 @@ public class Employee : IEquatable<Employee>
 - 需要頻繁的**插入/移除**特定位置的元素
 
 ---
-
 ### 10.2 使用自定義物件的檢查清單
 
 當你在 HashSet 中使用自定義類別時，請確保：
@@ -809,7 +778,6 @@ public class Employee : IEquatable<Employee>
 - [ ] `GetHashCode` 的實作要根據實際用來比較的屬性
 
 ---
-
 ### 10.3 效能總結
 
 |操作|List<T>|HashSet<T>|
@@ -819,5 +787,3 @@ public class Employee : IEquatable<Employee>
 |Contains|**O(n)**|**O(1)** ⭐|
 |順序|保證|不保證|
 |重複|允許|不允許|
-
-身為華碩的 C# 程式設計師，正確使用 HashSet 並搭配完整的 `IEquatable<T>` 實作，能夠顯著提升 Portal 和 GTS 系統在處理大量資料時的效能，是非常重要的技能。
