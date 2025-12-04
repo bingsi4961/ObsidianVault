@@ -732,7 +732,7 @@ public class Employee : IEquatable<Employee>
     public override int GetHashCode()
     {
         // ------------------------------------------------------------
-		// [現代化寫法]：適用於您的 Portal (.NET Core 3.1) 系統
+		// [現代化寫法]：.NET Core 2.1+ 推薦寫法
 		// ------------------------------------------------------------
 		// 優點 1：自動處理 Null 安全
 		//        它會自動判斷 Department 是否為 null，不用手寫 ?. 判斷。
@@ -746,9 +746,7 @@ public class Employee : IEquatable<Employee>
 		// 注意事項：
 		//        若要在您的 GTS (.NET Framework 4.8) 系統使用此寫法，
 		//        必須從 NuGet 安裝套件：Microsoft.Bcl.HashCode
-		return HashCode.Combine(Id, Department);
-		// .NET Core 2.1+ 推薦寫法
-		
+		return HashCode.Combine(Id, Department);		
 		
 		// ------------------------------------------------------------
 		// [傳統寫法]：舊版 .NET Framework 常見 (不推薦新專案使用)
