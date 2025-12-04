@@ -723,6 +723,7 @@ public class Employee : IEquatable<Employee>
     public bool Equals(Employee other)
     {
         if (other is null) return false;
+        // 比較 Id 與 Department 是否皆相同
         return this.Id == other.Id && 
                this.Department == other.Department;
     }
@@ -730,17 +731,40 @@ public class Employee : IEquatable<Employee>
     // 多個屬性的 HashCode 計算
     public override int GetHashCode()
     {
-        // .NET Core 2.1+ 推薦寫法
-        return HashCode.Combine(Id, Department);
-        
-        // 或舊版 .NET Framework 寫法
-        // unchecked
-        // {
-        //     int hash = 17;
-        //     hash = hash * 23 + Id.GetHashCode();
-        //     hash = hash * 23 + (Department?.GetHashCode() ?? 0);
-        //     return hash;
-        // }
+        // ------------------------------------------------------------
+		// [現代化寫法]：適用於您的 Portal (.NET Core 3.1) 系統
+		// ------------------------------------------------------------
+		// 優點 1：自動處理 Null 安全
+		//        它會自動判斷 Department 是否為 null，不用手寫 ?. 判斷。
+		//
+		// 優點 2：演算法優化 (xxHash32)
+		//        底層使用更先進的混淆演算法，比舊式乘法更能避免雜湊碰撞。
+		//
+		// 優點 3：參數順序敏感
+		//        Combine(A, B) 與 Combine(B, A) 會產生不同的結果，這在邏輯上更嚴謹。
+		//
+		// 注意事項：
+		//        若要在您的 GTS (.NET Framework 4.8) 系統使用此寫法，
+		//        必須從 NuGet 安裝套件：Microsoft.Bcl.HashCode
+		return HashCode.Combine(Id, Department);
+		// .NET Core 2.1+ 推薦寫法
+		
+		
+		// ------------------------------------------------------------
+		// [傳統寫法]：舊版 .NET Framework 常見 (不推薦新專案使用)
+		// ------------------------------------------------------------
+		// unchecked // 避免溢位檢查，稍微提升效能
+		// {
+		//      // 這些 17, 23 是質數 (Magic Numbers)，用來減少碰撞，但可讀性差
+		//      int hash = 17;
+		//      
+		//      hash = hash * 23 + Id.GetHashCode();
+		//
+		//      // 缺點：必須手動處理 Null，否則 Department 為 null 時會拋出異常
+		//      hash = hash * 23 + (Department?.GetHashCode() ?? 0);
+		//      
+		//      return hash;
+		// }        
     }
     
     public override bool Equals(object obj) => Equals(obj as Employee);
