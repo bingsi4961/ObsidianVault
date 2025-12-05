@@ -28,15 +28,15 @@ Topics :: {筆記跟什麼主題有關，用 `[Topic],[Topic]` 格式}
 ### 第一步：修改資料表結構（加入時間戳記欄位）
 
 ```sql
-ALTER TABLE [dbo].[SW_CheckLink] -- (改成要記錄的 Table 名稱)
+ALTER TABLE [dbo].[GroupSetting] -- (改成要記錄的 Table 名稱)
 ADD
   -- 1. 定義「開始時間」欄位
   FromTime DATETIME2(2) GENERATED ALWAYS AS ROW START -- HIDDEN (加入 HIDDEN，需指定欄位名稱(FromTime) 才會顯示)
-        CONSTRAINT CheckLink_FromTime DEFAULT DATEADD(SECOND, -1, SYSUTCDATETIME())
+        CONSTRAINT DF_GroupSetting_FromTime DEFAULT DATEADD(SECOND, -1, SYSUTCDATETIME())
   
   -- 2. 定義「結束時間」欄位
 , ToTime DATETIME2(2) GENERATED ALWAYS AS ROW END   
-        CONSTRAINT CheckLink_ToTime DEFAULT '9999.12.31 23:59:59.99'
+        CONSTRAINT DF_GroupSetting_ToTime DEFAULT '9999.12.31 23:59:59.99'
   
   -- 3. 定義這兩個欄位為「系統時間區間」
 , PERIOD FOR SYSTEM_TIME (FromTime, ToTime);
@@ -46,8 +46,8 @@ GO
 ### 第二步：啟用版本控制
 
 ```sql
-ALTER TABLE [dbo].[SW_CheckLink] -- (改成要記錄的 Table 名稱)
-    SET (SYSTEM_VERSIONING = ON (HISTORY_TABLE = dbo.SW_CheckLinkHistory));  -- (改成要記錄的「Table 名稱 + History」)
+ALTER TABLE [dbo].[GroupSetting] -- (改成要記錄的 Table 名稱)
+    SET (SYSTEM_VERSIONING = ON (HISTORY_TABLE = dbo.GroupSettingHistory));  -- (改成要記錄的「Table 名稱 + History」)
 GO
 ```
 
@@ -59,16 +59,17 @@ GO
 | ---------------------- | -------------- |
 | **FromTime**           | 欄位名稱（資料的生效時間）  |
 | **ToTime**             | 欄位名稱（資料的失效時間）  |
-| **CheckLink_FromTime** | 約束條件名稱（不是欄位名稱） |
-| **CheckLink_ToTime**   | 約束條件名稱（不是欄位名稱） |
+| **DF_GroupSetting_FromTime** | 約束條件名稱（不是欄位名稱） |
+| **DF_GroupSetting_ToTime**   | 約束條件名稱（不是欄位名稱） |
 
 ### 2. 重要關鍵字
 
 - **DATETIME2(2)**: 精確度到小數點後兩位
-- **GENERATED ALWAYS AS ROW START**: 系統自動維護的「資料生效時間」
-- **GENERATED ALWAYS AS ROW END**: 系統自動維護的「資料失效時間」
+- **GENERATED ALWAYS AS ROW START**: 系統自動維護的「資料生效時間」<mark style="background: #CACFD9A6;">( 不是 Insert 指令剛開始跑的時間 )</mark>
+- **GENERATED ALWAYS AS ROW END**: 系統自動維護的「資料失效時間」<mark style="background: #CACFD9A6;">( 不是 Insert 指令快跑完的時間 )</mark>
 - **HIDDEN**: 加上此關鍵字後，SELECT * 時不會顯示這兩個時間欄位（建議使用）
-- **SYSUTCDATETIME()**: 取得 UTC 時間（時態表強制使用 UTC）
+	- 對於既有系統，建議加上 `HIDDEN` 關鍵字，避免新增的兩個時間欄位，導致程式的欄位對應錯誤，特別是在使用 `SELECT *` 或 Dapper 等自動對應套件時。
+- **SYSUTCDATETIME()**: 取得 UTC 時間（<mark style="background: #FFF3A3A6;">時態表強制使用 UTC</mark>）
 - **PERIOD FOR SYSTEM_TIME**: 告訴 SQL Server 這兩個欄位用來計算資料的有效存活期間
 
 ### 3. 預設值說明
@@ -96,14 +97,14 @@ GO
 
 ### 新增 (INSERT)
 
-- 資料進入主表 `SW_CheckLink`
+- 資料進入主表 `GroupSetting`
 - FromTime = 現在 (UTC)
 - ToTime = 9999/12/31
 - 歷史表為空
 
 ### 修改 (UPDATE)
 
-1. 舊資料複製到歷史表 `SW_CheckLinkHistory`
+1. 舊資料複製到歷史表 `GroupSettingHistory`
     - FromTime = 原本時間
     - ToTime = 修改當下的時間
 
@@ -139,7 +140,7 @@ SELECT
     END AS ToTime_TW
 
 	,*
-FROM [dbo].[SW_CheckLink] FOR SYSTEM_TIME ALL
+FROM [dbo].[GroupSetting] FOR SYSTEM_TIME ALL
 WHERE Id = 286 
 ORDER BY FromTime DESC;
 ```
@@ -168,7 +169,7 @@ SELECT
     END AS ToTime_TW
     
     ,*
-FROM [dbo].[SW_CheckLink] FOR SYSTEM_TIME AS OF @OneHourAgo
+FROM [dbo].[GroupSetting] FOR SYSTEM_TIME AS OF @OneHourAgo
 WHERE Id = 286;
 ```
 
