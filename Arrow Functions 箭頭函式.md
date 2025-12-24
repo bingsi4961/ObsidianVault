@@ -93,7 +93,7 @@ Topics :: {筆記跟什麼主題有關，用 `[Topic],[Topic]` 格式}
     
 - **sort**：排序集合（類似於 LINQ 的 OrderBy）
 	
-	- [[sort() 箭頭函式]]
+	- [[JavaScript - Array.sort( )]]
 	
     ```javascript
     const numbers = [3, 1, 4, 2];
