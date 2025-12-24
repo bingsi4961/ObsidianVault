@@ -5,5 +5,7 @@
   "editor-width-slider",
   "highlightr-plugin",
   "table-editor-obsidian",
-  "editing-toolbar"
+  "editing-toolbar",
+  "oz-clear-unused-images",
+  "file-cleaner-redux"
 ]
