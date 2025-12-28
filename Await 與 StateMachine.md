@@ -16,21 +16,6 @@ Topics :: {筆記跟什麼主題有關，用 `[Topic],[Topic]` 格式}
 
 ---
 
-# C# 非同步程式設計 (Async/Await) 完整教學文件
-
-## 目錄
-
-1. [為什麼需要非同步程式設計](https://claude.ai/chat/a1ae2fc6-3d15-47a5-a3a4-ef3d1790d5f5#1-%E7%82%BA%E4%BB%80%E9%BA%BC%E9%9C%80%E8%A6%81%E9%9D%9E%E5%90%8C%E6%AD%A5%E7%A8%8B%E5%BC%8F%E8%A8%AD%E8%A8%88)
-2. [核心觀念與基礎知識](https://claude.ai/chat/a1ae2fc6-3d15-47a5-a3a4-ef3d1790d5f5#2-%E6%A0%B8%E5%BF%83%E8%A7%80%E5%BF%B5%E8%88%87%E5%9F%BA%E7%A4%8E%E7%9F%A5%E8%AD%98)
-3. [await 的完整運作機制](https://claude.ai/chat/a1ae2fc6-3d15-47a5-a3a4-ef3d1790d5f5#3-await-%E7%9A%84%E5%AE%8C%E6%95%B4%E9%81%8B%E4%BD%9C%E6%A9%9F%E5%88%B6)
-4. [執行緒的生命週期詳解](https://claude.ai/chat/a1ae2fc6-3d15-47a5-a3a4-ef3d1790d5f5#4-%E5%9F%B7%E8%A1%8C%E7%B7%92%E7%9A%84%E7%94%9F%E5%91%BD%E9%80%B1%E6%9C%9F%E8%A9%B3%E8%A7%A3)
-5. [狀態機（State Machine）深入剖析](https://claude.ai/chat/a1ae2fc6-3d15-47a5-a3a4-ef3d1790d5f5#5-%E7%8B%80%E6%85%8B%E6%A9%9Fstate-machine%E6%B7%B1%E5%85%A5%E5%89%96%E6%9E%90)
-6. [錯誤處理與異常管理](https://claude.ai/chat/a1ae2fc6-3d15-47a5-a3a4-ef3d1790d5f5#6-%E9%8C%AF%E8%AA%A4%E8%99%95%E7%90%86%E8%88%87%E7%95%B0%E5%B8%B8%E7%AE%A1%E7%90%86)
-7. [實務範例與情境分析](https://claude.ai/chat/a1ae2fc6-3d15-47a5-a3a4-ef3d1790d5f5#7-%E5%AF%A6%E5%8B%99%E7%AF%84%E4%BE%8B%E8%88%87%E6%83%85%E5%A2%83%E5%88%86%E6%9E%90)
-8. [最佳實踐與常見陷阱](https://claude.ai/chat/a1ae2fc6-3d15-47a5-a3a4-ef3d1790d5f5#8-%E6%9C%80%E4%BD%B3%E5%AF%A6%E8%B8%90%E8%88%87%E5%B8%B8%E8%A6%8B%E9%99%B7%E9%98%B1)
-
----
-
 ## 1. 為什麼需要非同步程式設計
 
 ### 1.1 同步 vs 非同步的本質差異
@@ -408,7 +393,7 @@ struct CalculateAsync_StateMachine
                     if (!delayAwaiter1.IsCompleted)
                     {
                         state = 0; // 記住位置：第一個 await
-                        delayAwaiter1.OnCompleted(continuation); // 註冊當 Task 完成時，會呼叫 MoveNext 🚨
+                        delayAwaiter1.OnCompleted(continuation); // 註冊「當 Task 完成時，回呼 MoveNext」🚨
                         return;
                     }
                     goto case 0;
@@ -425,7 +410,7 @@ struct CalculateAsync_StateMachine
                     if (!delayAwaiter2.IsCompleted)
                     {
                         state = 1; // 記住位置：第二個 await
-                        delayAwaiter2.OnCompleted(continuation); // 註冊當 Task 完成時，會呼叫 MoveNext 🚨
+                        delayAwaiter2.OnCompleted(continuation); // 註冊「當 Task 完成時，回呼 MoveNext」🚨
                         return;
                     }
                     goto case 1;
@@ -451,9 +436,7 @@ struct CalculateAsync_StateMachine
 }
 ```
 
-### 5.2 狀態機的四大功能
-
-
+狀態機在方法被呼叫時就建立，而不是等到 await 時才建立。
 
 ### 5.2 狀態機的四大功能
 
@@ -523,33 +506,7 @@ public async Task ProcessUserAction()
 }
 ```
 
-#### 錯誤範例：await 在 try 外
-
-```csharp
-public async Task ProcessUserAction()
-{
-    // ❌ 錯誤：await 在 try 外面
-    await OrderCoffeeAsync();
-    
-    try 
-    {
-        Console.WriteLine("3. 交付咖啡給客人。");
-    }
-    catch (Exception ex) 
-    {
-        // 如果 OrderCoffeeAsync 出錯，這裡抓不到！
-    }
-}
-```
-
-### 6.2 為什麼位置這麼重要？
-
-**生活化比喻**：
-
-- **錯誤示範**：你在門口等快遞，等快遞員把東西交給你後，才進屋準備處理工具。如果快遞員說「包裹弄丟了」，你還沒進屋，沒辦法處理。
-- **正確做法**：你先準備好處理工具，然後在這種狀態下去門口等快遞。一旦快遞員說有問題，立刻就能處理。
-
-### 6.3 火後不理（Fire and Forget）的問題
+### 6.2 火後不理（Fire and Forget）的問題
 
 #### 問題範例
 
@@ -629,93 +586,7 @@ static async Task DoHeavyWorkAsync()
 
 ## 7. 實務範例與情境分析
 
-### 7.1 UI 應用程式範例
-
-```csharp
-public partial class MainForm : Form
-{
-    private async void btnDownload_Click(object sender, EventArgs e)
-    {
-        try
-        {
-            // 停用按鈕避免重複點擊
-            btnDownload.Enabled = false;
-            lblStatus.Text = "下載中...";
-            
-            // 非同步下載，UI 不會凍結
-            string content = await DownloadFileAsync("https://example.com/data.json");
-            
-            // 自動回到 UI 執行緒
-            txtContent.Text = content;
-            lblStatus.Text = "下載完成！";
-        }
-        catch (Exception ex)
-        {
-            MessageBox.Show($"下載失敗：{ex.Message}");
-        }
-        finally
-        {
-            btnDownload.Enabled = true;
-        }
-    }
-    
-    private async Task<string> DownloadFileAsync(string url)
-    {
-        using (var client = new HttpClient())
-        {
-            // 真正的非同步 I/O 操作
-            return await client.GetStringAsync(url);
-        }
-    }
-}
-```
-
-### 7.2 Web API 範例
-
-```csharp
-[ApiController]
-[Route("[controller]")]
-public class WeatherController : ControllerBase
-{
-    private readonly IWeatherService _weatherService;
-    private readonly ILogger<WeatherController> _logger;
-    
-    public WeatherController(IWeatherService weatherService, ILogger<WeatherController> logger)
-    {
-        _weatherService = weatherService;
-        _logger = logger;
-    }
-    
-    [HttpGet("{city}")]
-    public async Task<ActionResult<WeatherData>> GetWeather(string city)
-    {
-        try
-        {
-            // 可能同時處理多個請求
-            _logger.LogInformation($"獲取 {city} 的天氣資料");
-            
-            // 非同步呼叫外部 API
-            var weatherData = await _weatherService.GetWeatherAsync(city);
-            
-            // 非同步寫入快取
-            await CacheService.SetAsync($"weather:{city}", weatherData);
-            
-            return Ok(weatherData);
-        }
-        catch (CityNotFoundException)
-        {
-            return NotFound($"找不到城市：{city}");
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "獲取天氣資料時發生錯誤");
-            return StatusCode(500, "內部伺服器錯誤");
-        }
-    }
-}
-```
-
-### 7.3 並行處理範例
+### 7.1 並行處理範例
 
 ```csharp
 public async Task ProcessMultipleFilesAsync(string[] filePaths)
@@ -752,48 +623,6 @@ public async Task ProcessMultipleFilesAsync(string[] filePaths)
 
 ## 8. 最佳實踐與常見陷阱
 
-### 8.1 最佳實踐
-
-#### 1. Async All the Way
-
-```csharp
-// ✅ 好：一路 async
-public async Task<string> GetDataAsync()
-{
-    return await FetchFromDatabaseAsync();
-}
-
-// ❌ 壞：混用同步和非同步
-public string GetData()
-{
-    return FetchFromDatabaseAsync().Result; // 可能死鎖！
-}
-```
-
-#### 2. 使用 ConfigureAwait
-
-```csharp
-// 在程式庫中，通常不需要回到原始上下文
-public async Task<string> GetDataAsync()
-{
-    return await FetchFromDatabaseAsync()
-        .ConfigureAwait(false); // 提升效能
-}
-```
-
-#### 3. 取消支援
-
-```csharp
-public async Task<string> DownloadAsync(string url, CancellationToken cancellationToken)
-{
-    using (var client = new HttpClient())
-    {
-        var response = await client.GetAsync(url, cancellationToken);
-        return await response.Content.ReadAsStringAsync();
-    }
-}
-```
-
 ### 8.2 常見陷阱
 
 #### 1. async void 的危險
@@ -816,22 +645,6 @@ public async Task ProcessDataAsync()
 
 **規則**：除了事件處理器，永遠使用 `async Task`
 
-#### 2. 死鎖問題
-
-```csharp
-// ❌ 在 UI 或 ASP.NET 中可能死鎖
-public void ButtonClick()
-{
-    var result = GetDataAsync().Result; // 死鎖！
-}
-
-// ✅ 正確做法
-public async void ButtonClick()
-{
-    var result = await GetDataAsync();
-}
-```
-
 #### 3. 忘記 await
 
 ```csharp
@@ -845,37 +658,6 @@ public async Task ProcessAsync()
 public async Task ProcessAsync()
 {
     await DoSomethingAsync();
-}
-```
-
-### 8.3 效能考量
-
-#### 1. ValueTask vs Task
-
-```csharp
-// 當結果經常已經可用時，使用 ValueTask
-public async ValueTask<int> GetCachedValueAsync()
-{
-    if (_cache.TryGetValue(key, out var value))
-        return value; // 不會配置 Task 物件
-    
-    return await LoadFromDatabaseAsync();
-}
-```
-
-#### 2. 避免不必要的 async
-
-```csharp
-// ❌ 不必要的 async/await
-public async Task<string> GetNameAsync()
-{
-    return await Task.FromResult("Name");
-}
-
-// ✅ 直接回傳 Task
-public Task<string> GetNameAsync()
-{
-    return Task.FromResult("Name");
 }
 ```
 
