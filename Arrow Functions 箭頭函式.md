@@ -93,13 +93,13 @@ Topics :: {筆記跟什麼主題有關，用 `[Topic],[Topic]` 格式}
     
 - **sort**：排序集合（類似於 LINQ 的 OrderBy）
 	
-	- [[JavaScript - Array.sort( )]]
-	
     ```javascript
     const numbers = [3, 1, 4, 2];
     numbers.sort((a, b) => a - b); // [1, 2, 3, 4]
     ```
-    
+
+	- [[JavaScript - Array.sort( )]]
+
 - **flat**：扁平化嵌套陣列（類似於 LINQ 的 SelectMany）
     
     ```javascript
