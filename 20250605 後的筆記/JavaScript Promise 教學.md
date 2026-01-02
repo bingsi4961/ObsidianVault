@@ -88,26 +88,6 @@ neverResolvePromise()
 
 這個例子清楚地展示了 Promise 必須透過 resolve() 或 reject() 來改變狀態，才能觸發後續的 .then() 或 .catch() 方法。
 
-## 類比 C# 的 Task
-
-這個概念其實和你熟悉的 C# Task 很相似。在 C# 中：
-
-csharp
-
-```csharp
-// 類似的概念
-var task = Task.Run(() => {
-    // 如果這個方法沒有 return 或 throw exception
-    // 呼叫者的 await 就會一直等待
-});
-
-// 只有當 task 完成時，await 後面的程式碼才會執行
-await task;
-Console.WriteLine("Task 完成了");
-```
-
-JavaScript 的 Promise 就像 C# 的 Task，必須有明確的「完成」信號（resolve/reject），後續的處理（.then/.catch）才會被觸發。
-
 ## 基礎語法與建立 Promise
 
 讓我們從最基本的 Promise 建立開始：
