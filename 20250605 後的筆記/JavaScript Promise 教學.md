@@ -234,28 +234,67 @@ loginUser({ username: "user", password: "pass" })
 當你需要同時執行多個異步操作並等待全部完成時，可以使用 `Promise.all`：
 
 ```javascript
-// 假設需要同時載入多種資料
+/**
+ * 觀念：loadDashboardData 執行後會立即回傳一個 Promise 物件。
+ * 類比：這就像 C# 中的 public async Task<DashboardData> LoadDashboardData()。
+ */
 const loadDashboardData = () => {
+    // 1. 初始化三個非同步請求 (這時請求已經發出，類似 C# 的啟動 Task 但不 await)
     const userDataPromise = fetchUserData(123);
     const statisticsPromise = fetchStatistics();
     const notificationsPromise = fetchNotifications();
     
+    // 2. Promise.all 就像 Task.WhenAll，將多個 Task 打包成一個。
+    // 它會回傳一個全新的 Promise，當全部成功時狀態為 Resolved，任一失敗則為 Rejected。
     return Promise.all([userDataPromise, statisticsPromise, notificationsPromise])
         .then((results) => {
+            // 觀念：results 的順序保證與傳入的陣列順序一致。
             const [userData, statistics, notifications] = results;
             
-            // 所有資料都載入完成，現在可以更新 UI
+            // 在這裡處理 UI 更新 (Side Effects)
             updateUserSection(userData);
             updateStatisticsSection(statistics);
             updateNotificationsSection(notifications);
             
             console.log("儀表板資料全部載入完成");
+
+            /**
+             * 觀念：必須使用 return 才能將資料傳遞給下一個 .then()。
+             * 如果不寫 return，下一個 .then 接收到的會是 undefined。
+             */
+            return { userData, statistics, notifications }; 
         })
         .catch((error) => {
-            // 任何一個 Promise 失敗都會觸發這裡
+            /**
+             * 觀念：這是「錯誤攔截」層。
+             * 如果這裡只寫 console.error 而沒有 throw，這個 Promise 鏈結會被視為「已修復」，
+             * 導致呼叫端的 .then() 被執行且接收到 undefined。
+             * * 類比：這裡的 throw error 就像 C# catch 區塊中的 throw; 
+             * 目的在於將異常繼續往上拋給「呼叫端」處理。
+             */
             console.error("載入儀表板資料時發生錯誤：", error);
+            throw error; 
         });
 };
+
+/**
+ * 呼叫端 (Caller) 的處理
+ */
+loadDashboardData()
+    .then(data => { 
+        /**
+         * 因為 loadDashboardData 內部有 return 資料，
+         * 且出錯時有 throw error，所以這裡的 data 保證有值且結構正確。
+         */
+        console.log("成功拿到資料：", data.userData);
+    })
+    .catch(err => {
+        /**
+         * 觀念：所有的 Rejected 狀態（無論是 API 失敗或內層 throw）
+         * 最終都會匯流到這裡。可以在這裡顯示全域的錯誤訊息（例如：彈出視窗）。
+         */
+        showErrorModal("系統載入失敗，請稍後再試");
+    });
 ```
 
 ## Promise.race - 競速執行
