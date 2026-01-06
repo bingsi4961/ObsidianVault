@@ -298,8 +298,11 @@ loadDashboardData()
 ```
 
 ## Promise.race - 競速執行
+#### 最常見的場景：逾時控制 (Timeout Control)
 
-有時候你可能想要「誰先完成就用誰的結果」，這時可以使用 `Promise.race`：
+`Promise.race` 的特性是：**「只要有一棒先抵達終點（不論是成功還是失敗），就立刻結束並回傳該結果。」**
+
+這是 `Promise.race` 最經典的用法。JavaScript 的 `fetch` 或某些版本的 AJAX，本身沒有內建方便的 Timeout 機制，我們可以自製一個：
 
 ```javascript
 // 設定逾時機制的範例
@@ -314,6 +317,19 @@ function fetchWithTimeout(url, timeout = 5000) {
     
     // 看誰先完成：實際請求或逾時
     return Promise.race([fetchPromise, timeoutPromise]);
+    // 1. 建立一個全新的「代理 Promise」
+	// 當你呼叫 Promise.race([...]) 時，它會立刻回傳一個全新的 Promise 實例。這個 Promise 一開始的狀態是 pending（等待中）。
+
+	// 2. 訂閱所有參賽者
+	// 這個代理 Promise 會同時去關注（訂閱）你傳入陣列中的所有 Promise（在您的範例中是 fetchPromise 和 timeoutPromise）。
+
+	// 3.「誰先到，我就變成誰」
+	// 這是最關鍵的部分。只要陣列中任何一個 Promise 率先變成了 Settled 狀態（不論是 Resolved 還是 Rejected），代理 Promise 就會立刻「變身」：
+	// 如果 fetchPromise 先成功：代理 Promise 會立刻變為 Resolved，並把 fetchPromise 的 response 物件拿過來當作自己的結果。
+	// 如果 timeoutPromise 先失敗：代理 Promise 會立刻變為 Rejected，並把 timeoutPromise 的 Error("請求逾時") 拿過來當作自己的錯誤訊息。
+	
+	// 4. 進階觀念：輸掉的 Promise 會怎樣？
+	// 這點在開發中非常重要：「輸掉的人並不會停止執行」。瀏覽器依然會繼續下載資料直到完成或出錯，只是代理 Promise 已經不再理會它了。
 }
 
 fetchWithTimeout('/api/slow-endpoint', 3000)
