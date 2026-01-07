@@ -179,4 +179,4 @@ function myFunction() {
 
 - 每個 `.then()`、`.catch()`、`.finally()` ==都會返回一個新的 Promise==
 
-#### 📑[[Promise.then() 鏈中的 return 機制]]
+#### 📑[[☯Promise.then() 鏈中的 return 機制]]
