@@ -344,41 +344,48 @@ fetchWithTimeout('/api/slow-endpoint', 3000)
 
 ```javascript
 // 建議的錯誤處理模式
+/**
+ * 使用 jQuery AJAX 的版本
+ * @param {string} endpoint 請求位址
+ */
 function robustDataFetch(endpoint) {
-    return fetch(endpoint)
-        .then(response => {
-            // 檢查 HTTP 狀態碼
-            if (!response.ok) {
-                throw new Error(`HTTP Error: ${response.status} ${response.statusText}`);
-            }
-            return response.json();
-        })
-        .then(data => {
-            // 驗證資料格式
-            if (!data || typeof data !== 'object') {
-                throw new Error("回應資料格式不正確");
-            }
-            return data;
-        })
-        .catch(error => {
-            // 統一的錯誤處理
-            console.error("資料載入失敗：", error);
-            
-            // 可以根據錯誤類型做不同處理
-            if (error.message.includes("HTTP Error")) {
-                // 伺服器錯誤
-                showServerErrorMessage();
-            } else if (error.message.includes("格式不正確")) {
-                // 資料格式錯誤
-                showDataFormatErrorMessage();
-            } else {
-                // 網路或其他錯誤
-                showGenericErrorMessage();
-            }
-            
-            // 重新拋出錯誤讓上層處理
-            throw error;
-        });
+    return $.ajax({
+        url: endpoint,
+        method: 'GET',
+        dataType: 'json', // 自動將回傳結果解析為 JSON 物件
+        timeout: 10000    // 設定超時 (fetch 原生不支援超時，jQuery 支援)
+    })
+    .done(function(data, textStatus, jqXHR) {
+        // 成功處理 (等同於 Status Code 200-299)
+        console.log("資料載入成功");
+        
+        // 驗證資料格式 (類似 C# 的 null check)
+        if (!data || typeof data !== 'object') {
+            alert("回應資料格式不正確");
+            return;
+        }
+        
+        // 這裡處理您的業務邏輯
+        console.log(data);
+    })
+    .fail(function(jqXHR, textStatus, errorThrown) {
+        // 統一錯誤處理 (4xx, 5xx, 或網路斷線、超時都會進來)
+        console.error("請求失敗狀態碼：" + jqXHR.status);
+        
+        if (jqXHR.status >= 500) {
+            showServerErrorMessage(); // 伺服器端錯誤 (500)
+        } else if (jqXHR.status === 404) {
+            console.warn("找不到路徑");
+        } else if (textStatus === 'timeout') {
+            alert("伺服器回應超時，請檢查網路");
+        } else {
+            showGenericErrorMessage();
+        }
+    })
+    .always(function() {
+        // 無論成功或失敗都會執行 (類似 C# 的 finally)
+        hideLoadingSpinner(); 
+    });
 }
 ```
 
