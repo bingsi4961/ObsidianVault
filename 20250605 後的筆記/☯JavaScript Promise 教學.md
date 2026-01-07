@@ -343,55 +343,53 @@ fetchWithTimeout('/api/slow-endpoint', 3000)
 ```html
 <script type="text/javascript">
 	
-	// 觸發 Promise
-	function LaunchPromise() {
+	function createPromise() {	
+	    return new Promise((resolve, reject) => {        
+	        var success = true; 
+	        setTimeout(function() {
+	            if(success)
+	                resolve('資料處理完成!!');
+	            else
+	                reject('資料處理失敗!!');
+	        }, 3000);
+	    });
+	}
+
+	function launchPromise() {	    
+		console.log('launchPromise() 開始');
 		
-		console.log('LaunchPromise() 開始');
-		var myPromise = createPromise();
-		
-		myPromise
-			.then((result) => {
-				console.log('成功：', result);
-				
-				// 這裡返回的字串會被自動包裝成已解決（resolved）的 Promise，然後傳遞給下一個 .then()
+		// 秒數計數，是異步作業
+		var procCount = 0;
+		var procInterval = setInterval(() => {
+	        procCount++;
+	        console.log(`Promise處理中 (${procCount}秒)...`);
+	    }, 1000);
+	    
+	    createPromise()
+	        .then(result => {
+	            console.log('成功：', result);
+	            
+				// 這裡返回的字串，會被自動包裝成已解決（resolved）的 Promise，然後傳遞給下一個 .then()
 				// 相當於 return Promise.resolve('處理後的資料-XXX');
 				// 如果沒有 return，就會自動變成 return Promise.resolve(undefined);
 				// 每個 .then() 一定都會返回一個新的 Promise
-				return '處理後的資料-XXX';	
-			})
-			.then((newResult) => {
-				console.log('進一步處理：', newResult);
-			})
-			.catch((error) => {
-				console.log('錯誤：', error);
-			})
-			.finally(() => {
-				console.log('清理工作完成');
-				// 清除(停止) progressInterval
-				clearInterval(progressInterval);
-			});
-		
-		// 秒數計數，是異步作業
-		var processCount = 0;
-		var progressInterval = setInterval(() => {
-			processCount++;
-			console.log(`Promise 處理中 (${processCount}秒) ...`);
-		}, 1000);		
-	}
-	
-	// 建立 Promise
-	function createPromise() {
-		return new Promise((resolve, reject) => {
-			var success;
-			setTimeout(function () {
-				success = true;
-				if(success) {
-					resolve('資料處理完成!!');					
-				} else {
-					resolve('資料處理失敗!!');
-				}				
-			},3000);
-		});
+	            return '處理後的資料-xxx'; 
+	        })
+	        .then(newResult => {            
+	            console.log('進一步處理：', newResult);			
+	        })
+	        .catch(error => {
+	            console.log('錯誤：', error);			
+	        })
+	        .finally(() => {
+	            // Promise 的 finally callback function 是不帶任何參數
+				// finally 不會接收 resolve 的值，也不會接收 reject 的錯誤訊息
+				// 如果嘗試在 finally 帶入參數，該參數會是 undefined
+				
+				console.log('工作完成 (無論成功失敗都會執行)');
+	            // 清除(停止) progressInterval
+				clearInterval(procInterval);
+	        });
 	}
 </script>
 
