@@ -379,7 +379,7 @@ fetchWithTimeout('/api/slow-endpoint', 3000)
 	            console.log('進一步處理：', newResult);			
 	        })
 	        .catch(error => {
-	            console.log('錯誤：', error);			
+	            console.error('錯誤：', error);			
 	        })
 	        .finally(() => {
 	            // Promise 的 finally callback function 是不帶任何參數
