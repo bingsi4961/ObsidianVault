@@ -14,7 +14,7 @@ Topics :: {筆記跟什麼主題有關，用 `[Topic],[Topic]` 格式}
 
 ---
 # 連結筆記
-##### 📑 [[JavaScript Promise 教學]]
+##### 📑 [[☯JavaScript Promise 教學]]
 ##### 📑 [[Promise async await 範例]]
 
 ---
