@@ -15,7 +15,7 @@ Topics :: {筆記跟什麼主題有關，用 `[Topic],[Topic]` 格式}
 ---
 
 #### 📑 [[Promise.then() 鏈中的 return 機制]]
-#### 📑 [[鏈式回傳 Promise]]
+#### 📑 [[☯ 鏈式回傳 Promise]]
 #### 📑 [[Promise async await 範例]]
 #### 📑 [[$.ajax() deferred (Promise-like)  vs  Javascript Promise (學得很混淆)]]
 #### 📑 [[Promise 中 resolve reject 與 catch 觸發機制筆記]]
