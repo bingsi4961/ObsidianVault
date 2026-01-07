@@ -427,7 +427,7 @@ fetchWithTimeout('/api/slow-endpoint', 3000)
 		});
 	}
 
-	function LaunchChaining() {	
+	function launchChaining() {	
 				
 		// 秒數計數, 是異步作業
 		var processCount = 0;
@@ -436,7 +436,7 @@ fetchWithTimeout('/api/slow-endpoint', 3000)
 			console.log(`Promise 處理中 (${processCount}秒) ...`);
 		}, 1000);
 		
-		console.log('LaunchPromise() 開始', `(${processCount}秒)`);		
+		console.log('launchChaining() 開始', `(${processCount}秒)`);		
 		
 		// 鏈接多個 Promise
 		loginUser({ userName: "user", passWord: "pass" })
@@ -447,17 +447,21 @@ fetchWithTimeout('/api/slow-endpoint', 3000)
 			})
 			.then((userProfile) => {
 				console.log("使用者資料載入完成：", userProfile, `(${processCount}秒)`);				
-				// updateUserInterface(userProfile);
-				clearInterval(progressInterval);
+				// updateUserInterface(userProfile);				
 			})
 			.catch((error) => {
 				console.error("操作過程發生錯誤：", error);				
+			})
+			.finally(() => {
+				console.log("流程結束，停止計時");
+				// 放在這裡最安全，無論成功或失敗，最後都會執行
+				clearInterval(progressInterval);
 			});
 	}	
 
 </script>
 
-<input type="button" value="Promise 的鏈接" onclick="LaunchChaining()" style="margin: 10px;">
+<input type="button" value="Promise 的鏈接" onclick="launchChaining()" style="margin: 10px;">
 ```
 
 ![[Pasted image 20250705234123.png]]
