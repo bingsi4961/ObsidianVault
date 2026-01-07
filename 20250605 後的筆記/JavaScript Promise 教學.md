@@ -350,7 +350,8 @@ fetchWithTimeout('/api/slow-endpoint', 3000)
  */
 function robustDataFetch(endpoint) {
     return $.ajax({
-        url: endpoint,
+        //url: endpoint,
+        url: 'https://jsonplaceholder.typicode.com/posts',
         method: 'GET',
         dataType: 'json', // 自動將回傳結果解析為 JSON 物件
         timeout: 10000    // 設定超時 (fetch 原生不支援超時，jQuery 支援)
