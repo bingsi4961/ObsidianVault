@@ -1,12 +1,8 @@
 ---
-date : 2026-01-18 15:21
+date: 2026-01-18 15:21
 aliases:
-  - 別名測試1
-  - 別名測試2
 tags:
-  - 標籤測試1
-  - 標籤測試2
-
+  - JavaScript
 ---
 # Metadata
 Status :: 🌱
@@ -17,7 +13,7 @@ Topics :: {筆記跟什麼主題有關，用 `[Topic],[Topic]` 格式}
 
 ---
 # 連結筆記
-#### 📑 [[]]
+#### 📑 [[JavaScript Promise 完整教學（二）：鏈式調用與回傳機制]]
 
 ---
 
@@ -526,4 +522,4 @@ Promise 只是負責**「管理這些外包任務的結果」**。
 
 ---
 
-_上一篇：JavaScript Promise 完整教學（二）：鏈式調用與回傳機制_
+[[JavaScript Promise 完整教學（二）：鏈式調用與回傳機制| 上一篇：JavaScript Promise 完整教學（二）：鏈式調用與回傳機制]]

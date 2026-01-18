@@ -1,12 +1,8 @@
 ---
-date : 2026-01-18 15:20
+date: 2026-01-18 15:20
 aliases:
-  - 別名測試1
-  - 別名測試2
 tags:
-  - 標籤測試1
-  - 標籤測試2
-
+  - JavaScript
 ---
 # Metadata
 Status :: 🌱
@@ -17,7 +13,8 @@ Topics :: {筆記跟什麼主題有關，用 `[Topic],[Topic]` 格式}
 
 ---
 # 連結筆記
-#### 📑 [[]]
+#### 📑 [[JavaScript Promise 完整教學（一）：基礎觀念與核心機制]]
+#### 📑 [[JavaScript Promise 完整教學（三）：進階技巧與並行處理]]
 
 ---
 
@@ -240,7 +237,51 @@ function myFunction() {
 
 `.finally()` 的行為與 `.then()` 和 `.catch()` 完全不同，它被設計為一個「不干涉」的區塊。它會盡力讓前一棒的結果「直接通過」。
 
-### 4.1 `.finally()` 的特性
+### 4.1 `.finally()` 需要帶參數嗎？
+
+**答案是：不需要，也不應該帶參數。**
+
+在 JavaScript 的規範中，傳遞給 `finally()` 的回呼函式（Callback function）是**不接受任何參數**的。
+
+- **`.then(value => ...)`**：會接收到成功的「值」。
+- **`.catch(error => ...)`**：會接收到失敗的「原因」。
+- **`.finally(() => ...)`**：什麼都不會收到。
+
+### 4.2 `then()` 或 `catch()` 的值會傳進 `finally()` 嗎？
+
+**不會。** `finally` 的設計初衷是為了「清理現場」，它並不關心前面到底是成功還是失敗，也不關心具體的資料是什麼。
+
+這就像是你在實驗室做實驗 🧪：
+
+1. **實驗成功**（`.then`）：你拿到了實驗數據。
+2. **實驗失敗**（`.catch`）：你記錄了失敗的原因。
+3. **不論成功或失敗**（`.finally`）：你最後都要**把實驗袍掛好、把燈關掉**。
+
+清理（關燈）這個動作，並不需要知道實驗數據是什麼，也不需要知道失敗原因是什麼。
+
+### 4.3 三個方法的參數接收比較表
+
+|方法|接收的參數內容|會收到前面 return 的值嗎？|主要用途|
+|---|---|---|---|
+|**`.then()`**|`result` (成功的值)|**會**，收到前一棒的 return|處理資料、執行下一步任務。|
+|**`.catch()`**|`error` (失敗原因)|**會**，收到前一棒拋出的錯誤|捕捉錯誤、進行補救。|
+|**`.finally()`**|**無** (空參數)|**不會**，它會「忽略」並「傳遞」值|清除定時器、關閉 Loading 圖示。|
+
+### 4.4 測驗：如果在 `finally` 中寫了參數會怎樣？
+
+```javascript
+somePromise
+    .then(result => result)
+    .finally((data) => { 
+        console.log(data); // 印出什麼？
+    });
+```
+
+**答案：`undefined`**
+
+因為 `finally` 的設計就是「不參與資料流」，所以它不會接收到任何結果，即使你寫了參數，該參數的值也會是 `undefined`。
+
+### 4.5 `.finally()` 的特性
 
 |程式碼情境|在 `finally()` 中的結果|下一步去哪？|
 |---|---|---|
@@ -249,7 +290,7 @@ function myFunction() {
 |**`throw new Error()`**|**Rejected** (失敗) ❌|**強行跳到** 下一個 `.catch()`|
 |**`return Promise.reject()`**|**Rejected** (失敗) ❌|**強行跳到** 下一個 `.catch()`|
 
-### 4.2 範例：finally 不改變傳遞的資料
+### 4.6 範例：finally 不改變傳遞的資料
 
 ```javascript
 // 情況 1：finally 有 return（通常被忽略）
@@ -267,11 +308,30 @@ Promise.resolve('成功結果')
     });
 ```
 
-### 4.3 為什麼 `finally()` 裡的 `return` 會被忽略？
+### 4.7 為什麼 `finally()` 裡的 `return` 會被忽略？
 
 因為 `finally()` 的功能是「打掃」。不論任務成功與否，都要關燈、關冷氣。如果你在打掃時突然說「拿這塊蛋糕去給下一棒」（`return "蛋糕"`），系統會覺得這不是你的職責，所以會直接把原本就在傳遞的東西繼續傳下去。
 
-### 4.4 唯一例外：在 finally 中拋出錯誤
+### 4.8 程式碼觀察：為什麼值會「跳過」`finally`？
+
+如果在 `finally` 之後再接一個 `.then()`，你會發現資料依然存在：
+
+```javascript
+createPromise()
+    .then(result => {
+        return '處理後的資料-xxx'; 
+    })
+    .finally(() => {
+        console.log('清理中...'); // 這裡沒辦法拿到 '處理後的資料-xxx'
+    })
+    .then(data => {
+        console.log('最後一棒拿到：', data); // 這裡依然能拿到 '處理後的資料-xxx'
+    });
+```
+
+這證實了我們之前說的：`finally` 是一個 **「透明的過路站」**。它執行完內部的程式碼後，會自動把「進入 `finally` 之前的結果」原封不動地交給下一棒。
+
+### 4.9 唯一例外：在 finally 中拋出錯誤
 
 ```javascript
 Promise.resolve('成功結果')
@@ -396,13 +456,74 @@ checkAccount()
 |**有 return**|`return $.ajax(...)`|鏈條會**等待**網路請求完成，才跑下一棒。|**會！** 網路出錯會跳到 `.catch`。|
 |**沒 return**|`$.ajax(...)`|鏈條**不會等待**，直接跑下一棒。|**不會！** 請求失敗時，Promise 鏈已經跑完了。|
 
+**實作範例：當 `$.ajax` 發生錯誤時**
+
+```javascript
+checkAccount()
+  .then((data) => {
+    console.log("帳號檢查通過，準備抓取資料...");
+    
+    // 情境：我們回傳一個 $.ajax 請求
+    return $.ajax({
+      url: "https://api.example.com/user/123",
+      method: "GET"
+    });
+  })
+  .then((userInfo) => {
+    // 只有在 ajax 成功時才會執行到這裡
+    console.log("抓到資料了：", userInfo);
+  })
+  .catch((error) => {
+    // 只要 checkAccount 失敗，或者 $.ajax 失敗（如 404 或網路斷線）
+    // 都會統一跳到這裡處理！
+    console.log("流程中發生錯誤：", error.statusText);
+  });
+```
+
 ### 7.2 為什麼「沒寫 return」會導致 catch 不到？
 
 如果你沒寫 `return`，對 Promise 鏈來說，你在這個 `.then` 裡面只是啟動了一個「背景任務」，然後就「結束並回傳了 undefined」。
 
 就像你叫店員去煮咖啡，但他轉身去啟動機器後就立刻回頭跟你說「我做完了」（回傳了 undefined），而不是「等咖啡煮好再回報」。這時候機器就算爆炸了（ajax 失敗），店員也已經宣稱他任務完成，`.catch` 自然接不到這個錯誤。
 
-### 7.3 箭頭函式的隱含回傳
+### 7.3 深入釐清：沒有 return 對 catch 的兩種情況
+
+「沒寫 return 會導致 catch 不到」這句話需要拆解成兩個層面來理解：
+
+|情況|發生了什麼事？|`catch` 能抓到嗎？|
+|---|---|---|
+|**情況 A：Promise 內部出錯**|在 `then` 裡面直接寫 `throw new Error()`|**能！** 因為這是在這一段執行時發生的。|
+|**情況 B：非同步任務（如 AJAX）失敗**|沒寫 `return`，但 `$.ajax` 失敗了|**不能！** 因為 `then` 已經結束了，AJAX 的錯誤發生在「未來」，主鍊條已經抓不到它了。|
+
+> **重點整理：** 沒寫 `return`，Promise 鏈就會「斷掉」對那個非同步任務的監控。對鏈條來說，回傳值就是 `undefined`（成功狀態），所以它會繼續往下跑 `.then`，而不會進到 `.catch`。
+
+### 7.4 測驗解析：沒寫 return 時，下一個 then 何時執行？
+
+請看這段程式碼：
+
+```javascript
+promiseA()
+  .then(() => {
+    $.ajax({ url: "/api/test" }); // 注意：這裡沒寫 return
+  })
+  .then(() => {
+    console.log("任務完成！");
+  });
+```
+
+**問題：如果 `/api/test` 的網路請求需要跑 10 秒鐘，那「任務完成！」這行字是在「10 秒後」印出，還是「幾乎立刻」印出呢？**
+
+**答案：「幾乎立刻」**
+
+因為 JavaScript 的 `.then()` 就像是一個**快遞員**：
+
+- 如果你給他一個 `return`，他會乖乖拿著東西送到下一站。
+- 如果你給他一個 **Promise**（加上 `return`），他會在那裡等包裹拆開，再送去下一站。
+- **但是**，如果你沒寫 `return`，快遞員跑進房間（執行了 `$.ajax`），看到裡面沒東西要給他，他會以為任務結束了，直接兩手空空（帶著 `undefined`）衝向下一站。
+
+所以，雖然 `$.ajax` 在背景慢慢跑 10 秒，但 `.then()` 早就不等它，直接執行下一個 `then` 印出「任務完成！」了。
+
+### 7.5 箭頭函式的隱含回傳
 
 要特別注意**括號**的使用：
 
@@ -461,4 +582,5 @@ function myFunction() {
 
 ---
 
-_上一篇：JavaScript Promise 完整教學（一）：基礎觀念與核心機制_ _下一篇：JavaScript Promise 完整教學（三）：進階技巧與並行處理_
+[[JavaScript Promise 完整教學（一）：基礎觀念與核心機制 | 上一篇：JavaScript Promise 完整教學（一）：基礎觀念與核心機制]]
+[[JavaScript Promise 完整教學（三）：進階技巧與並行處理 | 下一篇：JavaScript Promise 完整教學（三）：進階技巧與並行處理]]
