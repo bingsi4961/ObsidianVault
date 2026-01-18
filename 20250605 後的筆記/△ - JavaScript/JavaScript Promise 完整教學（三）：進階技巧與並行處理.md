@@ -14,6 +14,7 @@ Topics :: {筆記跟什麼主題有關，用 `[Topic],[Topic]` 格式}
 ---
 # 連結筆記
 #### 📑 [[JavaScript Promise 完整教學（二）：鏈式調用與回傳機制]]
+#### 📑 [[JavaScript Promise 完整教學（四）：Async Await 語法糖]]
 
 ---
 
@@ -91,6 +92,206 @@ uploadFile(null).catch(err => console.log(err)); // 輸出：錯誤：未選擇�
 - 如果你傳入一個 **$.ajax (Thenable)**，它會把它轉換成標準的原生 Promise。
 
 > **為什麼這很重要？** 當你不確定某個套件回傳的是不是標準 Promise 時，用 `Promise.resolve(結果)` 包一下，就能確保後續一定可以使用標準的 `.then()`。
+
+### 1.5 重要觀念：「Resolve」不等於「Fulfill」
+
+很多開發者在初學時都會被 `Promise.resolve()` 這個名稱誤導，認為它「保證」會回傳一個狀態為 **Fulfilled (成功)** 的 Promise。
+
+但實際上，`Promise.resolve()` 的行為更像是**「包裝器」**或**「轉換器」**，它的核心邏輯是：**「讓傳入的東西，表現得像一個標準 Promise」。**
+
+在 Promise 的規格書（ECMAScript）中：
+
+- **Fulfill (成功)**：代表任務圓滿完成。
+- **Resolve (解析)**：代表「我處理完了這個值，現在這個 Promise 的狀態**由那個值決定**」。
+
+如果傳入的是一個**已經失敗的 Promise**，`Promise.resolve()` 的工作就是「如實反映」那個失敗的狀態，而不是強行把它扭轉成成功。
+
+### 1.6 三種情境的行為拆解
+
+我們可以把 `Promise.resolve(input)` 看作是一個代理人，它會根據 `input` 的狀態來決定自己的樣子：
+
+|傳入的 `input`|`Promise.resolve(input)` 的結果|
+|---|---|
+|**一般數值/物件**|回傳一個 **Fulfilled** 的 Promise，值為該數值。|
+|**成功的 Promise**|直接回傳該 Promise（**Fulfilled**）。|
+|**失敗的 Promise**|直接回傳該 Promise（**Rejected**）。|
+|**失敗的 Thenable ($.ajax)**|轉換為一個 **Rejected** 的原生 Promise。|
+
+**程式碼實驗：**
+
+```javascript
+// 情境：傳入一個已經 Rejected 的 Promise
+const failedP = Promise.reject("這是一個錯誤");
+const resultP = Promise.resolve(failedP);
+
+resultP
+  .then(() => console.log("成功"))
+  .catch((err) => console.log("失敗了，錯誤是：" + err)); 
+// 輸出結果：失敗了，錯誤是：這是一個錯誤
+```
+
+### 1.7 `Promise.reject()` 的行為：不問青紅皂白
+
+與 `Promise.resolve()` 不同，`Promise.reject()` **不會**去解析（Unwrap）你傳進去的東西。不管你傳入的是一般數值、成功的 Promise，還是失敗的 Promise，它都會直接把那個「東西」包在一個 Rejected 的 Promise 裡面。
+
+- **傳入數值**：回傳一個 Rejected Promise，原因就是該數值。
+- **傳入一個成功的 Promise**：回傳一個 Rejected Promise，**原因就是那個 Promise 物件本身**（這通常不是你要的）。
+
+**程式碼實驗：兩者的差異**
+
+```javascript
+const successP = Promise.resolve("我是成功的");
+
+// --- Promise.resolve 會拆箱 ---
+const resolvedP = Promise.resolve(successP);
+resolvedP.then(val => console.log("Resolve 結果:", val)); 
+// 輸出: Resolve 結果: 我是成功的 (它拿到了裡面的字串)
+
+// --- Promise.reject 不會拆箱 ---
+const rejectedP = Promise.reject(successP);
+rejectedP.catch(err => console.log("Reject 結果:", err)); 
+// 輸出: Reject 結果: Promise { <fulfilled>: "我是成功的" }
+// 它直接把整個 Promise 物件當作錯誤原因丟出來了！
+```
+
+### 1.8 為什麼 `Promise.reject()` 要設計得這麼「直接」？
+
+這涉及到了**「錯誤處理（Error Handling）」**的哲學：
+
+1. **確保因果關係**：如果你呼叫了 `Promise.reject(x)`，你的意圖非常明確——「我現在就是要拋出一個錯誤」。如果 JS 自動幫你解析 `x`，萬一 `x` 是一個成功的 Promise，那 `Promise.reject()` 反而可能變成成功，這會讓邏輯陷入混亂。
+    
+2. **保留現場**：在除錯時，如果你把一個物件（甚至是一個 Promise）當作錯誤拋出，你通常希望完整拿到那個物件來分析原因，而不是被系統自動轉換過後的結果。
+    
+
+### 1.9 快速比較表：resolve vs reject
+
+|特性|`Promise.resolve(x)`|`Promise.reject(x)`|
+|---|---|---|
+|**主要目的**|將 `x` 標準化為一個 Promise。|強制產生一個失敗的 Promise。|
+|**是否解析 Thenable**|**會**。會等待 `x` 結束並採用其狀態。|**不會**。直接把 `x` 當作失敗原因。|
+|**回傳狀態**|可能成功，也可能失敗（取決於 `x`）。|**保證失敗 (Rejected)**。|
+|**比喻**|像一個**轉接頭**，適配各種插座。|像一個**紅色警報箱**，裡面放什麼都會警報。|
+
+### 1.10 常見陷阱：`Promise.resolve(new Error())`
+
+這是一個新手非常容易踩進去的「陷阱」。
+
+**結論：它會回傳一個狀態為 Fulfilled (成功) 的 Promise，內容物是那個 Error 物件。**
+
+為什麼？因為在 JavaScript 中，`new Error()` 只是一個**普通的物件**，它並沒有 `.then()` 方法。所以對 `Promise.resolve` 來說，它跟 `Promise.resolve(123)` 或 `Promise.resolve({name: "ASUS"})` 是完全一樣的——它只是一個「值」。
+
+**程式碼實驗：**
+
+```javascript
+const p = Promise.resolve(new Error('人工錯誤'));
+
+p.then((val) => {
+    console.log("成功標籤：", val.message); // 會執行這一行！
+}).catch((err) => {
+    console.log("失敗標籤：", err);        // 不會執行這行
+});
+// 輸出：成功標籤： 人工錯誤
+```
+
+> **重點筆記：** 如果你想產生一個失敗狀態且內容是 Error 物件，你必須使用 `Promise.reject(new Error('...'))`。
+
+### 1.11 `new Promise` 中的 `resolve()` / `reject()` 是否也是一樣的觀念？
+
+**是的，觀念幾乎完全一致。** 在 `new Promise((resolve, reject) => { ... })` 裡面，這兩個參數的行為邏輯與 `Promise.resolve()` / `Promise.reject()` 是對等的。
+
+**1. 內部的 `resolve(x)`：它是「聰明」的**
+
+如果你在 `new Promise` 裡呼叫 `resolve(x)`，它也會進行「拆箱」：
+
+- 如果 `x` 是一個已經 **Rejected** 的 Promise，那麼你現在這個 `new Promise` 也會變成 **Rejected**。
+- 它不只是「宣告成功」，而是「這件事的結果交由 `x` 來決定」。
+
+```javascript
+const p = new Promise((resolve) => {
+    // 這裡 resolve 了一個失敗的 Promise
+    resolve(Promise.reject("這是一個失敗")); 
+});
+p.catch(err => console.log(err)); // 輸出: 這是一個失敗 (它自動跟隨了內部的狀態)
+```
+
+**2. 內部的 `reject(x)`：它是「直接」的**
+
+不論你傳什麼給 `reject()`，它都會直接把該值當作失敗原因，不會做任何解析。
+
+```javascript
+const p = new Promise((resolve, reject) => {
+    reject(Promise.resolve("我成功了")); 
+});
+p.catch(err => console.log("報錯了：", err)); 
+// 輸出: 報錯了： Promise { <fulfilled>: "我成功了" }
+// 它直接把那個成功的 Promise 當作「失敗的原因」丟出來了
+```
+
+### 1.12 觀念總整理表
+
+|執行動作|處理邏輯|行為描述|
+|---|---|---|
+|**`Promise.resolve(x)`**|**解析 (Resolve)**|如果 `x` 是 Promise/Thenable，會追隨其狀態；其餘視為成功。|
+|**建構子內的 `resolve(x)`**|**解析 (Resolve)**|與上方一致，會等待並採用 `x` 的最終狀態。|
+|**`Promise.reject(x)`**|**強制拒絕 (Reject)**|不管 `x` 是什麼，直接將 `x` 作為失敗原因。|
+|**建構子內的 `reject(x)`**|**強制拒絕 (Reject)**|與上方一致，直接將 `x` 作為失敗原因。|
+
+### 1.13 進階觀念：`Promise.resolve(p)` vs `new Promise(r => r(p))` 的差異
+
+這是一個非常細膩的觀察。**針對「標準的原生 Promise」來說，`Promise.resolve(p)` 會原封不動傳出 `p`。**
+
+**原生 Promise：它是「原封不動」的**
+
+如果您傳入的是原生 Promise，`Promise.resolve()` 會直接回傳該物件的引用（Reference）。這意味著兩者在記憶體中是同一個東西。
+
+```javascript
+const originalP = new Promise((resolve) => resolve("ASUS"));
+const resolvedP = Promise.resolve(originalP);
+
+console.log(originalP === resolvedP); 
+// 輸出: true (這證明了它真的原封不動，連包裝都沒拆)
+```
+
+這就是為什麼在程式碼中重複呼叫 `Promise.resolve(somePromise)` 是**零效能損耗**的，它只是把同樣的地址再傳一次而已。
+
+**但是，`new Promise` 建構式一定會「蓋新房子」**
+
+當您執行 `const p = new Promise(...)` 時，JavaScript 引擎的操作順序如下：
+
+1. **分配記憶體**：引擎看到 `new` 關鍵字，立刻在記憶體中建立一個**全新的 Promise 物件實例**。
+2. **執行 Executor**：開始執行您寫在裡面的函式 `(resolve) => { ... }`。
+3. **狀態連結 (State Linking)**：當您呼叫 `resolve(prevP)` 時，引擎發現 `prevP` 是一個 Promise，它會讓**新物件 `p`** 去「監聽」**舊物件 `prevP`** 的狀態。
+
+雖然 `p` 的結果（值與狀態）最後會跟 `prevP` 一模一樣，但 **`p` 本身是一個剛蓋好的新房子**，它和 `prevP` 的記憶體位址（Identity）是不同的。
+
+```javascript
+const prevP = Promise.reject("這是一個失敗");
+
+// 做法 A: 靜態方法
+const pA = Promise.resolve(prevP);
+console.log(pA === prevP); // true
+
+// 做法 B: 建構式
+const pB = new Promise((resolve) => resolve(prevP));
+console.log(pB === prevP); // false
+```
+
+**這對開發有什麼影響？**
+
+在華碩的系統開發中（無論是 Portal 還是 GTS），這通常不會造成功能上的 Bug，因為不論是 `pA` 還是 `pB`，它們**「表現出來的行為」**（最終會進 `.then` 還是 `.catch`）是完全一致的。
+
+但這涉及到一個效能細節：
+
+- **`new Promise(r => r(p))`**：不但多佔用了記憶體，還會產生額外的 **Microtask** 開銷，因為它必須透過層層轉發來「追隨」前一個 Promise 的狀態。
+- **建議做法**：如果您只是單純想確保某個變數是 Promise，請永遠優先使用 **`Promise.resolve(x)`**。
+
+### 1.14 海關檢查站比喻
+
+您可以把 `Promise.resolve(x)` 想像成一個**「海關檢查站」**：
+
+1. **如果你已經護照齊全（原生 Promise）：** 海關看一眼直接揮手讓你過去，你還是原本的你。
+2. **如果你拿著舊式證件（Thenable/$.ajax）：** 海關會收走舊證件，發給你一張新的標準護照（原生 Promise）。
+3. **如果你什麼都沒帶（一般數值/物件）：** 海關會直接幫你辦一張全新的護照給你。
 
 ---
 
@@ -416,7 +617,161 @@ loadDashboardData()
 - **併發 (Concurrency)**：在同一段時間內，交替執行多個任務。看起來像是同時在跑，但實際上是在任務間快速切換。
 - **平行 (Parallelism)**：在同一個瞬間，真的有多隻手同時在做不同的工作（通常需要多核心 CPU）。
 
-### 6.2 Promise 是如何運作的？（以煮飯為例）
+### 6.2 Promise 的兩個關鍵執行規則
+
+在深入理解執行順序之前，必須先釐清這兩個規則：
+
+1. **Promise Executor 是同步的**：`new Promise((resolve, reject) => { ... })` 括號裡面的程式碼會**立即執行**。
+2. **`.then()` 是微任務 (Microtask)**：即便 Promise 已經 `resolve` 了，`.then()` 裡面的回呼函數也會被放到「微任務佇列」中，等到所有同步程式碼執行完畢後才執行。
+
+### 6.3 同步任務、微任務、宏任務
+
+|順序|類型|執行時機|說明|
+|---|---|---|---|
+|1|同步任務|立即執行|所有一般的 `console.log`、變數宣告等都屬於這一類。|
+|2|微任務 (Microtask)|同步任務結束後|`Promise.then()`、`async/await` 後續動作。|
+|3|宏任務 (Macrotask)|微任務結束後|`setTimeout`、`setInterval`、DOM 事件。|
+
+> **黃金律則：** 只要看到 `new Promise(...)`，請把它當作一般同步程式碼來看待；只要看到 `.then(...)`，請把它想成**「這件事晚點再說，先排隊」**。
+
+### 6.4 嵌套 Promise 的執行順序
+
+當 Promise 裡面又有 Promise 時，執行順序會是什麼樣子？
+
+```javascript
+console.log("1. 開始點餐");
+
+const mainOrder = new Promise((resolve) => {
+    console.log("2. 製作主餐（第一層 Promise）");
+    
+    // 嵌套的 Promise
+    new Promise((resolveInner) => {
+        console.log("3. 準備餐具（第二層 Promise）");
+        resolveInner("🍴 叉子");
+    }).then((tool) => {
+        console.log("6. 收到通知，拿到工具：" + tool);
+    });
+
+    resolve("🍔 漢堡");
+});
+
+console.log("4. 繼續滑手機");
+
+mainOrder.then((food) => {
+    console.log("7. 收到通知，拿到餐點：" + food);
+});
+
+console.log("5. 這裡是最後一行");
+```
+
+**執行結果順序：`1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7`**
+
+**詳細步驟拆解：**
+
+1. **同步執行 (Call Stack)**:
+    
+    - 印出 `1`。
+    - 進入 `mainOrder` 的 Executor，印出 `2`。
+    - 遇到內層 `new Promise`，立即進入其 Executor，印出 `3`。
+    - 內層執行 `resolveInner()`，將內層的 `.then()` (印出 6) 放入微任務佇列。
+    - 回到外層執行 `resolve()`，將外層的 `.then()` (印出 7) 放入微任務佇列。
+    - 跳出 Promise 區塊，印出 `4`。
+    - 執行最後一行，印出 `5`。
+2. **處理微任務 (Microtask Queue - FIFO 先進先出)**:
+    
+    - 此時同步任務已結束，JS 引擎檢查微任務佇列。
+    - 取出第一個微任務：執行內層的 `.then()`，印出 `6`。
+    - 取出第二個微任務：執行外層的 `.then()`，印出 `7`。
+
+### 6.5 CPU 密集型 vs I/O 密集型作業
+
+這是許多初學者對 Promise 的誤解：**以為「包在 Promise 裡面的程式碼就會自動變成非同步」**。
+
+關鍵在於：你的作業是「CPU 密集型」還是「I/O 密集型」？
+
+**1. CPU 密集型（會卡住）**
+
+如果你在 Promise 裡面寫了一個運算 10 億次的 `for` 迴圈，這段程式碼會直接在主執行緒 (Main Thread) 上執行。
+
+```javascript
+new Promise((resolve) => {
+    // 這是在主執行緒執行的，畫面會直接凍結！
+    for(let i = 0; i < 1000000000; i++) { /* 計算 */ } 
+    resolve("計算完成");
+});
+```
+
+因為 JavaScript 是單執行緒，它必須先把這段同步的「磨豆子」工作做完，才能去處理滑手機、更新畫面等其他任務。
+
+**2. I/O 密集型（不會卡住）**
+
+當你使用 `fetch` 或 `setTimeout` 時，JavaScript 會把這些工作**委派給瀏覽器（Web APIs）或系統底層**去處理。
+
+真實的非同步流程：
+
+1. JavaScript 呼叫瀏覽器的下載模組（這是一瞬間的事，同步執行）。
+2. JavaScript 繼續執行後面的程式碼（不會等檔案下載完）。
+3. 瀏覽器在背景默默下載檔案（不佔用 JS 的主執行緒）。
+4. 檔案下載完成後，瀏覽器把「通知」丟進任務佇列，等 JS 有空時再來處理 `.then()`。
+
+|情況|行為|結果|
+|---|---|---|
+|**純計算** (如大迴圈)|像是在主執行緒執行死迴圈|UI 凍結，無法點擊任何東西。|
+|**I/O 作業** (如 fetch/AJAX)|委派給瀏覽器背景處理|UI 流暢，背景下載，完成後才回頭處理。|
+
+> **重要觀念：** Promise 的功用並非「開新執行緒」（那是 Web Workers 在做的事），Promise 的真正價值在於**「提供一種優雅的機制，來管理那些『未來才會完成』的任務回報」**。
+
+### 6.6 常見錯誤：fetch 後面緊接 resolve
+
+假設 Promise 中有一個 `fetch`（不知道要跑多久），而 `fetch` 後面緊接著 `resolve`，會發生什麼事？
+
+**錯誤的寫法：非同步與同步的脫節**
+
+```javascript
+const coffeeOrder = new Promise((resolve, reject) => {
+    // 1. 呼叫 fetch (這是一個非同步動作)
+    // 瀏覽器收到指令：去下載檔案！然後 JS 就繼續往下跑了，不會在這裡停下。
+    fetch("https://api.example.com/coffee"); 
+
+    // 2. 緊接著執行 resolve
+    // JS 認為：喔！你現在就叫我結案，那我就結案吧。
+    resolve("☕ 結案回報：我已經下達下載指令了！");
+});
+
+coffeeOrder.then((msg) => {
+    // 3. 當 Call Stack 空了，這裡會「立刻」執行
+    console.log(msg); 
+});
+```
+
+**發生了什麼事？**
+
+- `fetch` 像是一個被外包出去的員工，他還在外面跑。
+- 但你在公司內部（Promise Executor）直接蓋了「已完成」的印章（`resolve`）。
+- 結果：`.then()` 會被觸發，拿到的是那個「結案回報」字串，而 `fetch` 回來的資料則變成了「孤兒」，沒人理它。
+
+**正確的寫法：將 `resolve` 放在「通知」裡**
+
+如果要讓 Promise 等待 `fetch` 結束，你必須把 `resolve` 放在 `fetch` 的回呼函數（callback）裡：
+
+```javascript
+const coffeeOrder = new Promise((resolve, reject) => {
+    // 啟動 fetch，並告訴它：結束後要做什麼
+    fetch("https://api.example.com/coffee")
+        .then(response => response.json())
+        .then(data => {
+            // 只有當 fetch 真正成功拿到資料時，才執行 resolve
+            resolve(data); 
+        })
+        .catch(err => {
+            reject(err);
+        });
+});
+```
+
+> **結論：** 只要 `resolve()` 被呼叫，Promise 狀態就會變成 `fulfilled`，之後掛載的 `.then()` 一定會跑。問題在於**時機**：如果 `resolve` 寫在 `fetch` 外面，`.then()` 會在 `fetch` 完成之前就跑完；如果 `resolve` 寫在 `fetch` 裡面（回呼函式內），`.then()` 就會乖乖等 `fetch` 成功後才跑。
+
+### 6.7 Promise 是如何運作的？（以煮飯為例）
 
 想像你正在廚房煮一頓大餐：
 
@@ -428,7 +783,7 @@ loadDashboardData()
     - 當烤箱響了（Promise Resolve），你切完菜後再去處理肉。
 3. **平行 (Parallelism)**：這需要你請另一個廚師來。在 JavaScript 中，這叫 `Web Workers`，但普通的 Promise 並不是這樣。
 
-### 6.3 Promise 的角色
+### 6.8 Promise 的角色
 
 Promise 只是負責**「管理這些外包任務的結果」**。
 
@@ -440,7 +795,7 @@ Promise 只是負責**「管理這些外包任務的結果」**。
 |**併發 (Concurrency)**|雖然我只有一隻手，但我能管理很多同時進行的任務（不阻塞）。|**Promise**, `setTimeout`, AJAX|
 |**平行 (Parallelism)**|我有多隻手，同一秒真的在運算兩個不同的東西。|**Web Workers** (JS 較少見的用法)|
 
-### 6.4 兩個任務「同時」等待的原理
+### 6.9 兩個任務「同時」等待的原理
 
 ```javascript
 .then(() => {
@@ -503,23 +858,14 @@ Promise 只是負責**「管理這些外包任務的結果」**。
 - `Promise.allSettled()`：不管成敗都要回報
 - `$.when()`：jQuery 的並行器
 - `Promise.race()`：競速執行與逾時控制
+- 同步任務、微任務、宏任務的執行順序
+- 嵌套 Promise 的執行順序解析
+- CPU 密集型 vs I/O 密集型作業
 - JavaScript 的單執行緒與併發機制
 
-你現在擁有的非同步知識，已經足以應付 95% 的實務開發需求！
-
----
-
-## 下一步：Async / Await
-
-既然你已經懂了：
-
-1. Promise 是如何「管理任務」的。
-2. 它們是如何在單執行緒中「併發」執行的。
-
-現在，你可以進一步學習如何把這些複雜的 `.then()` 改寫成 **`async / await`**。
-
-`async / await` 是 JavaScript 在 2017 年推出的終極語法，它能讓非同步程式碼「讀起來跟同步程式碼一模一樣」，本質上就是 Promise 的語法糖，讓你的程式碼從「回呼地獄」或「長長的鏈條」，變成優雅的小說。
+在下一篇中，我們將學習 **async / await** 語法糖，讓非同步程式碼讀起來就像同步程式碼一樣直覺！
 
 ---
 
 [[JavaScript Promise 完整教學（二）：鏈式調用與回傳機制| 上一篇：JavaScript Promise 完整教學（二）：鏈式調用與回傳機制]]
+[[JavaScript Promise 完整教學（四）：Async Await 語法糖 | 下一篇：JavaScript Promise 完整教學（四）：Async Await 語法糖]]
