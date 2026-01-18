@@ -568,7 +568,7 @@ function myFunction() {
 
 ## 本章小結
 
-在這一篇中，我們深入學習了：
+在這一篇中，我們學習了：
 
 1. **Promise 鏈式調用**的運作原理：每個 `.then()`、`.catch()`、`.finally()` 都會回傳一個新的 Promise。
 2. **`.then()` 的回傳機制**：四種情境（回傳普通值、回傳 Promise、拋出錯誤、沒有 return）。
@@ -577,8 +577,6 @@ function myFunction() {
 5. **`.finally()` 的回傳機制**：透明過路站，不改變傳遞的資料。
 6. **實戰應用**：多步驟登入流程與 `$.ajax` 整合。
 7. **常見陷阱**：`return new Error()` vs `throw new Error()`、箭頭函式的隱含回傳。
-
-在下一篇中，我們將學習如何**同時處理多個 Promise**（`Promise.all`、`Promise.allSettled`、`$.when`），以及 **`Promise.resolve()`** 與 **`Promise.reject()`** 的快捷用法！
 
 ---
 

@@ -403,42 +403,15 @@ async function parallel() {
 
 ---
 
-## 本系列總結
+## 本章小結
 
-恭喜你完成了整個 JavaScript Promise 系列教學！你已經學會了：
+在這一篇中，我們學習了：
 
-**第一篇：基礎觀念與核心機制**
-
-- 同步與非同步的差異
-- Promise 的三種狀態（Pending、Fulfilled、Rejected）
-- resolve/reject（動作）與 fulfilled/rejected（狀態）的區別
-- 如何建立 Promise 以及 Promise 內容會立即執行的特性
-- 如何使用 `.then()`、`.catch()`、`.finally()` 處理結果
-
-**第二篇：鏈式調用與回傳機制**
-
-- Promise 鏈式調用的運作原理
-- `.then()` 的回傳機制（四種情境）
-- Promise 展平 (Flattening)
-- `.catch()` 與 `.finally()` 的回傳機制
-- 常見陷阱與實戰應用
-
-**第三篇：進階技巧與並行處理**
-
-- `Promise.resolve()` 與 `Promise.reject()` 快捷方法
-- `Promise.all()`、`Promise.allSettled()`、`$.when()`
-- `Promise.race()` 與逾時控制
-- 同步任務、微任務、宏任務的執行順序
-- CPU 密集型 vs I/O 密集型作業
-- JavaScript 的單執行緒與併發機制
-
-**第四篇：Async / Await 語法糖**
-
-- `async / await` 的執行流程
-- Resolve 在哪裡？編譯器如何轉換
-- 錯誤處理：`try...catch`
-- 實戰改寫：從 Promise 到 Async/Await
-- 循序執行 vs 並行執行
+1. `async / await` 的執行流程
+2. Resolve 在哪裡？編譯器如何轉換
+3. 錯誤處理：`try...catch`
+4. 實戰改寫：從 Promise 到 Async/Await
+5. 循序執行 vs 並行執行
 
 ---
 

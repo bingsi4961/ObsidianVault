@@ -829,41 +829,19 @@ Promise 只是負責**「管理這些外包任務的結果」**。
 
 ---
 
-## 本系列總結
+## 本章小結
 
-恭喜你完成了整個 JavaScript Promise 系列教學！你已經學會了：
+在這一篇中，我們學習了：
 
-**第一篇：基礎觀念與核心機制**
-
-- 同步與非同步的差異
-- Promise 的三種狀態（Pending、Fulfilled、Rejected）
-- resolve/reject（動作）與 fulfilled/rejected（狀態）的區別
-- 如何建立 Promise 以及 Promise 內容會立即執行的特性
-- 如何使用 `.then()`、`.catch()`、`.finally()` 處理結果
-- 實際應用：封裝 jQuery AJAX 為 Promise
-
-**第二篇：鏈式調用與回傳機制**
-
-- Promise 鏈式調用的運作原理
-- `.then()` 的回傳機制（四種情境）
-- Promise 展平 (Flattening)
-- `.catch()` 的回傳機制（修復成功）
-- `.finally()` 的回傳機制（透明過路站）
-- 常見陷阱與實戰應用
-
-**第三篇：進階技巧與並行處理**
-
-- `Promise.resolve()` 與 `Promise.reject()` 快捷方法
-- `Promise.all()`：全成功才算數
-- `Promise.allSettled()`：不管成敗都要回報
-- `$.when()`：jQuery 的並行器
-- `Promise.race()`：競速執行與逾時控制
-- 同步任務、微任務、宏任務的執行順序
-- 嵌套 Promise 的執行順序解析
-- CPU 密集型 vs I/O 密集型作業
-- JavaScript 的單執行緒與併發機制
-
-在下一篇中，我們將學習 **async / await** 語法糖，讓非同步程式碼讀起來就像同步程式碼一樣直覺！
+1. `Promise.resolve()` 與 `Promise.reject()` 快捷方法
+2. `Promise.all()`：全成功才算數
+3. `Promise.allSettled()`：不管成敗都要回報
+4. `$.when()`：jQuery 的並行器
+5. `Promise.race()`：競速執行與逾時控制
+6. 同步任務、微任務、宏任務的執行順序
+7. 嵌套 Promise 的執行順序解析
+8. CPU 密集型 vs I/O 密集型作業
+9. JavaScript 的單執行緒與併發機制
 
 ---
 
