@@ -384,20 +384,36 @@ async function example() {
 }
 ```
 
-### 8.3 循序執行 vs 並行執行
+### 8.3 序列化執行 vs 並發啟動
 
 ```javascript
-// 循序執行（較慢）：A 完成後才執行 B
+// 模式一：序列化執行 (Serial Execution)
 async function sequential() {
-    const a = await taskA(); // 等 2 秒
-    const b = await taskB(); // 再等 3 秒
-    // 總共 5 秒
+    // 1. 執行 A 並暫停：主執行緒會等待 A 完成。
+    // 2. 如果 A 是 CPU 運算，主執行緒會被 A 佔滿；如果是 I/O，主執行緒會閒置等待。
+    const a = await taskA(); 
+    
+    // 只有在 A 徹底結束後，taskB 才會被呼叫。
+    const b = await taskB(); 
+    
+    // 總耗時：永遠是 A + B。
 }
 
-// 並行執行（較快）：A 和 B 同時進行
+// 模式二：並發啟動 (Concurrent Initiation)
 async function parallel() {
+    // 同時呼叫 taskA() 與 taskB()，嘗試將任務「同時」交給執行環境。
     const [a, b] = await Promise.all([taskA(), taskB()]);
-    // 總共只要 3 秒（取決於最慢的那個）
+    
+    /**
+     * 【效能差異關鍵筆記】
+     * * 1. 如果是 I/O 密集 (如 Fetch API, Database)：
+     * - 任務交由瀏覽器底層並行處理，主執行緒不參與等待。
+     * - 總耗時 = max(A, B) -> 顯著變快。
+     * * 2. 如果是 CPU 密集 (如 大量迴圈計算、加密、影像處理)：
+     * - 雖然 Promise.all 嘗試並發，但 JS 主執行緒一次只能算一件事。
+     * - A 算完之前，B 雖然被呼叫了，但只能在任務隊列排隊，無法動工。
+     * - 總耗時 ≈ A + B -> 基本上與循序執行「沒有差別」。
+     */
 }
 ```
 
