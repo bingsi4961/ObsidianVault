@@ -183,11 +183,17 @@ async function loginProcess() {
 }
 ```
 
-### 5.2 如果 `checkAccount` 失敗了會怎樣？
+### 5.2 `await` 處理錯誤的核心機制
 
-如果 `checkAccount` 失敗並回傳了錯誤訊息（呼叫了 `reject`），程式會**直接跳進 `catch` 區塊**，不會執行 `try` 區塊剩下的程式碼。
+當 `await checkAccount()` 執行且發生失敗時，過程並非「直接跳轉」，而是經過以下三個微觀步驟：
 
-這就像是 C# 的 `try...catch`：一旦發生例外，後續的程式碼就不會執行，直接跳到 `catch` 處理錯誤。
+1. **產生拒絕 (Reject)**： `checkAccount()` 異步操作失敗，回傳一個狀態為 `rejected` 的 Promise 物件。
+    
+2. **運算子解析 (Unwrap)**： `await` 運算子負責「拆開」這個 Promise。當它發現狀態是 `rejected` 時，`await` 會在當前代碼行 **主動拋出（throw）** 一個異常。
+    
+3. **觸發攔截 (Catch)**： 因為 `await` 拋出了異常，控制權才會由 JavaScript 引擎轉交給最近的 `catch` 區塊。
+
+4. **沒有 `await` 就沒有 `catch`**：如果不加 `await`，即便 Promise 失敗了，它也只是一個帶有錯誤訊息的物件，不會觸發 `try-catch` 的跳轉。
 
 ---
 
