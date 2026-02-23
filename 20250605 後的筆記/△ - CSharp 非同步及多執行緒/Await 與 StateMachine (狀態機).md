@@ -495,8 +495,7 @@ public async Task ProcessUserAction()
     try 
     {
         // ✅ 正確：將 await 放在 try 裡面
-        await OrderCoffeeAsync(); 
-        
+        await OrderCoffeeAsync();         
         Console.WriteLine("3. 交付咖啡給客人。");
     }
     catch (Exception ex) 
