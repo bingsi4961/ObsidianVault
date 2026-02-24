@@ -141,7 +141,64 @@ catch (AggregateException ae)
 - **拋出的異常**：當你執行 `await funcAsync()` 時，如果有錯誤發生，程式會直接跳進 `catch (Exception ex)`。這時的 `ex` 只會是**單一個**原始錯誤（例如 `SqlException`），而不是包裝過的 `AggregateException`。
 - **Task 物件內部的狀態**：雖然 `await` 只給了你一個錯誤，但 `funcAsync()` 回傳的那個 `Task` 物件，它內部的 `Exception` 屬性其實可能還是裝著一個 `AggregateException` 📦。
 
-### 3.2 沒有 await 就抓不到錯誤：「遺失的例外狀況」
+### 3.2 await 的核心職責：拆解並重新拋出異常
+
+**`await` 的作用就是幫你把 Task 裡面包著的 Exception 「拆解」並重新拋出（re-throw）。**
+
+當一個非同步方法發生錯誤時，該異常會被包裝在 `Task` 物件的 `Exception` 屬性中（通常是 `AggregateException`）。
+
+- **如果不 `await`：** 呼叫端只會拿到一個「代表任務」的物件，程式會繼續往下跑。除非你主動去檢查 `task.Exception`，否則主執行緒根本不知道裡面出事了。
+- **如果使用 `await`：** 編譯器會自動幫你處理。如果 Task 失敗了，`await` 會將內部的第一個異常拋出來，這時它的行為就**像同步程式碼一樣**。
+
+### 3.3 錯誤會「一路丟回」呼叫方法嗎？
+
+**是的，但前提是「每一層都有 await」。**
+
+在 .NET 的非同步機制中，異常的傳遞（Propagation）依賴於 `await` 鏈。如果你的呼叫堆疊（Call Stack）長這樣：
+
+`MethodA` -> `await MethodB` -> `await MethodC (出錯)`
+
+1. `MethodC` 拋出異常，將其存在 Task 中。
+2. `MethodB` 因為 `await` 了 `MethodC`，它會抓到這個異常並重新拋出。
+3. `MethodA` 因為 `await` 了 `MethodB`，它也會抓到。
+
+**這就是錯誤「丟回呼叫方法」的機制。** 雖然錯誤會一直往上丟，但如果你在最頂層（例如 Controller Action 或 UI 事件）都沒有寫 `try-catch`，這個錯誤最終會變成 **Unhandled Exception（未處理的異常）**，導致網頁顯示 500 Error、視窗程式直接閃退（Crash），或系統日誌（Log）沒記錄到具體原因。
+
+這就像同步程式（Synchronous code）一樣。`try-catch` 不是為了「捕捉」才寫，而是為了「**處理（Handle）**」。如果不寫，程式雖然能偵測到錯誤，但會因為沒人處理而直接崩潰或回傳 500。
+
+### 3.4 實際情境對照：有 await 但沒 try-catch vs 有 try-catch
+
+**情境 A：有 `await` 但沒 `try-catch`**
+
+```csharp
+public async Task<IActionResult> Export()
+{
+    // 如果發生錯誤，錯誤會丟給 .NET Core Middleware，頁面會跳轉到預設錯誤頁
+    await _excelService.GenerateClosedXMLAsync(); 
+    return Ok();
+}
+```
+
+**情境 B：有 `await` 且有 `try-catch`（推薦做法）**
+
+```csharp
+public async Task<IActionResult> Export()
+{
+    try 
+    {
+        await _excelService.GenerateClosedXMLAsync();
+        return Ok();
+    }
+    catch (Exception ex)
+    {
+        // 你可以在這裡記錄 Log，或回傳友好的錯誤訊息給使用者
+        _logger.LogError(ex, "匯出失敗");
+        return BadRequest("系統忙碌中，請稍後再試");
+    }
+}
+```
+
+### 3.5 沒有 await 就抓不到錯誤：「遺失的例外狀況」
 
 如果呼叫一個非同步方法但不使用 `await`，`try-catch` 將**無法**捕捉到 Task 內部的錯誤。這就是「遺失的例外狀況 (Swallowed Exceptions)」👻。
 
@@ -162,7 +219,7 @@ try {
 
 這就像是你請快遞去送貨（啟動 Task），快遞出發後，你覺得「寄件」這個動作已經完成了，於是你就轉身去廚房煮飯（執行下一行代碼）。就算快遞在路上爆胎了（發生錯誤），正在廚房煮飯的你也不會立刻感應到。🚚💨
 
-### 3.3 同步錯誤 vs 非同步錯誤
+### 3.6 同步錯誤 vs 非同步錯誤
 
 有一種特殊情況是抓得到的，那就是錯誤發生在「非同步任務真正開始之前」。
 
@@ -171,7 +228,7 @@ try {
 |**同步錯誤 (Synchronous)**|在方法內還沒碰到第一個 `await` 或 `Task.Run` 之前就拋出。|**可以** ✅（因為它還在當前的呼叫堆疊中）|
 |**非同步錯誤 (Asynchronous)**|任務已經回傳 `Task` 物件，在背景執行時才拋出。|**不行** ❌（除非有 `await`、`Wait()` 或存取 `Result`）|
 
-### 3.4 Task 是一個包裹 — 理解錯誤封裝的核心概念
+### 3.7 Task 是一個包裹 — 理解錯誤封裝的核心概念
 
 在傳統的同步程式中，錯誤會沿著「呼叫堆疊 (Call Stack)」一路向上傳遞，直到被捕捉為止。但在非同步的世界裡，規則改變了。我們可以用 **「容器 📦」** 的概念來理解：
 
@@ -186,7 +243,13 @@ try {
 |**誰能抓到？**|呼叫堆疊上的任何 `try-catch`|只有「打開」Task 的人（await / Wait / Result）|
 |**沒抓到會怎樣？**|程式立刻崩潰|變成「被遺忘的錯誤」，可能導致程式行為異常但不會立刻當掉|
 
-### 3.5 使用 await 時，錯誤何時被觀察到？
+### 3.8 await 錯誤傳遞的總結
+
+1. **系統會丟回錯誤嗎？** 會，只要你有用 `await`，它就會像傳統錯誤一樣層層向上傳遞。
+2. **一定要 `try-catch` 嗎？** 不是為了「捕捉」才寫，而是為了「**處理（Handle）**」。如果不寫，程式雖然能偵測到錯誤，但會因為沒人處理而直接崩潰或回傳 500。
+3. **最危險的情況：** 是 `async void`（常用在舊的 WinForms 事件）。這種情況下即使外層寫了 `try-catch` 也攔截不到，會直接讓整個 Process 掛掉。對於 GTS 系統（.NET Framework 4.8），這點尤其重要，因為舊框架對於未處理非同步異常的容忍度有時比 .NET Core 更低。
+
+### 3.9 使用 await 時，錯誤何時被觀察到？
 
 以下面這段程式碼為例：
 
@@ -228,7 +291,39 @@ await allTasks;
 
 這種「阻塞」與「非同步等待」的差異，正是避免 UI 介面卡死或提升伺服器吞吐量的關鍵。
 
-### 5.2 AggregateException — 多任務的錯誤容器
+### 5.2 Task.WhenAll 的回傳型態
+
+`Task.WhenAll` 的回傳型態會根據你傳入的 Task 種類而有所不同。
+
+#### 如果 Task 有回傳值（Task<T>）
+
+假設你的三個 Task 型態都是 `Task<string>`：
+
+```csharp
+Task<string[]> allTasks = Task.WhenAll(task1, task2, task3);
+string[] results = await allTasks;
+```
+
+- **`allTasks` 的型態**是 **`Task<string[]>`**。`Task.WhenAll` 會將多個個別的任務包裝成一個「大任務」，這個大任務的目標是：等待所有人完成，並把結果收集成一個**陣列**。
+- **`results` 的型態**是 **`string[]`**（字串陣列）。當你對 `Task<string[]>` 使用 `await` 時，編譯器會幫你「拆箱」。`await` 結束後，非同步的任務已經完成，你拿到的就是實實在在的資料陣列。
+
+#### 如果 Task 沒有回傳值（Task）
+
+假設你的 Task 只是單純執行動作（例如存檔、發送 Email），型態是 `Task`：
+
+- **`allTasks` 的型態**是 **`Task`**。因為沒有回傳值，它單純代表「這三件事都做完」這個狀態。
+- 如果你寫 `var results = await allTasks;` 而 `allTasks` 只是 `Task`，這在 C# 中是不合法的，因為 `Task`（非泛型）的 `await` 結果是 `void`。
+
+#### 型態對照表
+
+|情況|`allTasks` 的型態（Before await）|`results` 的型態（After await）|
+|---|---|---|
+|**傳入多個 `Task<int>`**|`Task<int[]>`|`int[]`|
+|**傳入多個 `Task<Customer>`**|`Task<Customer[]>`|`Customer[]`|
+|**傳入多個 `Task`（無回傳）**|`Task`|無（不能賦值給變量）|
+|**混合不同型態（不建議）**|`Task<object[]>` 或 `Task`|`object[]` 或 無|
+
+### 5.3 AggregateException — 多任務的錯誤容器
 
 當我們使用 `Task.WaitAll()` 同時等待多個任務時，.NET 的設計目標是確保我們不會漏掉任何一個執行過程中的失敗資訊。因此，它使用 `AggregateException` 📦 作為一個容器來「匯總」這些錯誤。
 
@@ -236,7 +331,7 @@ await allTasks;
 
 舉例來說，如果我們啟動了 3 個任務 🧵，其中有 2 個任務因為不同的原因失敗了 ❌，`InnerExceptions` 集合裡面就會包含 **2 個**錯誤物件。不論同時有多少個任務失敗，它都會把這些錯誤一個一個放進 `InnerExceptions` 集合裡。這樣一來，開發者就能透過迴圈遍歷這個集合，掌握每一個失敗任務的細節。
 
-### 5.3 AggregateException vs await 處理方式
+### 5.4 AggregateException vs await 處理方式
 
 |方式|錯誤拋出行為|
 |---|---|
@@ -245,7 +340,7 @@ await allTasks;
 
 這種差異在除錯時非常關鍵。如果你使用 `await`，程式碼看起來比較簡潔，但你預設只能抓到「第一個」錯誤訊息，這可能會讓你忽略掉其他同時發生的問題。
 
-### 5.4 使用 Task.WhenAll 搭配 await — 兩全其美
+### 5.5 使用 Task.WhenAll 搭配 await — 兩全其美
 
 如果需要在不鎖死執行緒的情況下，依然能拿到所有的錯誤資訊，關鍵角色就是 **`Task.WhenAll`**。🌐
 
@@ -256,7 +351,7 @@ await allTasks;
 
 當我們 `await Task.WhenAll(...)` 時，如果有多個任務失敗，`await` 確實只會拋出**第一個**捕獲到的異常。但是，重點在於：雖然 `await` 只給了你一個錯誤，但那個由 `WhenAll` 產生的**「總合 Task」**，其實內部仍然完整保存了所有的錯誤訊息。我們可以透過 `allTasks.Exception`（型態是 `AggregateException`）來取得它。
 
-### 5.5 捕捉所有錯誤的完整範例
+### 5.6 捕捉所有錯誤的完整範例
 
 為了在 `catch` 區塊中存取任務狀態，我們需要先在 `try` 外部宣告變數。以下是常用的結構：
 
@@ -283,7 +378,7 @@ catch (Exception)
 }
 ```
 
-### 5.6 關於 Flatten() — 處理巢狀的 AggregateException
+### 5.7 關於 Flatten() — 處理巢狀的 AggregateException
 
 在處理複雜的非同步情境時，有時候錯誤會「層層包裝」（例如一個 `AggregateException` 裡面又包了另一個 `AggregateException`）。這在「任務 A」執行到一半又啟動了「子任務 B」，且這兩個任務都發生錯誤的時候會出現。
 
@@ -295,7 +390,7 @@ catch (Exception)
 allTasks.Exception.Flatten().InnerExceptions
 ```
 
-### 5.7 await 拋出哪一個錯誤？— 參數順序決定
+### 5.8 await 拋出哪一個錯誤？— 參數順序決定
 
 當多個任務同時失敗時，`await` 必須選擇一個來拋出。它選擇的標準**不是**誰「先」噴出錯誤，而是誰在 `WhenAll(task1, task2, task3)` 的括號裡面**排在最前面**。
 
@@ -472,9 +567,128 @@ else
 
 ---
 
-## 第七章：全景總覽 — 所有等待方式一次比較
+## 第七章：Task 的狀態屬性與 TaskStatus 列舉
 
-### 7.1 單任務等待方式
+`Task` 物件除了透過 `try-catch` 來處理錯誤之外，還提供了幾個非常重要的狀態屬性，讓你可以透過「狀態檢查」來判斷任務的執行結果。這些屬性主要來自 `Task` 的**狀態機（State Machine）**機制。
+
+### 7.1 核心狀態屬性 (Status Properties)
+
+|屬性名稱|型態|說明|
+|---|---|---|
+|**`IsCompleted`**|`bool`|**最常用。** 不論任務是成功、失敗、還是被取消，只要任務「結束了」，它就是 `true`。|
+|**`IsFaulted`**|`bool`|當任務因為**未處理的異常（Exception）**而終止時為 `true`。|
+|**`IsCanceled`**|`bool`|當任務因為 **CancellationToken** 被取消而終止時為 `true`。|
+|**`Status`**|`Enum`|回傳 `TaskStatus` 列舉，可以更細節地知道它是 `Running`、`WaitingForActivation` 還是 `RanToCompletion`。|
+
+### 7.2 三個 bool 屬性的關係
+
+這三個 `bool` 屬性其實是有重疊與互斥關係的。當 `IsCompleted` 為 `true` 時，代表任務進入了終點站，但終點站有三種可能：
+
+1. **成功：** `IsFaulted` = false, `IsCanceled` = false（這在 `Status` 裡叫 `RanToCompletion`）。
+2. **失敗：** `IsFaulted` = true。
+3. **取消：** `IsCanceled` = true。
+
+### 7.3 關於 Exception 屬性
+
+當 `IsFaulted` 為 `true` 時，你可以存取 `task.Exception`。
+
+- 它的型態永遠是 **`AggregateException`**。
+- 這是因為一個 Task 可能會包含多個子任務，所以它用一個「容器」把所有錯誤包起來。
+- 通常我們會用 `task.Exception.Flatten()` 來攤平巢狀錯誤，方便記錄 Log。
+
+### 7.4 實務應用：透過狀態檢查處理結果
+
+假設你在處理 ClosedXML 產製報表，不想讓整個系統噴 Error，而是想根據狀態給提示：
+
+```csharp
+Task exportTask = _excelService.GenerateReportAsync();
+
+// 假設我們不用 await 擋住，而是晚點回來檢查
+if (exportTask.IsCompleted) 
+{
+    if (exportTask.IsFaulted) 
+    {
+        // 這裡可以抓到具體的 Exception，而不用寫 try-catch 塊
+        var error = exportTask.Exception?.InnerException;
+        _logger.LogError(error, "報表產製失敗");
+    }
+    else if (exportTask.IsCanceled)
+    {
+        _logger.LogWarning("使用者取消了下載");
+    }
+    else 
+    {
+        _logger.LogInformation("成功完成！");
+    }
+}
+```
+
+### 7.5 狀態檢查 vs. Try-Catch 的使用時機
+
+- **使用 `try-catch` + `await`：** 是最直覺、最像同步程式寫法的方式，適合大多數商業邏輯。
+- **使用 `IsFaulted` 檢查：** 適合用在「不想要中斷程式執行」或是「批次處理多個 Task」的情境（例如：先發出一堆 Request，最後再檢查哪些失敗了）。
+
+### 7.6 TaskStatus 列舉的完整生命週期
+
+`TaskStatus` 是一個**列舉 (Enum)**，用來精細地描述 Task 目前處於生命週期的哪一個階段。你可以把 Task 想像成一個**工單**，從建立、排隊、執行到結案，都有對應的狀態。
+
+#### 階段一：準備與排隊 (Preparing)
+
+- **`Created`**：Task 已被初始化，但還沒呼叫 `Start()`。通常手動 `new Task()` 才會看到，如果是 `Task.Run` 會直接跳過這步。
+- **`WaitingForActivation`**：Task 正在等待 .NET 內部的排程機制激活，或者正在等待它所依賴的其他 Task 完成。
+- **`WaitingToRun`**：Task 已經由排程器（Scheduler）接手，正在排隊等待 CPU 執行。
+
+#### 階段二：執行中 (In Progress)
+
+- **`Running`**：Task 正在執行中，程式碼正在跑。
+- **`WaitingForChildrenToComplete`**：主要任務已跑完，但它開出的「子任務」（Attached Child Tasks）還在跑，所以它必須等小孩都回家才能結案。
+
+#### 階段三：最終狀態 (Final States)
+
+一旦進入以下三種狀態，`Task.IsCompleted` 就會變成 `true`。
+
+- **`RanToCompletion`**：**最理想的狀態。** 任務成功執行完畢，沒有報錯，也沒有被取消。
+- **`Canceled`**：任務因為 `CancellationToken` 被觸發而安全撤銷。
+- **`Faulted`**：任務因為發生未處理的異常（Exception）而崩潰。
+
+### 7.7 實務對照表
+
+|狀態名稱|你的程式碼在幹嘛？|備註|
+|---|---|---|
+|**`Running`**|`await _service.GetDataAsync();` 正在執行 SQL 或呼叫 API。|執行中。|
+|**`RanToCompletion`**|資料抓完了，畫面正常顯示。|這是 `IsCompleted` 且沒有錯誤的狀態。|
+|**`Faulted`**|`ClosedXML` 存檔時權限不足，拋出了 `IOException`。|此時 `IsFaulted` 為 `true`。|
+|**`Canceled`**|使用者按了「取消匯出」，觸發了 `CancellationToken`。|此時 `IsCanceled` 為 `true`。|
+
+### 7.8 如何在程式碼中使用 TaskStatus？
+
+通常我們不會直接判斷 `TaskStatus.Running`，因為狀態變化很快。但在 **Debug 偵錯**或**單元測試**時，這非常有幫助：
+
+```csharp
+var task = DoSomethingAsync();
+
+// 檢查任務是否還在跑
+if (task.Status == TaskStatus.Running) 
+{
+    // 執行某些邏輯...
+}
+
+// 或是更嚴謹的判斷成功
+if (task.Status == TaskStatus.RanToCompletion)
+{
+    Console.WriteLine("完美落地！");
+}
+```
+
+### 7.9 小提醒：.NET Framework 4.8 的差異
+
+在 .NET Framework 4.8 中，如果你使用較舊的 `Task.Factory.StartNew` 而不是 `Task.Run`，你會更頻繁地看到 `WaitingForChildrenToComplete`，因為 `StartNew` 預設支持子任務附加（Parent/Child Tasks），而 `Task.Run` 會自動幫你把任務「攤平」。
+
+---
+
+## 第八章：全景總覽 — 所有等待方式一次比較
+
+### 8.1 單任務等待方式
 
 |特性|`Task.Wait()` / `.Result`|`GetAwaiter().GetResult()`|`await`|
 |---|---|---|---|
@@ -482,7 +696,7 @@ else
 |**錯誤呈現**|`AggregateException` 📦|原始異常 ⚡|原始異常 ⚡|
 |**建議使用**|盡量避免 ⚠️|特殊同步需求|**首選方式** ✅|
 
-### 7.2 多任務 — 等待全部完成
+### 8.2 多任務 — 等待全部完成
 
 |特性|`Task.WaitAll` 🛑|`Task.WhenAll` ⏳|
 |---|---|---|
@@ -490,7 +704,7 @@ else
 |**錯誤呈現**|`AggregateException`（包含所有錯誤）|`await` 只拋出第一個，但可透過 `.Exception` 取得全部|
 |**取得所有錯誤**|`catch (AggregateException)`|`allTasks.Exception.Flatten().InnerExceptions`|
 
-### 7.3 多任務 — 等待任一完成
+### 8.3 多任務 — 等待任一完成
 
 |特性|`Task.WaitAny` 🛑|`Task.WhenAny` ⏳|
 |---|---|---|
@@ -499,8 +713,17 @@ else
 |**本身是否拋出異常**|否|否（需再次 await 贏家任務）|
 |**取得錯誤**|`tasks[index].Exception`|再次 `await winnerTask`|
 
-### 7.4 WhenAny / WaitAny 的共同特性
+### 8.4 WhenAny / WaitAny 的共同特性
 
 - 不管任務是成功、失敗還是被取消，只要「結束」就算完成。
 - 本身**不會**拋出任務內部的異常，必須另外檢查或 await。
 - 其他還在執行的任務**不會自動停止**，會繼續在背景執行。
+
+### 8.5 Task 狀態屬性速查
+
+|屬性|型態|何時為 true|
+|---|---|---|
+|`IsCompleted`|`bool`|任務結束（不論成功、失敗、取消）|
+|`IsFaulted`|`bool`|任務因異常而終止|
+|`IsCanceled`|`bool`|任務因 CancellationToken 而取消|
+|`Status`|`TaskStatus`|提供更精細的生命週期階段|
