@@ -166,6 +166,29 @@ JArray skillsArray = (JArray)skillsToken;
 JArray skillsArray = (JArray)person["skills"];
 ```
 
+### 使用 is 搭配模式匹配（Pattern Matching）進行型別判斷與轉換
+
+C# 7 開始支援 `is` 搭配模式匹配（Pattern Matching），可以「判斷型別 + 宣告變數」一步完成，比傳統的先判斷再轉型更簡潔安全：
+
+```csharp
+// ✅ C# 7+ 模式匹配寫法：判斷 + 轉型一步完成
+if (item is JObject jObject)
+{
+    // jObject 已經是 JObject 型別，可以直接使用
+    Console.WriteLine($"找到物件，裡面有 {jObject.Count} 個屬性");
+    string task = (string)jObject["task"];
+}
+
+// ❌ 傳統寫法：需要兩步驟
+if (item is JObject)
+{
+    JObject jObject = (JObject)item;  // 還要再轉型一次
+    Console.WriteLine($"找到物件，裡面有 {jObject.Count} 個屬性");
+}
+```
+
+> **小提醒**：模式匹配的變數 `jObject` 只在 `if` 區塊內有效（作用域限於該區塊），且如果型別不符就不會進入區塊，因此不會有 `InvalidCastException` 的風險。
+
 ### JToken.Type 屬性
 
 可以用來檢查 JToken 的實際類型：
@@ -181,6 +204,44 @@ foreach (JToken item in mixedArray)
     }
 }
 ```
+
+### 使用 JToken.Type 搭配 switch 做分流處理
+
+當 JToken 的型別有多種可能時，使用 `switch` 搭配 `JTokenType` 列舉來做分流處理，特別適合需要「針對不同型別做不同渲染或格式化」的場景：
+
+```csharp
+/// <summary>
+/// 根據 JToken 的型別，分流處理並回傳對應的字串結果
+/// </summary>
+private string RenderToken(JToken token)
+{
+    switch (token.Type)
+    {
+        case JTokenType.Object:
+            // 遇到物件，委派給專門處理物件的方法
+            return RenderObject((JObject)token);
+
+        case JTokenType.Array:
+            // 遇到陣列，委派給專門處理陣列的方法
+            return RenderArray((JArray)token);
+
+        case JTokenType.Null:
+        case JTokenType.Undefined:
+            // null 或 undefined 直接回傳空字串
+            return string.Empty;
+
+        default:
+            // 其餘（String、Integer、Float、Boolean 等 JValue）
+            // 直接轉成字串輸出
+            return Encode(token.ToString());
+    }
+}
+```
+
+> **重點整理**：
+> - `JTokenType.Object` 和 `JTokenType.Array` 是容器型別
+> - `JTokenType.Null` 和 `JTokenType.Undefined` 建議特別處理，避免 `NullReferenceException`
+> - `default` 涵蓋所有 JValue 的子型別（String、Integer、Float、Boolean、Date 等）
 
 ## 五、JValue 的實戰使用
 
@@ -264,6 +325,36 @@ person.Add(nameProperty);
 person.Add(skillsProperty);
 ```
 
+### 安全取值：TryGetValue 方法
+
+使用中括號 `jObject["key"]` 取值時，如果 key 不存在會回傳 `null`，後續操作可能觸發 `NullReferenceException`。
+更安全的做法是使用 `TryGetValue`，它會先檢查 key 是否存在，存在才取值：
+
+```csharp
+JObject person = JObject.Parse(jsonString);
+
+// ✅ 安全做法：TryGetValue 先檢查再取值
+if (person.TryGetValue("email", out JToken emailToken))
+{
+    // key 存在，emailToken 已經有值，可以安全使用
+    string email = emailToken.ToString();
+    Console.WriteLine($"Email: {email}");
+}
+else
+{
+    // key 不存在，不會拋出例外
+    Console.WriteLine("找不到 email 欄位");
+}
+
+// ❌ 不安全做法：如果 "phone" 不存在，後續 .ToString() 會爆炸
+// string phone = person["phone"].ToString();  // NullReferenceException!
+```
+
+> **TryGetValue vs 中括號取值的比較**：
+> - `jObject["key"]`：key 不存在時回傳 `null`，需要自己做 null 檢查
+> - `jObject.TryGetValue("key", out JToken value)`：回傳 `bool`，成功時 `value` 已填入，失敗時不會出錯
+> - 當你不確定 JSON 是否包含某個欄位時（例如處理外部 API 回傳的資料），**強烈建議使用 TryGetValue**
+
 ## 七、JArray 的彈性 - 混合型態陣列
 
 ### 重要觀念
@@ -311,6 +402,31 @@ foreach (JToken item in mixedArray)
         JArray arr = (JArray)item;
         Console.WriteLine($"  -> 內容 (JArray): 裡面有 {arr.Count} 個元素");
     }
+}
+```
+
+### 使用 LINQ 快速判斷 JArray 是否全為基本型別
+
+有時候我們需要根據 JArray 的內容來決定處理方式，例如：全部都是基本型別（字串、數字等）時直接輸出，有巢狀物件或陣列時則需要遞迴處理。
+可以用 LINQ 的 `All` 方法搭配 `JTokenType` 來快速判斷：
+
+```csharp
+JArray array = JArray.Parse(jsonString);
+
+// 檢查陣列中是否全部都是「基本型別」（不含 Object 和 Array）
+bool allPrimitive = array.All(t =>
+    t.Type != JTokenType.Object && t.Type != JTokenType.Array);
+
+if (allPrimitive)
+{
+    // 全部都是 JValue（字串、數字、布林、null 等），可以直接逐一輸出
+    string result = string.Join(", ", array.Select(t => t.ToString()));
+    Console.WriteLine($"簡單陣列: [{result}]");
+}
+else
+{
+    // 裡面包含 JObject 或 JArray，需要遞迴或特殊處理
+    Console.WriteLine("這是一個包含巢狀結構的複雜陣列");
 }
 ```
 
@@ -396,5 +512,8 @@ List<string> fruitList = jArray.ToObject<List<string>>();
 3. **JValue 只能存放最終的值，不能是容器**
 4. **Parse 方法將 JSON 字串轉換為可操作的物件**
 5. **ToObject 方法將 JToken 轉換為強型別的 C# 物件**
+6. **使用 `is` 模式匹配可以同時判斷型別並轉型，比傳統 `is` + 強制轉型更安全簡潔**
+7. **使用 `TryGetValue` 安全取值，避免因 key 不存在而拋出例外**
+8. **使用 `JToken.Type` 搭配 `switch` 可以清晰地分流處理不同型別的 JSON 元素**
 
 在現代 C# 開發中，通常稱 JObject 的方式為「動態解析 (Dynamic Parsing)」，而 ToObject 的方式為「反序列化 (Deserialization)」。90% 的情況下，ToObject 都是首選方法，因為它安全、乾淨且效率極高。
