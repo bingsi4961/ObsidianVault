@@ -82,7 +82,7 @@
       }
     },
     "inlineTitle": {
-      "enabled": false,
+      "enabled": true,
       "templates": {
         "main": "",
         "fallback": ""
@@ -103,7 +103,7 @@
       }
     },
     "windowFrame": {
-      "enabled": false,
+      "enabled": true,
       "templates": {
         "main": "",
         "fallback": ""
