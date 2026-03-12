@@ -23,7 +23,7 @@
   },
   "features": {
     "alias": {
-      "enabled": false,
+      "enabled": true,
       "strategy": "ensure",
       "validator": "fr",
       "templates": {
@@ -61,7 +61,7 @@
       }
     },
     "bookmarks": {
-      "enabled": false,
+      "enabled": true,
       "templates": {
         "main": "",
         "fallback": ""
