@@ -7,5 +7,6 @@
   "table-editor-obsidian",
   "editing-toolbar",
   "oz-clear-unused-images",
-  "file-cleaner-redux"
+  "file-cleaner-redux",
+  "obsidian-front-matter-title-plugin"
 ]
