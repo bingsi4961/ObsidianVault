@@ -6,6 +6,7 @@ aliases:
   - Linq.Cast
 tags:
   - CSharp_語法
+
 ---
 # Metadata
 Status :: 🌱
