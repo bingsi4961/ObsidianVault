@@ -6,5 +6,7 @@
   "theme": "system",
   "enabledCssSnippets": [
     "code-no-wrap"
-  ]
+  ],
+  "showViewHeader": true,
+  "showRibbon": true
 }

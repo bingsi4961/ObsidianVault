@@ -1,12 +1,12 @@
 [
   "obsidian-git",
   "obsidian-emoji-toolbar",
-  "obsidian-hover-editor",
   "editor-width-slider",
   "highlightr-plugin",
   "table-editor-obsidian",
   "editing-toolbar",
   "oz-clear-unused-images",
   "file-cleaner-redux",
-  "obsidian-front-matter-title-plugin"
+  "obsidian-front-matter-title-plugin",
+  "obsidian-hover-editor"
 ]

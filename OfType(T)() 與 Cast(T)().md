@@ -1,7 +1,9 @@
 ---
 date: 2026-03-12 10:12
-title: "OfType<T>() 與 Cast<T>()"
+title: OfType<T>() 與 Cast<T>()
 aliases:
+  - Linq.OfType
+  - Linq.Cast
 tags:
   - CSharp_語法
 ---
