@@ -100,6 +100,9 @@ public ActionResult Index()
 
 #### 4. 資料庫查詢優化
 ```csharp
+// ✅ 先宣告並設定 userIds 
+var userIds = new List<int> { 1, 2, 3, 4, 5 };
+
 // Entity Framework 查詢後建立字典加速查找
 var userRoles = dbContext.UserRoles
     .Where(ur => userIds.Contains(ur.UserId))
