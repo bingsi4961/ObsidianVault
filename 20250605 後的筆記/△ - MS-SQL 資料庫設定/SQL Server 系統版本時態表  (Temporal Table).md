@@ -2,6 +2,7 @@
 date: 2025-12-05 09:26
 aliases:
 tags:
+  - SSMS
 ---
 # Metadata
 Status :: 🌱

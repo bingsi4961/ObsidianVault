@@ -3,6 +3,7 @@ date: 2026-04-24 14:21
 title: SSMS - 主鍵 (PK)、索引鍵 (PK/FK/UK)、條件約束、索引、統計資料 - 02 實作操作
 aliases:
 tags:
+  - SSMS
 ---
 # Metadata
 Status :: 🌱
