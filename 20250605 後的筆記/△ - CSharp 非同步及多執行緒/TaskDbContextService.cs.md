@@ -2,12 +2,7 @@
 date: 2026-05-03 14:56
 title:
 aliases:
-  - 別名測試1
-  - 別名測試2
 tags:
-  - 標籤測試1
-  - 標籤測試2
-
 ---
 # Metadata
 Status :: 🌱
@@ -21,9 +16,7 @@ Topics :: {筆記跟什麼主題有關，用 `[Topic],[Topic]` 格式}
 #### 📑 [[]]
 
 ---
-
 ## TaskDbContextService.cs
-
 ```csharp
 using GamingAPI.Models.DB;
 using Microsoft.EntityFrameworkCore.Storage;
@@ -225,4 +218,144 @@ namespace GamingAPI.Handler
     }
 }
 
+```
+
+## SpmCostKpDataController.cs
+```csharp
+namespace GamingAPI.Controllers
+{
+    [Route("api/[controller]/[action]")]
+    [ApiController]
+    public class SpmCostKpDataController : ControllerBase
+    {
+        private readonly GamingPortalContextCust _db;
+        private readonly TaskDbContextService _taskDbContextService;
+        private readonly TaskHelper _taskHelper;
+
+        public SpmCostKpDataController(GamingPortalContextCust context, TaskDbContextService taskDbContextService, TaskHelper taskHelper)
+        {
+            this._db = context;
+            this._taskDbContextService = taskDbContextService;
+            this._taskHelper = taskHelper;
+        }
+
+        [HttpGet]
+        public async Task<CommonResponse<SpmCostKpDataVM>> FindSpmCostKpData([FromQuery] ModifyByIdVM model)
+        {
+            var resp = new CommonResponse<SpmCostKpDataVM>();
+            var vmKpData = new SpmCostKpDataVM();
+
+            var categoryTask = GetCategoryAsync(model.ModifyId);
+            var columnsTask = GetColumnsAsync(model.ModifyId);
+
+            await Task.WhenAll(categoryTask, columnsTask);
+            vmKpData.KpCategory = await categoryTask;
+            vmKpData.KpColumns = await columnsTask;
+
+            resp.Status = CommonResponse.StatusEnum.Success;
+            resp.Data = vmKpData;
+            return resp;
+        }
+
+        /// <summary>
+        /// 透過 CategoryId 取得 Category
+        /// </summary>
+        private async Task<SpmCostKpCatVM> GetCategoryAsync(int categoryId)
+        {
+            var condition = ExpressionBuilder.True<SpmcostKpcategory>();
+            condition = condition.And(dbKpCate => dbKpCate.IsValid.Value && dbKpCate.Id == categoryId);
+
+            var _taskDb = this._taskDbContextService.GetReadContext().DbContext;
+            return await _taskDb.SpmcostKpcategory.AsNoTracking()
+                .Where(condition)
+                .Select(dbKpCate => new SpmCostKpCatVM
+                {
+                    Id = dbKpCate.Id,
+                    Name = dbKpCate.Name,
+                    MktSpecId = dbKpCate.MktspecId,
+                    MktSpecName = (dbKpCate.Mktspec != null && dbKpCate.Mktspec.IsValid.Value) ? dbKpCate.Mktspec.Spec : null
+                }).FirstOrDefaultAsync();
+        }
+
+        /// <summary>
+        /// 透過 CategoryId 取得 Columns (自訂欄位)
+        /// </summary>
+        private async Task<List<SpmCostKpColVM>> GetColumnsAsync(int categoryId)
+        {
+            var _taskDb = this._taskDbContextService.GetReadContext().DbContext;
+            return await _taskDb.SpmcostKpcolumn.AsNoTracking()
+                .Where(dbKpCol => dbKpCol.IsValid.Value && dbKpCol.KpcategoryId == categoryId)
+                .OrderBy(dbKpCol => dbKpCol.Sequence)
+                .Select(dbKpCol => new SpmCostKpColVM
+                {
+                    Id = dbKpCol.Id,
+                    Name = dbKpCol.Name,
+                    IsKeypartList = dbKpCol.IsKeypartList
+                }).ToListAsync();
+        }        
+
+        [HttpPost]
+        public async Task<CommonResponse> UpdateSpmCostKpData(SpmCostKpDataVM4Update model)
+        {
+            var resp = new CommonResponse();
+            Task[] executedTasks = null;
+
+            try
+            {
+                executedTasks = new[] {
+                    model.KeyParts.Any(x => x.Id > 0)
+                        ? UpdateKeyPartsAndDescsAsync(model, await this._taskDbContextService.GetWriteContextAsync())
+                        : Task.CompletedTask,
+                    model.KeyParts.Any(x => x.Id == 0)
+                        ? InsertKeyPartsAndDescsAsync(model, await this._taskDbContextService.GetWriteContextAsync())
+                        : Task.CompletedTask
+                };
+
+                await Task.WhenAll(executedTasks);
+                await this._taskDbContextService.CommitTransactionsAsync();
+                resp.Status = CommonResponse.StatusEnum.Success;
+            }
+            catch (Exception ex)
+            {
+                await this._taskDbContextService.RollbackTransactionsAsync();
+                resp.Message = this._taskHelper.FormatErrorMessage(executedTasks, ex);
+            }
+
+            return resp;
+        }
+
+        /// <summary>
+        /// 新增 Keyparts、新增 KpDescriptions 
+        /// </summary>
+        private async Task InsertKeyPartsAndDescsAsync(SpmCostKpDataVM model, TaskContext taskContext)
+        {
+            var dao = new SeqDao();
+            var _taskDb = taskContext.DbContext;
+
+            var newKeyParts = model.KeyParts
+                .Where(vmKp => vmKp.Id == 0)
+                .Select(vmKp =>
+                {
+                    var newKpId = dao.GetSeqNo("SPMCost_Keypart");
+                    return new SpmcostKeypart
+                    {
+                        Id = newKpId,
+                        KpcolumnId = vmKp.KPColumnId,
+                        MktspecInfoId = vmKp.MKTSpecInfoId,
+                        Name = vmKp.KpName,
+                        Cost = vmKp.Cost,
+                        SortOrder = vmKp.SortOrder,
+                        ModifyUser = model.setModifyUser,
+                        Creator = model.setCreator
+                    };
+                }).ToList();
+
+            if (newKeyParts.Any())
+            {
+                await _taskDb.SpmcostKeypart.AddRangeAsync(newKeyParts);
+                await _taskDb.SaveChangesAsync();
+            }
+        }
+    }
+}
 ```
