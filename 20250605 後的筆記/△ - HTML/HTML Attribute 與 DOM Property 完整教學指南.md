@@ -2,12 +2,10 @@
 date: 2026-05-04 13:54
 title:
 aliases:
-  - 別名測試1
-  - 別名測試2
 tags:
-  - 標籤測試1
-  - 標籤測試2
-
+  - HTML
+  - JavaScript
+  - jQuery
 ---
 # Metadata
 Status :: 🌱
@@ -18,27 +16,7 @@ Topics :: {筆記跟什麼主題有關，用 `[Topic],[Topic]` 格式}
 
 ---
 # 連結筆記
-#### 📑 [[]]
-
----
-
-# HTML Attribute 與 DOM Property 完整教學指南
-
-> **給讀者的話** 這份文件是為了幫助你從「完全搞不清楚差異」到「能在實務中精準選用正確語法」。 我會坐在你旁邊，一步一步帶你走過每一個觀念。過程中你會看到一些 ⚠️ 提醒和 💣 踩坑紀錄—— 那都是前人用 Bug 換來的智慧，請多留意。
-
----
-
-## 目錄
-
-1. [為什麼要學這個？](https://claude.ai/chat/8fc66ee1-1575-4e6d-994b-c5fca967cd71#1-%E7%82%BA%E4%BB%80%E9%BA%BC%E8%A6%81%E5%AD%B8%E9%80%99%E5%80%8B)
-2. [最核心的比喻：出生證明 vs 當前狀態](https://claude.ai/chat/8fc66ee1-1575-4e6d-994b-c5fca967cd71#2-%E6%9C%80%E6%A0%B8%E5%BF%83%E7%9A%84%E6%AF%94%E5%96%BB%E5%87%BA%E7%94%9F%E8%AD%89%E6%98%8E-vs-%E7%95%B6%E5%89%8D%E7%8B%80%E6%85%8B)
-3. [基礎對決：attr vs prop vs val](https://claude.ai/chat/8fc66ee1-1575-4e6d-994b-c5fca967cd71#3-%E5%9F%BA%E7%A4%8E%E5%B0%8D%E6%B1%BAattr-vs-prop-vs-val)
-4. [同步機制：誰會跟著改變、誰不會？](https://claude.ai/chat/8fc66ee1-1575-4e6d-994b-c5fca967cd71#4-%E5%90%8C%E6%AD%A5%E6%A9%9F%E5%88%B6%E8%AA%B0%E6%9C%83%E8%B7%9F%E8%91%97%E6%94%B9%E8%AE%8A%E8%AA%B0%E4%B8%8D%E6%9C%83)
-5. [防禦性清空：val 搭配 attr 的實務場景](https://claude.ai/chat/8fc66ee1-1575-4e6d-994b-c5fca967cd71#5-%E9%98%B2%E7%A6%A6%E6%80%A7%E6%B8%85%E7%A9%BAval-%E6%90%AD%E9%85%8D-attr-%E7%9A%84%E5%AF%A6%E5%8B%99%E5%A0%B4%E6%99%AF)
-6. [表單實戰：Checkbox 與 Select 的正確操作](https://claude.ai/chat/8fc66ee1-1575-4e6d-994b-c5fca967cd71#6-%E8%A1%A8%E5%96%AE%E5%AF%A6%E6%88%B0checkbox-%E8%88%87-select-%E7%9A%84%E6%AD%A3%E7%A2%BA%E6%93%8D%E4%BD%9C)
-7. [便利貼資料：data-* 屬性與 .data() 方法](https://claude.ai/chat/8fc66ee1-1575-4e6d-994b-c5fca967cd71#7-%E4%BE%BF%E5%88%A9%E8%B2%BC%E8%B3%87%E6%96%99data--%E5%B1%AC%E6%80%A7%E8%88%87-data-%E6%96%B9%E6%B3%95)
-8. [樣式操作：為什麼不要用 attr 改 class](https://claude.ai/chat/8fc66ee1-1575-4e6d-994b-c5fca967cd71#8-%E6%A8%A3%E5%BC%8F%E6%93%8D%E4%BD%9C%E7%82%BA%E4%BB%80%E9%BA%BC%E4%B8%8D%E8%A6%81%E7%94%A8-attr-%E6%94%B9-class)
-9. [完整速查表](https://claude.ai/chat/8fc66ee1-1575-4e6d-994b-c5fca967cd71#9-%E5%AE%8C%E6%95%B4%E9%80%9F%E6%9F%A5%E8%A1%A8)
+#### 📑 [[HTML Attribute 與 DOM Property 指令應用範例速查]]
 
 ---
 
@@ -398,26 +376,17 @@ $('#hamburger-btn').on('click', function () {
 
 ### 9.2 清空表單欄位的選擇
 
-|情境|推薦寫法|
-|:--|:--|
-|單純清空畫面（不會觸發 form.reset()）|`$element.val('')`|
-|嚴謹清空（之後可能觸發 form.reset()）|`$element.val('').attr('value', '')`|
-|需要連根清除 Attribute（幾乎不需要）|`$element.removeAttr('value')`（非必要，謹慎使用）|
+| 情境               | 推薦寫法                                     |
+| :--------------- | :--------------------------------------- |
+| 單純清空畫面           | `$element.val('')`                       |
+| 嚴謹清空             | `$element.val('').attr('value', '')`     |
+| 需要連根清除 Attribute | `$element.removeAttr('value')`（非必要，謹慎使用） |
 
 ### 9.3 大原則一句話總結
 
-> **記住這個優先順序**： 讀寫表單值 → `.val()` 讀寫布林狀態 → `.prop()` 讀取 data 屬性 → `.data()` 讀取初始值或操作 HTML 標籤本身 → `.attr()` 切換樣式外觀 → `addClass / removeClass / toggleClass`（**絕對不要用 `.attr('class')`**）
-
----
-
-## 附錄：延伸閱讀
-
-如果你想繼續深入這些概念，有幾個方向可以探索：
-
-**原生 JavaScript 的 dataset API**：搜尋「MDN HTMLElement.dataset」，這是瀏覽器原生處理 `data-*` 便利貼的 API，概念跟 jQuery 的 `.data()` 讀取方式幾乎一樣，但修改行為略有差異——`dataset` 的修改會直接反映到 HTML 標籤上，這點與 jQuery `.data()` 不同。
-
-**jQuery 版本差異**：你的 Portal 系統使用 jQuery 3.3.1，GTS 系統使用 jQuery 1.10.2。在舊版 jQuery 中，`.attr()` 和 `.prop()` 的邊界曾經較為模糊，某些布林屬性的行為與新版不同。若在 GTS 系統遇到怪異的 checked 行為，這可能是版本差異造成的。
-
----
-
-_文件版本：初版 ｜ 適用對象：有 HTML / jQuery 基礎、希望精準掌握 Attribute 與 Property 差異的前端開發者_
+> **記住這個優先順序**： 
+> 讀寫表單值 → `.val()` 
+> 讀寫布林狀態 → `.prop()` 
+> 讀取 data 屬性 → `.data()` 
+> 讀取初始值或操作 HTML 標籤本身 → `.attr()` 
+> 切換樣式外觀 → `addClass / removeClass / toggleClass`（**絕對不要用 `.attr('class')`**）
