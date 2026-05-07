@@ -299,9 +299,11 @@ $('#meal').val()                   // jQuery 等效
 sel.value = 'pork'                 // 直接改 select.value，畫面跟著變
 sel.selectedIndex = 1              // 或用 index
 $('#meal').val('pork')             // jQuery 等效
+
 // 也可以改單個 option 的 selected 狀態：
 sel.options[1].selected = true     // 把排骨飯設為選中
 $('#meal').find('option').eq(1).prop('selected', true) // jQuery 等效
+$('#meal option:eq(1)').prop('selected', true)
 
 // --- 讀取初始設定 ---
 sel.options[0].defaultSelected     // true（牛肉麵是初始預設）
@@ -309,7 +311,16 @@ sel.options[0].defaultSelected     // true（牛肉麵是初始預設）
 // --- 清空所有選項（例如：連動下拉選單要先清空再填入）---
 sel.innerHTML = ''                 // ✅ 這是正確的清空方式
 $('#meal').empty()                 // ✅ jQuery 等效
+
+sel.options[x].innerHTML = ''
+$('#meal option:eq(x)').empty();
 ```
+
+`<select>` / `<option>` 是**結構選擇型元件**，使用者只能從清單中點選，無法自由輸入或編輯文字內容。
+
+因此，瀏覽器對它們的**文字內容（`innerHTML` / `textContent`）不需要啟動弄髒機制（Dirty Flag）**——不存在「使用者輸入心血需要被保護」的情境，也就不需要區分「初始狀態」與「目前狀態」這兩層設計。
+
+結果就是：直接修改或清空 `innerHTML` / `textContent`，<mark style="background: #FFF3A3A6;">畫面永遠會即時同步反映，沒有脫鉤的問題</mark>。
 
 ### ⚠️ `option` 的 Fallback 機制與反射特性
 
