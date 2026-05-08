@@ -127,6 +127,9 @@ el.textContent
 
 ### 「弄髒機制（Dirty Flag）」詳解
 
+![[Pasted image 20260508091053.png]]
+
+
 這裡有個細膩的地方需要特別說明：
 
 **乾淨狀態（Clean）**：網頁剛載入，使用者還沒動過這個 `textarea`。這時你用程式修改 `defaultValue`（或 `innerHTML`、`textContent`），畫面上的內容會跟著連動改變，因為 `.value` 還是跟著初始值走。
@@ -308,19 +311,28 @@ $('#meal option:eq(1)').prop('selected', true)
 // --- 讀取初始設定 ---
 sel.options[0].defaultSelected     // true（牛肉麵是初始預設）
 
+// --- 修改 option 的顯示文字 ---
+sel.options[0].textContent = '台北 (已額滿)' // ✅ 正確：純文字，安全無虞
+sel.options[0].innerHTML = '<b>台北</b>'     // ❌ HTML 規範不允許 option 內嵌標籤，
+                                             //    瀏覽器會忽略 <b>，且有 XSS 風險
+
 // --- 清空所有選項（例如：連動下拉選單要先清空再填入）---
-sel.innerHTML = ''                 // ✅ 這是正確的清空方式
+sel.innerHTML = ''                 // ✅ 清空整個 select（正確方式）
 $('#meal').empty()                 // ✅ jQuery 等效
 
-sel.options[x].innerHTML = ''
-$('#meal option:eq(x)').empty();
+sel.options[x].innerHTML = ''     // ⚠️ 清空單一 option 的文字，但應改用 .textContent
+$('#meal option:eq(x)').empty()   // ⚠️ jQuery 等效，同上建議
 ```
+
+### 為何 `select` / `option` 不需要 Dirty Flag？
 
 `<select>` / `<option>` 是**結構選擇型元件**，使用者只能從清單中點選，無法自由輸入或編輯文字內容。
 
 因此，瀏覽器對它們的**文字內容（`innerHTML` / `textContent`）不需要啟動弄髒機制（Dirty Flag）**——不存在「使用者輸入心血需要被保護」的情境，也就不需要區分「初始狀態」與「目前狀態」這兩層設計。
 
-結果就是：直接修改或清空 `innerHTML` / `textContent`，<mark style="background: #FFF3A3A6;">畫面永遠會即時同步反映，沒有脫鉤的問題</mark>。
+結果就是：直接修改或清空 `innerHTML` / `textContent`，畫面永遠會即時同步反映，沒有脫鉤的問題。
+
+然而正因為 `option` 的文字內容由瀏覽器直接渲染、不經過使用者輸入，HTML 規範也明確**不允許在 `option` 裡包裝其他 HTML 標籤**。修改顯示文字時，一律應使用 `.textContent` 而非 `.innerHTML`，後者在 `option` 中既無效又有 XSS 風險。
 
 ### ⚠️ `option` 的 Fallback 機制與反射特性
 
@@ -390,48 +402,3 @@ el.replaceChildren()  // 不傳參數就清空，效能極佳，未來減少 jQu
 ```
 
 > ⚠️ **誤區提醒**：`.empty()` 或 `innerHTML = ''` 只能用在「有肚子的容器元件」（`div`、`span`、`ul`、`tbody`、`select`）。不要對 `input` 使用——因為 `input` 是自我封閉的單一標籤，沒有肚子，它的資料存在 `.value` 裡，要清空必須用 `el.value = ''`。
-
-### `option` 的 `innerHTML` / `textContent` 使用原則
-
-`option` 雖然也繼承了 `innerHTML` 和 `textContent`，但 HTML 規範不允許在 `option` 裡包裝其他 HTML 標籤。所以修改 `option` 的顯示文字，一律用 `.textContent`：
-
-```javascript
-sel.options[0].textContent = '台北 (已額滿)' // ✅ 正確
-sel.options[0].innerHTML = '<b>台北</b>'     // ❌ 瀏覽器忽略 <b> 標籤，且有 XSS 風險
-```
-
----
-
-## 九、jQuery Getter / Setter 的語法陷阱
-
-最後補充一個語法層面很常見的誤解。原生 JS 用等號 `=` 來賦值，但 jQuery 的所有操作都是函數呼叫：
-
-```javascript
-// 原生 JS：用等號賦值
-spanElement.textContent = inputElement.value  // ✅
-
-// jQuery：不傳參數是讀取（Getter），傳入參數是寫入（Setter）
-$('#headerName').text($('#nickNameInput').val())  // ✅ 正確
-
-$('#headerName').text() = $('#nickNameInput').val()  // ❌ 語法錯誤！函數回傳值不能被賦值
-```
-
-這個錯誤在邏輯上完全正確——你知道要把右邊的值塞給左邊——只是語法用了原生 JS 的思維去寫 jQuery，所以會失效。記住：jQuery 賦值永遠是**把值放進括號裡傳進去**。
-
----
-
-## 本篇總結
-
-讀完這篇，你應該能夠：
-
-1. 準確說出每個表單元件的「初始狀態 Property」和「當前狀態 Property」各叫什麼名字
-2. 理解 `textarea` 的三位一體與弄髒機制
-3. 理解 `checkbox` 的 `.value` 和 `.checked` 是兩件不同的事
-4. 清楚 `select` / `option` 的店長與員工分工
-5. 知道 `innerHTML` vs. `textContent` 的差異與資安風險
-
----
-
-**下一篇：[（三）實戰備忘錄——F12 測試驗證結果與操作速查表](https://claude.ai/chat/03_practical_cheatsheet.md)**
-
-第三篇會把這些觀念濃縮成一份可以直接在開發時查閱的速查表，並整理出你在 F12 親手測試後驗證的所有行為，方便日後快速查閱。
