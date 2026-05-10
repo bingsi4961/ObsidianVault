@@ -17,6 +17,9 @@ Topics :: {筆記跟什麼主題有關，用 `[Topic],[Topic]` 格式}
 ---
 # 連結筆記
 #### 📑 [[HTML Attribute 與 DOM Property 完整教學指南]]
+#### 📑 [[HTML Attribute 與 DOM Property 完全指南（一）：搞懂藍圖與房子的差異]]
+#### 📑 [[HTML Attribute 與 DOM Property 完全指南（二）：各元件對應關係完整拆解]]
+#### 📑 [[HTML Attribute 與 DOM Property 完全指南（三）：實戰備忘錄與速查表]]
 
 ---
 

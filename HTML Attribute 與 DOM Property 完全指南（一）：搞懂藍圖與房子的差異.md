@@ -2,12 +2,7 @@
 date: 2026-05-07 14:00
 title:
 aliases:
-  - 別名測試1
-  - 別名測試2
 tags:
-  - 標籤測試1
-  - 標籤測試2
-
 ---
 # Metadata
 Status :: 🌱
@@ -18,7 +13,10 @@ Topics :: {筆記跟什麼主題有關，用 `[Topic],[Topic]` 格式}
 
 ---
 # 連結筆記
-#### 📑 [[]]
+#### 📑 [[HTML Attribute 與 DOM Property 完全指南（二）：各元件對應關係完整拆解]]
+#### 📑 [[HTML Attribute 與 DOM Property 完全指南（三）：實戰備忘錄與速查表]]
+#### 📑 [[HTML Attribute 與 DOM Property 完整教學指南]]
+#### 📑 [[HTML Attribute 與 DOM Property 指令應用範例速查]]
 
 ---
 
