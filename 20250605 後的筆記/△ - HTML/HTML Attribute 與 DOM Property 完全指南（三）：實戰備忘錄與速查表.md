@@ -3,6 +3,9 @@ date: 2026-05-08 08:55
 title:
 aliases:
 tags:
+  - HTML
+  - JavaScript
+  - jQuery
 ---
 # Metadata
 Status :: 🌱
