@@ -1,7 +1,7 @@
 ---
-title: ES Module 範例
-tags: [JavaScript]
-
+title:
+tags:
+  - JavaScript
 ---
 
 ## SharedUtils.js
