@@ -2,12 +2,7 @@
 date: 2026-05-24 22:12
 title:
 aliases:
-  - 別名測試1
-  - 別名測試2
 tags:
-  - 標籤測試1
-  - 標籤測試2
-
 ---
 # Metadata
 Status :: 🌱
@@ -285,8 +280,12 @@ ModelState.AddModelError("Email", "此信箱已被其他人註冊");
 // Model 端：指定去呼叫哪個 Controller 的哪個 Action 做驗證
 public class RegisterViewModel
 {
+	// 這是你要一起帶過去的第二個參數
+	public int CommpanyId { get; set; }
+    
     [Required(ErrorMessage = "帳號必填")]
-    [Remote(action: "CheckAccountDuplicate", controller: "User", ErrorMessage = "這個帳號已經被註冊囉")]
+    [Remote(action: "CheckAccountDuplicate", controller: "User", 
+	    AdditionalFields = nameof(CompanyId), ErrorMessage = "這個帳號已經被註冊囉")]
     public string Account { get; set; }
 }
 ```
@@ -297,9 +296,9 @@ public class UserController : Controller
 {
     // ❶ 給前端 AJAX 呼叫的「查哨站」—— 只能回傳 JSON
     [AcceptVerbs("GET", "POST")]
-    public IActionResult CheckAccountDuplicate(string account)
+    public IActionResult CheckAccountDuplicate(string account, int id)
     {
-        bool isExist = CheckFromDatabase(account);
+        bool isExist = CheckFromDatabase(account, id);
 
         if (isExist)
         {
@@ -317,7 +316,7 @@ public class UserController : Controller
     {
         // 🚨 重要！[Remote] 只管前端體驗，後端不會自動執行 Remote 的檢查
         // 你必須在這裡手動再查一次資料庫！
-        if (CheckFromDatabase(model.Account))
+        if (CheckFromDatabase(model.Account, model.CommpanyId))
         {
             ModelState.AddModelError("Account", "這個帳號已經被註冊囉");
         }
@@ -334,7 +333,3 @@ public class UserController : Controller
 ```
 
 > ⚠️ **`[Remote]` 最大的地雷**：`[Remote]` 的設計初衷「純粹是為了前端的體驗（UX）」。當表單整包送到後端、執行 `ModelState.IsValid` 時，系統不會自動再去呼叫 Remote 的查哨站。因此，你必須在接收表單的 Action 裡**手動再查一次資料庫**，並用 `ModelState.AddModelError()` 把錯誤加入。 `[Remote]` 只防君子，不防小人。
-
----
-
-> ✅ **本篇結束**。你已經掌握了 MVC 表單驗證的完整大框架。接下來，請繼續閱讀《第二篇：ModelState 深度剖析》，我們會把 Controller 裡這個重要的「安檢紀錄本」徹底拆解開來。
