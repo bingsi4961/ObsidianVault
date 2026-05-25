@@ -188,7 +188,6 @@ public class RegisterViewModel
 ```
 
 ---
-
 ### 第二步：讓前端也看得懂（實作 `IClientModelValidator`）
 
 自訂標籤完成了**後端防線**——資料送到伺服器後，`ModelState.IsValid` 會正確攔截。
@@ -238,7 +237,6 @@ public class TaiwanIdAttribute : ValidationAttribute, IClientModelValidator
 ```
 
 ---
-
 ### 第三步：教導前端品管員（JavaScript）
 
 有了 `data-val-taiwanid` 這張便利貼，品管員看到了，但腦袋裡的預設手冊裡沒有 `taiwanid` 這個規則，還是不知道要怎麼檢查。
