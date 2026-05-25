@@ -169,6 +169,8 @@ public class TaiwanIdAttribute : ValidationAttribute
         string id = value.ToString();
 
         // 用正規表達式檢查身分證格式（首字大寫英文 + 數字1或2 + 8位數字）
+        // @ 前綴 → 告訴 C# 不要解譯反斜線，讓 \d 直接交給 Regex 引擎處理
+        // @ 放在字串前面，是告訴 C# 編譯器「這個字串請原封不動，不要解讀任何跳脫字元」。
         if (Regex.IsMatch(id, @"^[A-Z][1-2]\d{8}$"))
         {
             return ValidationResult.Success;
@@ -270,14 +272,16 @@ public class TaiwanIdAttribute : ValidationAttribute, IClientModelValidator
 
 ```javascript
 // 第一步：告訴品管員「taiwanid 規則要怎麼檢查」
-$.validator.addMethod("taiwanid", function (value, element) {
-    // this.optional(element) 表示如果欄位是選填且為空，直接回傳 true（放行）
-    // this.optional(element)：「這個欄位是非必填、且目前為空嗎？」 // 如果是，直接放行，不執行後面的 Regex。 // 注意：optional 這裡是「非必填」的意思，和 <select> 的 <option> 毫無關係。
+$.validator.addMethod("taiwanid", function (value, element) {    
+    // this.optional(element)：「這個欄位是非必填、並且目前為空嗎？」 
+    // 如果是，直接放行，不執行後面的 Regex。 
+    // 注意：optional 這裡是「非必填」的意思，和 <select> 的 <option> 毫無關係。
     if (this.optional(element)) return true;
     return /^[A-Z][1-2]\d{8}$/.test(value);
 });
 
-// 第二步：把 HTML 屬性（data-val-taiwanid）和上面定義的規則「綁在一起」
+// 第二步：把 HTML 屬性（data-val-taiwanid）和上面定義的規則「綁在一起」 
+// addBool 代表：只要 HTML 上出現 data-val-taiwanid 屬性（不管值是什麼），就觸發 "taiwanid" 規則
 $.validator.unobtrusive.adapters.addBool("taiwanid");
 ```
 

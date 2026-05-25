@@ -235,7 +235,27 @@ ModelState.AddModelError(string.Empty, "伺服器處理失敗，請稍後再試"
 ---
 ### `ModelState.ClearValidationState(key)`
 
-把指定欄位的錯誤清空，但把狀態重置回 `Unvalidated`（排隊中），而不是直接刪除這個抽屜。適用於你打算後續手動重新執行驗證的進階情境。
+把指定欄位的**錯誤清空**，並將**狀態重置回 `Unvalidated`（排隊中）**，但不會刪除該欄位的抽屜（保留 `AttemptedValue` 使用者輸入值）。
+
+適用於**打算後續手動重新執行驗證**的進階情境。
+
+**正確 SOP：**
+
+```csharp
+ModelState.ClearValidationState("Age");  // 清除舊錯誤，重置狀態（保留輸入值）
+TryValidateModel(model.Age, "Age");      // 重新驗證，寫入最新錯誤
+```
+
+> ⚠️ `TryValidateModel()` 不會自動清空 Errors，只會「疊加」新錯誤，所以必須先呼叫 `ClearValidationState`。
+
+### `TryValidateModel(object model, string prefix)`
+
+手動對指定的值重新執行驗證，並將結果存回 `ModelState`。
+
+|參數|說明|
+|---|---|
+|`model.Age`|驗**什麼**（要驗證的值）|
+|`"Age"`|存到**哪裡**（ModelState 的 key）|
 
 ---
 ## 七、嵌套物件的 Key 命名規則

@@ -282,11 +282,14 @@ ModelState.AddModelError("Email", "此信箱已被其他人註冊");
 public class RegisterViewModel
 {
 	// 這是你要一起帶過去的第二個參數
-	public int CommpanyId { get; set; }
+	public int CompanyId { get; set; }
+    
+    // 這是你要一起帶過去的第三個參數 
+    public int DepartmentId { get; set; }
     
     [Required(ErrorMessage = "帳號必填")]
     [Remote(action: "CheckAccountDuplicate", controller: "User", 
-	    AdditionalFields = nameof(CompanyId), ErrorMessage = "這個帳號已經被註冊囉")]
+	    AdditionalFields = nameof(CompanyId) + "," + nameof(DepartmentId), ErrorMessage = "這個帳號已經被註冊囉")]
     public string Account { get; set; }
 }
 ```
@@ -297,10 +300,9 @@ public class UserController : Controller
 {
     // ❶ 給前端 AJAX 呼叫的「查哨站」—— 只能回傳 JSON
     [AcceptVerbs("GET", "POST")]
-    public IActionResult CheckAccountDuplicate(string account, int id)
+    public IActionResult CheckAccountDuplicate(string account, int companyId, int departmentId)
     {
-        bool isExist = CheckFromDatabase(account, id);
-
+        bool isExist = CheckFromDatabase(account, companyId, departmentId);
         if (isExist)
         {
             // 回傳字串 = 驗證失敗，字串內容就是錯誤訊息
@@ -317,7 +319,7 @@ public class UserController : Controller
     {
         // 🚨 重要！[Remote] 只管前端體驗，後端不會自動執行 Remote 的檢查
         // 你必須在這裡手動再查一次資料庫！
-        if (CheckFromDatabase(model.Account, model.CommpanyId))
+        if (CheckFromDatabase(model.Account, model.CompanyId, model.DepartmentId))
         {
             ModelState.AddModelError("Account", "這個帳號已經被註冊囉");
         }
