@@ -318,7 +318,6 @@ $("#btnSave").click(function () {
 ```
 
 ---
-
 ## 八、動態表單的驗證重置：removeData 與 parse 組合拳
 
 ### 問題：動態新增的欄位為什麼沒有驗證？
@@ -388,7 +387,6 @@ $("#btnSubmit").click(function () {
 ```
 
 ---
-
 ## 九、在 MVC 環境動態移除或加回驗證規則的正統做法
 
 ### 用純 jQuery 的 `rules("remove")` 可以嗎？
@@ -423,7 +421,6 @@ $.validator.unobtrusive.parse($form);
 ```
 
 ---
-
 ## 十、純 jQuery 驗證的重置方式（作為對比參考）
 
 如果你在某些非 MVC 環境使用純 jQuery 驗證，重置的方式截然不同，這裡作為對比說明。
@@ -598,17 +595,3 @@ $(document).ready(function () {
 });
 </script>
 ```
-
----
-
-> ✅ **系列文章結束**。你現在已經完整掌握了 ASP.NET Core MVC 表單驗證的全貌——從 C# 的 Annotation 規則定義、ModelState 的底層結構，一路到前端 `data-val-*` 屬性、jQuery 兩門派的差異，以及動態表單的重置機制。這些觀念在你日常的 CRUD 開發和維護大型表單時，都會是非常有用的基礎。
-
----
-
-## 附錄：三篇閱讀順序與主題對應
-
-|篇次|標題|主要涵蓋主題|
-|---|---|---|
-|第一篇|從 Annotation 到畫面顯示|Model Annotation、Tag Helper、Controller 把關、`[Remote]`、雙重防護觀念|
-|第二篇|ModelState 深度剖析|`ModelStateDictionary` 結構、各屬性解析、`TryGetValue`、「畫面改不掉」地雷|
-|第三篇（本篇）|前端驗證進階實戰|`data-val-*` 屬性對照、自訂 Attribute、jQuery 兩門派、動態表單重置組合拳|
