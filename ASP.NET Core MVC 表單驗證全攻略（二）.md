@@ -123,7 +123,6 @@ Assert.Equal(1, modelState.ErrorCount); // 預期剛好只有 1 個錯誤
 這樣你就能理解為什麼 `ModelOnly` 只顯示整體性錯誤了——因為它只看 Root 這一層，不看底下的子欄位。
 
 ---
-
 ### 4.4 `ModelStateEntry.ValidationState`——抽屜的狀態紅章
 
 很多人第一次看到 `ValidationState` 會直覺地問：「這應該是 `bool` 吧？」
@@ -151,7 +150,6 @@ public enum ModelValidationState
 > 但即使是這個寫法，也非常危險。如果前端根本沒有送出 `Email` 欄位，`ModelState["Email"]` 會回傳 `null`，接著呼叫 `.ValidationState` 就會爆出 `NullReferenceException`，整個頁面崩潰。在實務上，我們幾乎只使用最外層的 `ModelState.IsValid`，而不會去底層針對單一欄位判斷狀態。
 
 ---
-
 ### 4.5 `AttemptedValue` vs `RawValue`——保留案發現場的兩個屬性
 
 這兩個屬性看起來很像，但有明確的差異：
@@ -168,7 +166,6 @@ public enum ModelValidationState
 > 💡 **實務準則**：在日常的 CRUD 開發中，這兩個屬性你幾乎不需要主動去碰。它們是 MVC 框架幕後自動使用的工具。你真的要動到它們的情境，只有寫自訂 Model Binder，或是記錄惡意攻擊的 Log 時。
 
 ---
-
 ### 4.6 `ModelErrorCollection`——為什麼是集合，而不是單一字串？
 
 `ModelStateEntry.Errors` 是一個集合（`ModelErrorCollection`，繼承自 `Collection<ModelError>`），而不是單一字串。
