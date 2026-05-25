@@ -13,7 +13,8 @@ Topics :: {筆記跟什麼主題有關，用 `[Topic],[Topic]` 格式}
 
 ---
 # 連結筆記
-#### 📑 [[ASP.NET Core MVC 表單驗證全攻略（二）]]
+#### 📑 [[ASP.NET Core MVC 表單驗證全攻略（一）]]
+#### 📑 [[ASP.NET Core MVC 表單驗證全攻略（三）]]
 
 ---
 ## 一、ModelState 是什麼？為什麼需要它？
