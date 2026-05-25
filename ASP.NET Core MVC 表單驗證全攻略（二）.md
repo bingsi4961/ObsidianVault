@@ -13,7 +13,7 @@ Topics :: {筆記跟什麼主題有關，用 `[Topic],[Topic]` 格式}
 
 ---
 # 連結筆記
-#### 📑 [[]]
+#### 📑 [[ASP.NET Core MVC 表單驗證全攻略（二）]]
 
 ---
 ## 一、ModelState 是什麼？為什麼需要它？
@@ -113,7 +113,6 @@ Assert.Equal(1, modelState.ErrorCount); // 預期剛好只有 1 個錯誤
 ```
 
 ---
-
 ### 4.3 `ModelState.Root`——整份表單的「總申報單」
 
 `Root` 是 `ModelStateDictionary` 裡一個特殊的 `ModelStateEntry`，它的 Key 是空字串 `""`，代表的是「整張表單本身」，而不是任何特定欄位。
@@ -175,7 +174,6 @@ public enum ModelValidationState
 `ModelErrorCollection` 雖然名字特別，但本質就是一個可以 `foreach` 的集合。微軟把它包裝成專屬類別而不是直接用 `List`，是為了框架內部管理的安全性——可以在裡面加上特製方法，並避免外部程式碼隨意修改。
 
 ---
-
 ## 五、安全地存取字典：`TryGetValue` vs `ContainsKey`
 
 `ModelState` 底層是一個字典，字典有個著名的地雷：如果你直接用 `[]` 索引子去取一個不存在的 Key，程式不會回傳 `null`，而是直接拋出 `KeyNotFoundException`，整個請求崩潰。
@@ -259,7 +257,6 @@ public class Address
 當 `City` 驗證失敗時，在 `ModelState` 字典裡記錄這筆錯誤的 Key 是 `"UserAddress.City"`。前端畫面的 `asp-validation-for="UserAddress.City"` 就是靠這個命名規則來精準對應的。
 
 ---
-
 ## 八、實戰演練：從一次完整的表單提交看 ModelState 如何填入
 
 讓我們模擬一個情境：年齡欄位預期是 `int`，使用者填了 `"十歲"`；信箱欄位使用者填了 `"abc"`（格式不對）。
@@ -274,7 +271,6 @@ public class Address
 系統先嘗試把 `"十歲"` 塞進 `int Age`，失敗，建立 Key 為 `"Age"` 的抽屜，把原始字串存進 `AttemptedValue`，並在 `Errors` 寫下型別錯誤。接著處理 `Email`，字串轉換成功，但進入第二關後發現 `[EmailAddress]` 規則不通過，建立 Key 為 `"Email"` 的抽屜並記下格式錯誤。最外層的 `ModelState.IsValid` 看到有抽屜有錯，自動變成 `false`。
 
 ---
-
 ## 九、`ModelState.Clear()` 解決「畫面改不掉」的經典地雷
 
 學到這裡，你已經理解了一個非常重要的幕後機制：HTML 的 `<input asp-for="Age" />` 在產生畫面時，會先看 `ModelState["Age"].AttemptedValue` 裡有沒有值，如果有，**優先顯示 AttemptedValue 的字串**，完全忽略你在 Model 裡設定的值。
@@ -311,7 +307,6 @@ if (!ModelState.IsValid)
 清空後，`Tag Helper` 找不到任何 `AttemptedValue`，就會乖乖去讀你設定的 `model.Age`，畫面就會正確顯示 `18` 了。
 
 ---
-
 ## 十、完整 ModelState 類別結構參考
 
 以下是 `ModelStateDictionary` 相關類別的簡化版結構，適合作為日後查閱的速查參考：
