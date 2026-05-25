@@ -141,11 +141,21 @@ ASP.NET Core 的預設專案範本（`wwwroot/css/site.css`）已經幫你寫了
 所有驗證標籤（包含 `[Required]`、`[EmailAddress]` 等）的老祖宗都是 `ValidationAttribute`。繼承它就等於取得了成為合法驗證標籤的資格：
 
 ```csharp
+// 引入 DataAnnotations 命名空間，這是所有驗證標籤（如 ValidationAttribute）的故鄉
 using System.ComponentModel.DataAnnotations;
 using System.Text.RegularExpressions;
 
+// ValidationAttribute → 繼承「後端驗證標籤」的基礎類別，取得成為合法 Annotation 的資格
 public class TaiwanIdAttribute : ValidationAttribute
 {
+	// ========================================== 
+	// 第一部分：後端把關（負責伺服器端的驗證） 
+	// ==========================================
+    
+    // 使用 override 覆寫基礎類別 ValidationAttribute 提供的 IsValid 方法 
+    // 這是後端驗證的核心大腦 - 框架在完成 Model Binding 後會自動呼叫它 
+    // value 參數：使用者填寫在輸入框裡的實際內容（原始證物） 
+    // validationContext 參數：包含目前驗證環境的上下文資訊（此處暫不使用）
     protected override ValidationResult IsValid(object value, ValidationContext validationContext)
     {
         // 遇到空值，直接放行。
@@ -165,7 +175,9 @@ public class TaiwanIdAttribute : ValidationAttribute
         }
         else
         {
-            // ErrorMessage 就是你貼標籤時寫的 ErrorMessage 參數，如果沒寫就用預設值
+            // ErrorMessage 就是你貼標籤時寫的 ErrorMessage 參數
+            // ErrorMessage 是從基礎類別 ValidationAttribute 繼承來的公開屬性
+            // 格式不符，建立一個新的「驗證失敗結果」物件並回傳
             return new ValidationResult(ErrorMessage ?? "身分證字號格式不正確");
         }
     }
@@ -193,14 +205,16 @@ public class RegisterViewModel
 要解決這個問題，我們需要讓 `TaiwanIdAttribute` 額外實作 `IClientModelValidator` 介面，手動告訴系統「在產生 HTML 時，請把這些便利貼貼到輸入框上」：
 
 ```csharp
+// 引入 ModelBinding.Validation 命名空間，這是 IClientModelValidator 合約的所在地（ASP.NET Core 專屬）
 using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Collections.Generic;
 using System.Text.RegularExpressions;
 
 // 同時繼承 ValidationAttribute（後端把關）和實作 IClientModelValidator（前端便利貼）
+// IClientModelValidator → 實作「前端產生 HTML 便利貼」的合約介面
 public class TaiwanIdAttribute : ValidationAttribute, IClientModelValidator
-{
+{	
     protected override ValidationResult IsValid(object value, ValidationContext validationContext)
     {
         // ... 同上，後端邏輯不變 ...
@@ -208,21 +222,36 @@ public class TaiwanIdAttribute : ValidationAttribute, IClientModelValidator
             return ValidationResult.Success;
 
         return Regex.IsMatch(value.ToString(), @"^[A-Z][1-2]\d{8}$")
-            ? ValidationResult.Success
+            ? ValidationResult.Success            
             : new ValidationResult(ErrorMessage ?? "身分證字號格式不正確");
     }
 
+	// ========================================== 
+	// 第二部分：前端翻譯（負責產生 HTML 的 data-val-* 屬性） 
+	// ==========================================
+
     // 這個方法就是「發配便利貼的包裝站」
+    // 實作 IClientModelValidator 介面規定的 AddValidation 方法 
+    // 注意：這裡「不需要」寫 override，因為它是「實作介面」而不是「覆寫父類別方法」
+    // context 參數：包含了準備貼在 HTML <input> 標籤上的所有屬性字典
     public void AddValidation(ClientModelValidationContext context)
     {
-        // context.Attributes 是準備貼在 <input> 上的 HTML 屬性字典
+        // 貼上「安檢總電源開關」便利貼 
+        // 前端品管員只有看到 data-val="true" 才會去掃描這個輸入框 
+        // 用 MergeAttribute 而非直接 Add，是為了防禦「已存在相同 Key」導致的例外
         MergeAttribute(context.Attributes, "data-val", "true");
+        
+        // 貼上專屬的 taiwanid 規則便利貼，並把錯誤訊息作為屬性值 
+        // 前端 $.validator.unobtrusive.adapters.addBool("taiwanid") 會來讀取這個屬性
         MergeAttribute(context.Attributes, "data-val-taiwanid", ErrorMessage ?? "身分證格式錯誤");
     }
 
     // 安全地加入屬性，避免重複 Key 導致例外
     private bool MergeAttribute(IDictionary<string, string> attributes, string key, string value)
     {
+	    // 防呆機制：先確認字典裡有沒有這個 key 
+	    // 因為如果有其他 Annotation（如 [Required]）已經加入了 data-val="true"， 
+	    // 再次呼叫 Add 會拋出 ArgumentException 讓程式當機 if (attributes.ContainsKey(key))
         if (attributes.ContainsKey(key))
             return false; // 已存在就不覆寫，直接跳過
 
@@ -243,6 +272,7 @@ public class TaiwanIdAttribute : ValidationAttribute, IClientModelValidator
 // 第一步：告訴品管員「taiwanid 規則要怎麼檢查」
 $.validator.addMethod("taiwanid", function (value, element) {
     // this.optional(element) 表示如果欄位是選填且為空，直接回傳 true（放行）
+    // this.optional(element)：「這個欄位是非必填、且目前為空嗎？」 // 如果是，直接放行，不執行後面的 Regex。 // 注意：optional 這裡是「非必填」的意思，和 <select> 的 <option> 毫無關係。
     if (this.optional(element)) return true;
     return /^[A-Z][1-2]\d{8}$/.test(value);
 });
