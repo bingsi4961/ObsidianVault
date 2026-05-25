@@ -207,7 +207,6 @@ if (ModelState.TryGetValue("Email", out var entry))
 > ⚠️ **效能地雷**：很多人直覺地寫 `if (dict.ContainsKey("Email")) { var x = dict["Email"]; }`——這樣字典被搜尋了兩次，資料量大時是隱形的效能殺手，請改用 `TryGetValue`。
 
 ---
-
 ## 六、操作 ModelState 的常用方法
 
 ### `ModelState.AddModelError(key, message)`
@@ -224,7 +223,6 @@ ModelState.AddModelError(string.Empty, "伺服器處理失敗，請稍後再試"
 ```
 
 ---
-
 ### `ModelState.Remove(key)` vs `ModelState.Clear()`
 
 有時候業務需求需要略過某個欄位的驗證，這時你需要把那個欄位的記錄從 `ModelState` 裡清除。
@@ -236,13 +234,11 @@ ModelState.AddModelError(string.Empty, "伺服器處理失敗，請稍後再試"
 > ⚠️ **不要直接呼叫 `ModelState["Age"].Errors.Clear()`**：這個做法很危險！`Errors.Clear()` 只清除了錯誤文字，但該欄位的 `ValidationState` 已經被蓋上了 `Invalid` 的紅章，`ModelState.IsValid` 依然可能判定為失敗。請永遠使用 `ModelState.Remove()` 或 `ModelState.Clear()` 這兩個框架層級的方法，它們是「砍掉整個抽屜」而不是「只擦掉抽屜裡的文字」。
 
 ---
-
 ### `ModelState.ClearValidationState(key)`
 
 把指定欄位的錯誤清空，但把狀態重置回 `Unvalidated`（排隊中），而不是直接刪除這個抽屜。適用於你打算後續手動重新執行驗證的進階情境。
 
 ---
-
 ## 七、嵌套物件的 Key 命名規則
 
 如果你的 ViewModel 裡包著另一個物件，ModelState 的 Key 會用「點（`.`）」連接，和 C# 呼叫物件屬性的寫法一樣：
@@ -270,10 +266,10 @@ public class Address
 
 當這份表單送到 Controller，`ModelState` 內部的狀態會是這樣：
 
-|Key|AttemptedValue|ValidationState|Errors 的 ErrorMessage|發生階段|
-|---|---|---|---|---|
-|`"Age"`|`"十歲"`|`Invalid`|"The value '十歲' is not valid for Age."|第一關：型別轉換失敗（字串無法轉 int）|
-|`"Email"`|`"abc"`|`Invalid`|"信箱格式不正確"|第二關：Annotation 規則失敗|
+| Key       | AttemptedValue | ValidationState | Errors 的 ErrorMessage                  | 發生階段                  |
+| --------- | -------------- | --------------- | -------------------------------------- | --------------------- |
+| `"Age"`   | `"十歲"`         | `Invalid`       | "The value '十歲' is not valid for Age." | 第一關：型別轉換失敗（字串無法轉 int） |
+| `"Email"` | `"abc"`        | `Invalid`       | "信箱格式不正確"                              | 第二關：Annotation 規則失敗   |
 
 系統先嘗試把 `"十歲"` 塞進 `int Age`，失敗，建立 Key 為 `"Age"` 的抽屜，把原始字串存進 `AttemptedValue`，並在 `Errors` 寫下型別錯誤。接著處理 `Email`，字串轉換成功，但進入第二關後發現 `[EmailAddress]` 規則不通過，建立 Key 為 `"Email"` 的抽屜並記下格式錯誤。最外層的 `ModelState.IsValid` 看到有抽屜有錯，自動變成 `false`。
 
@@ -374,7 +370,3 @@ public enum ModelValidationState
     Skipped     = 3  // 跳過驗證（例如加了 [ValidateNever]）
 }
 ```
-
----
-
-> ✅ **本篇結束**。你現在對 ModelState 的內部結構已經有了非常清晰的認識。接下來，請繼續閱讀《第三篇：前端驗證進階實戰》，我們要把視角拉到瀏覽器端，看看 C# 的規則是如何透過 HTML 屬性和 JavaScript 讓前端品管員動起來的。
