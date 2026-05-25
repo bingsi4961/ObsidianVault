@@ -29,7 +29,6 @@ Topics :: {筆記跟什麼主題有關，用 `[Topic],[Topic]` 格式}
 這兩個過程中，可能發生各種狀況。`ModelState` 就是用來**統一收集、記錄這整個過程中所有成功與失敗的細節**，讓你的 Controller 能夠根據這份「總結報告」決定下一步怎麼做。
 
 ---
-
 ## 二、生活比喻：海關的安檢紀錄本 🛂
 
 把 `ModelState` 想像成安檢員手上拿著的「安檢紀錄本」，整個流程有兩道關卡：
@@ -41,7 +40,6 @@ Topics :: {筆記跟什麼主題有關，用 `[Topic],[Topic]` 格式}
 海關主管（Controller）只需要看一眼紀錄本的封面（`ModelState.IsValid`），就知道這個人能不能放行。如果需要知道細節，才打開紀錄本一頁一頁翻。
 
 ---
-
 ## 三、ModelState 的內部結構：從類別圖看清楚
 
 `ModelState` 的底層是一個字典（`ModelStateDictionary`），以「欄位名稱」作為 Key，每個 Key 對應一份「詳細體檢報告」。我們用簡化版的 C# 類別來把它的樹狀結構攤開來看：
@@ -73,7 +71,6 @@ ModelStateDictionary（整個檔案櫃 / 海關總紀錄本）
 三層結構的分工很清楚：`ModelStateDictionary` 管理整份表單，`ModelStateEntry` 管理單一欄位，`ModelError` 管理單一欄位裡的每一條具體錯誤。
 
 ---
-
 ## 四、逐一解析每個重要屬性
 
 ### 4.1 `ModelState.IsValid`——主管看一眼的結論
@@ -88,7 +85,6 @@ if (!ModelState.IsValid)
 `IsValid` 是布林值，只要整本紀錄本裡（包含 Root 和所有子欄位）沒有任何一筆錯誤，它就是 `true`。這是 Controller 最常使用的屬性，通常放在 Action 的第一行。
 
 ---
-
 ### 4.2 `ModelState.ErrorCount`——全域錯誤計數器
 
 `ErrorCount` 回傳一個整數，代表目前整張表單中所有錯誤的總件數。它在底層會走訪 Root 和每一個子欄位的 Errors，把所有 `ModelError` 的數量加總起來。
