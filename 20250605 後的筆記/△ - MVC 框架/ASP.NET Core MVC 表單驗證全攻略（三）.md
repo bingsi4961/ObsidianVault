@@ -3,6 +3,7 @@ date: 2026-05-25 13:52
 title:
 aliases:
 tags:
+  - Validation
 ---
 # Metadata
 Status :: 🌱
@@ -13,6 +14,7 @@ Topics :: {筆記跟什麼主題有關，用 `[Topic],[Topic]` 格式}
 
 ---
 # 連結筆記
+#### 📑 [[jQuery Validation 三個檔案說明]]
 #### 📑 [[ASP.NET Core MVC 表單驗證全攻略（一）]]
 #### 📑 [[ASP.NET Core MVC 表單驗證全攻略（二）]]
 
@@ -49,16 +51,18 @@ Topics :: {筆記跟什麼主題有關，用 `[Topic],[Topic]` 格式}
 
 ● 翻譯後的 HTML 屬性（前端便利貼）都會加上 data-val="true" 總開關，後面的表格就不贅述
 
-| C# Annotation（後端標準書）                                        | 翻譯後的 HTML 屬性（前端便利貼）                                                                                                     |
-| ----------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
-| `[Required(ErrorMessage="必填")]`                             | `data-val-required="必填"`                                                                                                |
-| `[EmailAddress(ErrorMessage="格式錯誤")]`                       | `data-val-email="格式錯"`                                                                                                  |
-| `[StringLength(10, ErrorMessage="超長")]`                     | `data-val-length="超長"` + `data-val-length-max="10"`                                                                     |
-| `[Range(1, 100, ErrorMessage="超出範圍")]`                      | `data-val-range="超出範圍"` + `data-val-range-min="1"` + `data-val-range-max="100"`                                         |
-| `[RegularExpression(@"^\d+$", ErrorMessage="限數字")]`         | `data-val-regex="限數字"` + `data-val-regex-pattern="^\d+$"`                                                               |
-| `[Compare("Password", ErrorMessage="密碼不一致")]`               | `data-val-equalto="密碼不一致"` + `data-val-equalto-other="*.Password"`                                                      |
-| `[MinLength(6, ErrorMessage="密碼太短")]`                       | `data-val-minlength="密碼太短"` + `data-val-minlength-min="6"`                                                              |
-| `[Remote("CheckAction", "Controller", ErrorMessage="已被用")]` | `data-val-remote="已被用"` + `data-val-remote-url="/Controller/CheckAction"` + `data-val-remote-additionalfields="*.欄位名稱"` |
+| **Data Annotation** （後端標準書寫）                                                                                                                                           | **產生的 HTML data-val-* 屬性** （前端便利貼）                                                                                                              |
+| ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| `[Required(ErrorMessage = "必填")]`                                                                                                                                      | `data-val-required="必填"`                                                                                                                        |
+| `[EmailAddress(ErrorMessage = "Email格式錯誤")]`                                                                                                                           | `data-val-email="Email格式錯誤"`                                                                                                                    |
+| `[StringLength(20, ErrorMessage = "不得超過20個字元")]`<br>_或_<br>`[StringLength(maximumLength: 20, ErrorMessage = "不得超過20個字元")]`                                             | `data-val-length="不得超過20個字元"`<br>`data-val-length-max="20"`                                                                                     |
+| `[StringLength(10, MinimumLength = 5, ErrorMessage = "僅允許輸入5~20個字元")]`<br>_或_<br>`[StringLength(maximumLength: 20, MinimumLength = 5, ErrorMessage = "僅允許輸入5~20個字元")]` | `data-val-length="僅允許輸入5~20個字元"`<br>`data-val-length-max="20"`<br>`data-val-length-min="5"`                                                     |
+| `[MinLength(5, ErrorMessage = "不得少於5個字元")]`                                                                                                                            | `data-val-minlength="不得少於5個字元"`<br>`data-val-minlength-min="5"`                                                                                 |
+| `[MaxLength(20, ErrorMessage = "不得超過20個字元")]`                                                                                                                          | `data-val-maxlength="不得超過20個字元"`<br>`data-val-maxlength-max="20"`                                                                               |
+| `[Range(1, 100, ErrorMessage = "超出範圍")]`                                                                                                                               | `data-val-range="超出範圍"`<br>`data-val-range-max="100"`<br>`data-val-range-min="1"`                                                               |
+| `[RegularExpression(@"^\d+$", ErrorMessage = "限制輸入數字")]`                                                                                                               | `data-val-regex="限制輸入數字"`<br>`data-val-regex-pattern="^\d+$"`                                                                                   |
+| `[Compare(nameof(Password), ErrorMessage = "密碼不一致")]`                                                                                                                  | `data-val-equalto="密碼不一致"`<br>`data-val-equalto-other="*.Password"`                                                                             |
+| `[Remote(action: "IsExists", controller: "CheckAccount", AdditionalFields = "Id, Name", ErrorMessage = "此帳號已被使用")]`                                                    | `data-val-remote="此帳號已被使用"`<br>`data-val-remote-url="/CheckAccount/IsExists"` _(依路由設定自動生成)_<br>`data-val-remote-additionalfields="*.Id,*.Name"` |
 
 > 💡 **你有沒有注意到**，有些規則會拆成兩個 HTML 屬性——一個存錯誤訊息，一個存數字參數？例如 `data-val-range="錯誤訊息"` 和 `data-val-range-min="1"`。這是因為 HTML 屬性只能存字串，數字參數需要另外一個屬性來承載。
 
@@ -113,13 +117,19 @@ Topics :: {筆記跟什麼主題有關，用 `[Topic],[Topic]` 格式}
 |`<span>`（廣播喇叭）|`field-validation-valid`|`field-validation-error`|
 |`<input>`（輸入框）|`input-validation-valid`|`input-validation-error`|
 
-ASP.NET Core 的預設專案範本（`wwwroot/css/site.css`）已經幫你寫了這些 Class 的基本樣式——主要就是把文字或框線變成紅色。
+這四個 class 名稱是寫死在 ASP.NET Core 的 Tag Helper 與 jQuery Unobtrusive Validation 底層程式碼裡的，當品管員偵測到驗證狀態改變時，就會自動在 `valid` 和 `error` 之間切換，**不需要你自己寫任何 JavaScript**。
 
+---
+**你可能會在 `wwwroot/css/site.css` 裡找不到這四個 class 的定義——這是正常的。**
+
+在早期的 .NET Framework 範本時代，微軟確實會把這四個 class 的樣式直接內建在 `Site.css` 裡。但較新的 ASP.NET Core 範本已將 UI 樣式大量交由 Bootstrap 負責，不再主動維護這四個 class 的 CSS 定義。
+
+---
 **你一定會問：我只要在 `<span>` 上加 `class="text-danger"`（Bootstrap），是不是也可以達到一樣的效果？**
 
 可以，因為 `<span>` 沒有文字時看不見，有文字時 `text-danger` 讓它顯示為紅色，效果跟 `field-validation-error` 的樣式是相同的。
 
-但如果你希望**輸入框本身在填錯時也顯示紅色框線**，那你就需要利用 `input-validation-error` 這個自動加上的 class 來寫樣式：
+但如果你希望**輸入框本身在填錯時也顯示紅色框線**，那你就需要利用 `input-validation-error` 這個自動加上的 class 來寫樣式，而這個 class 是 Bootstrap 不會幫你處理的，**必須自己補在 `site.css` 裡**：
 
 ```css
 .field-validation-error { color: red; }
@@ -296,7 +306,6 @@ $.validator.unobtrusive.adapters.addBool("taiwanid");
 在 **C# Attribute 類別（`.cs` 檔）** 裡，你繼承 `ValidationAttribute` 寫後端邏輯，並實作 `IClientModelValidator` 產生 HTML 便利貼。在 **Model（`.cs` 檔）** 裡，你把自訂標籤貼到屬性上，指定 `ErrorMessage`。在 **JavaScript 檔（`.js` 或 View 底部的 `<script>`）** 裡，你用 `addMethod` 定義前端檢查邏輯，並用 `adapters.addBool` 綁定 HTML 屬性和規則。
 
 ---
-
 ## 六、你說看到了 jQuery 自己的驗證，它和 MVC 的有什麼不同？
 
 你在開發過程中可能也遇過不用 `data-val-*` 屬性、直接在 JavaScript 裡設定規則的做法，這就是「純 jQuery 驗證」。
@@ -329,7 +338,6 @@ $("#myForm").validate({
 > 💡 **最佳策略**：讓 C# 的 Annotation 處理 80% 的靜態格式驗證；遇到動態互動的 20%，用純 jQuery 的底層指令來補足。**但絕對不要在同一個欄位上同時用兩套系統設定規則**，它們會打架，驗證可能莫名其妙失效。
 
 ---
-
 ## 七、自訂 AJAX 送出時，前端防線會失效！
 
 如果你把表單的送出按鈕從 `<button type="submit">` 改成普通按鈕，並在 jQuery 的 click 事件裡自己寫 `$.ajax()` 送出，那麼前端品管員**不會自動觸發**，錯誤的資料會直接被送到後端。
@@ -363,17 +371,17 @@ $("#btnSave").click(function () {
 ```javascript
 var $form = $("#createForm");
 
-// 步驟一：撕毀舊名冊（順序絕對不能顛倒！）
-// 'validator' 是核心品管員（jQuery Validation）的記憶
-// 'unobtrusiveValidation' 是翻譯橋樑（Unobtrusive）的記憶
-// 兩個都要清除，否則它們會偷懶說「我已經初始化過了，不需要重新做」
+// 步驟一：清除表單的驗證快取（順序絕對不能顛倒！） 
+// 移除 jQuery Validation 與 Unobtrusive Validation 的初始化記憶 
+// 若不清除，兩者會認為已初始化完畢而略過重新解析
 $form.removeData('validator').removeData('unobtrusiveValidation');
 
-// 步驟二：重新巡視並建立新名冊
-// 命令系統重新掃描表單內所有的 data-val-* 屬性
+// 步驟二：重新解析表單驗證規則 
+// 掃描表單內所有 data-val-* 屬性，重新建立 unobtrusive validation 驗證規則
 $.validator.unobtrusive.parse($form);
 
-// 步驟三：清理畫面上的舊紅字（選擇性，視情況需要）
+// 步驟三：清除畫面上的錯誤提示（選擇性） 
+// 重置所有驗證狀態，讓表單回到初始狀態
 $form.validate().resetForm();
 ```
 
@@ -491,7 +499,6 @@ $("#myForm").validate({
 |動態移除欄位規則|操作 HTML `removeAttr`，再重新 `parse`|`.rules("remove", "ruleName")`|
 
 ---
-
 ## 十一、完整 HTML 範例：整合所有學過的驗證技巧
 
 以下是一個把本文所有概念整合在一起的完整表單範例，包含各種內建 `data-val-*` 屬性、自訂驗證方法，以及正確的腳本載入順序：

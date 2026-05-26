@@ -3,6 +3,7 @@ date: 2026-05-25 07:53
 title:
 aliases:
 tags:
+  - Validation
 ---
 # Metadata
 Status :: 🌱
@@ -13,6 +14,7 @@ Topics :: {筆記跟什麼主題有關，用 `[Topic],[Topic]` 格式}
 
 ---
 # 連結筆記
+#### 📑 [[jQuery Validation 三個檔案說明]]
 #### 📑 [[ASP.NET Core MVC 表單驗證全攻略（一）]]
 #### 📑 [[ASP.NET Core MVC 表單驗證全攻略（三）]]
 
