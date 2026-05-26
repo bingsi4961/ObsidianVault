@@ -49,27 +49,73 @@ Topics :: {筆記跟什麼主題有關，用 `[Topic],[Topic]` 格式}
 ModelStateDictionary（整個檔案櫃 / 海關總紀錄本）
 │
 ├── IsValid（bool）→ 主管看一眼：檔案櫃裡是不是完全沒有違規紀錄？
+├── ValidationState → 檢查「所有的 Key（包含代表 Model 本身的 string.Empty 以及各個子欄位）」，只要有任何一個出錯，整體就是不合法
 ├── ErrorCount（int）→ 所有錯誤的總件數
-├── Root（ModelStateEntry）→ 總申報單，代表整份表單本身（Key 為 ""）
-├── Keys（清單）→ 所有抽屜外面的「標籤貼紙」（例如："Age"、"Email"）
-└── Values（清單）→ 所有抽屜裡面的「詳細體檢報告」
+├── Keys（清單）→ 所有抽屜外面的「標籤貼紙」 [string.Empty, "Email", "Age"]
+│
+├── Root（ModelStateEntry，Key=""）
+│   │  ※ 在 .NET Core 是真正的樹狀節點；在 .NET Framework 只是「標籤為空字串的獨立抽屜」
+│   ├── AttemptedValue → null 或 ""（整份表單無法用單一字串表達）
+│   ├── RawValue → 原始 HTTP 傳入的整體結構
+│   ├── ValidationState → Invalid（只看「Key 為 string.Empty」的 Model 本身，子欄位有沒有錯都不關它的事）
+│   ├── Errors（ModelErrorCollection / 裝整體性錯誤的資料夾）
+│   │   └── ModelError
+│   │       ├── ErrorMessage: "密碼與確認密碼不相符"（透過 AddModelError("", "...") 寫入）
+│   │       └── Exception: null
+│   │
+│   └── Children（IReadOnlyList<ModelStateEntry>，僅 .NET Core 有此屬性）
+│       ├── [1] ─── 指向下方 "Email" 的 ModelStateEntry（共享同一實體）
+│       └── [2] ─── 指向下方 "Age" 的 ModelStateEntry（共享同一實體）
+│
+└── Values（清單 / 所有抽屜拆下來攤平的檢視，包含 Root 本身與所有子欄位）
     │
-    ├── ModelStateEntry（標籤為 "Email" 的專屬抽屜）
+    ├── [0] ModelStateEntry（Key=""）<─── 這就是 Root 實體本身
+    │   ├── AttemptedValue → null 或 ""
+    │   ├── RawValue → 原始 HTTP 傳入的整體結構
+    │   ├── ValidationState → Invalid
+    │   └── Errors
+    │       └── ModelError { ErrorMessage: "密碼與確認密碼不相符", Exception: null }
+    │
+    ├── [1] ModelStateEntry（Key="Email"）<─── 這就是 Root.Children[0]（.NET Core）
     │   ├── AttemptedValue → "abc"（案發現場：使用者亂填的字串）
-    │   ├── RawValue → 原始 HTTP 傳入的結構（通常是字串陣列）
-    │   ├── ValidationState → Invalid（抽屜的狀態紅章）
-    │   └── Errors（ModelErrorCollection / 裝滿錯誤的資料夾）
-    │       ├── ModelError → { ErrorMessage: "信箱格式不正確" }
-    │       └── ModelError → { ErrorMessage: "此信箱已被註冊" }
+    │   ├── RawValue → ["abc"]（通常是字串陣列）
+    │   ├── ValidationState → Invalid
+    │   └── Errors（ModelErrorCollection）
+    │       ├── ModelError { ErrorMessage: "信箱格式不正確",  Exception: null }
+    │       └── ModelError { ErrorMessage: "此信箱已被註冊",  Exception: null }
     │
-    └── ModelStateEntry（標籤為 "Age" 的專屬抽屜）
+    └── [2] ModelStateEntry（Key="Age"）<─── 這就是 Root.Children[1]（.NET Core）
         ├── AttemptedValue → "十歲"
+        ├── RawValue → ["十歲"]
         ├── ValidationState → Invalid
-        └── Errors
-            └── ModelError → { Exception: 發生轉型失敗的系統例外 }
+        └── Errors（ModelErrorCollection）
+            └── ModelError { ErrorMessage: null（或系統預設訊息）, Exception: System.FormatException }
 ```
 
-三層結構的分工很清楚：`ModelStateDictionary` 管理整份表單，`ModelStateEntry` 管理單一欄位，`ModelError` 管理單一欄位裡的每一條具體錯誤。
+讀完這張圖，有三個觀念值得特別停下來思考，因為它們是最容易產生誤解的地方。
+
+**觀念一：Root、Children、Values 是「三種視角看同一批物件」，不是三份獨立資料**
+
+這是整張圖最重要的核心。框架在記憶體裡只建立了一批 `ModelStateEntry` 物件（每個欄位一個），然後同時提供了三種不同的「觀察入口」讓你取用
+- `Root.Children` 讓你從樹的頂端往下走
+- `Values` 讓你把所有節點展開成一個扁平清單一次看完；直接用索引器 `ModelState["Email"]` 則讓你精準定位到特定欄位
+
+這個設計的實際意義是：如果你透過 `ModelState.Values[1].AttemptedValue` 把 `"abc"` 改成了 `"xyz"`，再去查 `ModelState.Root.Children[0].AttemptedValue`，你看到的會是 `"xyz"`，而不是原本的 `"abc"`。因為它們在記憶體裡本來就是指向同一個物件——不是兩個長得一樣的副本，而是同一個東西的兩個引用（Reference）。
+
+**觀念二：`Root.AttemptedValue` 通常是 null 的邏輯**
+
+`AttemptedValue` 存在的目的，是在「型別轉換失敗時保留使用者的原始輸入字串」，讓畫面退回後輸入框不會變空白。它的設計前提是：有一個明確的「單一輸入框」讓使用者打了某個字串。
+
+但 `Root` 代表的是「整份表單」或「整個 ViewModel 物件」，例如一個 `RegisterViewModel` 包含了姓名、信箱、密碼等好幾個屬性。這個整體物件根本不對應任何單一輸入框，也沒有一個字串可以代表「使用者在這個物件上輸入了什麼」。所以 `Root.AttemptedValue` 通常是 `null` 或空字串，這不是 Bug，而是符合其設計定義的正常現象。唯一的例外是當 Controller 的 Action 直接接收一個基本型別（例如 `public IActionResult Edit(string name)`）時，那個 `string` 本身就是 Root，才可能有具體的 AttemptedValue。
+
+**觀念三：三層結構各司其職**
+
+`ModelStateDictionary` 是整份表單的管理者；`ModelStateEntry` 是每個欄位的個別紀錄，記錄了使用者輸入了什麼（AttemptedValue）、現在狀態如何（ValidationState），以及犯了哪些錯（Errors）；`ModelError` 則是最細粒度的一層，記錄每一條具體錯誤的原因，可能是文字訊息（ErrorMessage），也可能是系統例外（Exception）。這三層讓你可以從「整體有沒有問題」一路往下查到「某個欄位的某條錯誤背後的根本原因」。
+
+**觀念四：三層結構各司其職**
+
+- **業務邏輯錯誤（驗證失敗）**：通常是欄位填錯、長度不對，這時候 `ErrorMessage` 會有你設定的文字（如 "信箱格式不正確"），而 `Exception` 會是 `null`。    
+- **系統層級錯誤（轉型失敗）**：例如使用者在數字欄位輸入了中文字 "十歲"，底層在做 Binding 的時候就直接拋出例外了。這時候 `Exception` 會捕捉到真正的例外錯誤（例如 `FormatException`），而 `ErrorMessage` 可能為空，或是框架自動補上的一句預設文字（例如 "The value '十歲' is not valid for Age."）。
 
 ---
 ## 四、逐一解析每個重要屬性
@@ -143,9 +189,7 @@ public enum ModelValidationState
 
 > ⚠️ **踩坑警告**：不要直接寫 `if (ModelState["Email"].ValidationState == true)`——這樣寫絕對編譯錯誤。正確寫法是用 Enum 比對：
 > 
-> ```csharp
 > if (ModelState["Email"].ValidationState == ModelValidationState.Valid)
-> ```
 > 
 > 但即使是這個寫法，也非常危險。如果前端根本沒有送出 `Email` 欄位，`ModelState["Email"]` 會回傳 `null`，接著呼叫 `.ValidationState` 就會爆出 `NullReferenceException`，整個頁面崩潰。在實務上，我們幾乎只使用最外層的 `ModelState.IsValid`，而不會去底層針對單一欄位判斷狀態。
 

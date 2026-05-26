@@ -47,12 +47,14 @@ Topics :: {筆記跟什麼主題有關，用 `[Topic],[Topic]` 格式}
 
 ### C# Annotation 與 HTML 屬性的完整對照表
 
+● 翻譯後的 HTML 屬性（前端便利貼）都會加上 data-val="true" 總開關，後面的表格就不贅述
+
 | C# Annotation（後端標準書）                                        | 翻譯後的 HTML 屬性（前端便利貼）                                                                                                     |
 | ----------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
-| `[Required(ErrorMessage="必填")]`                             | `data-val="true"` + `data-val-required="必填"`                                                                            |
+| `[Required(ErrorMessage="必填")]`                             | `data-val-required="必填"`                                                                                                |
 | `[EmailAddress(ErrorMessage="格式錯誤")]`                       | `data-val-email="格式錯"`                                                                                                  |
-| `[StringLength(10, ErrorMessage="超長")]`                     | `data-val-length="超長"` + `data-val-length-max="10"`                                                               |
-| `[Range(1, 100, ErrorMessage="超出範圍")]`                       | `data-val-range="超出範圍"` + `data-val-range-min="1"` + `data-val-range-max="100"`                                          |
+| `[StringLength(10, ErrorMessage="超長")]`                     | `data-val-length="超長"` + `data-val-length-max="10"`                                                                     |
+| `[Range(1, 100, ErrorMessage="超出範圍")]`                      | `data-val-range="超出範圍"` + `data-val-range-min="1"` + `data-val-range-max="100"`                                         |
 | `[RegularExpression(@"^\d+$", ErrorMessage="限數字")]`         | `data-val-regex="限數字"` + `data-val-regex-pattern="^\d+$"`                                                               |
 | `[Compare("Password", ErrorMessage="密碼不一致")]`               | `data-val-equalto="密碼不一致"` + `data-val-equalto-other="*.Password"`                                                      |
 | `[MinLength(6, ErrorMessage="密碼太短")]`                       | `data-val-minlength="密碼太短"` + `data-val-minlength-min="6"`                                                              |
@@ -77,7 +79,6 @@ Topics :: {筆記跟什麼主題有關，用 `[Topic],[Topic]` 格式}
 **`data-valmsg-replace="true"`**：控制錯誤訊息如何顯示。設為 `true` 時，每次貼上新的錯誤訊息前會先把舊的清掉，確保畫面只顯示最新的一條訊息，避免新舊訊息疊在一起造成版面混亂。ASP.NET Core 預設都會幫你產生 `true`。
 
 ---
-
 ### 實際產出的 HTML 長什麼樣？
 
 當你在 View 裡面寫：
