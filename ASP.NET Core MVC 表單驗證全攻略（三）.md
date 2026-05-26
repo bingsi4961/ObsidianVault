@@ -281,7 +281,8 @@ $.validator.addMethod("taiwanid", function (value, element) {
 });
 
 // 第二步：把 HTML 屬性（data-val-taiwanid）和上面定義的規則「綁在一起」 
-// addBool 代表：只要 HTML 上出現 data-val-taiwanid 屬性（不管值是什麼），就觸發 "taiwanid" 規則
+// addBool 代表：只要 HTML 上出現 data-val-taiwanid 屬性（不管值是什麼），就觸發品管員的 "taiwanid" 規則
+// 如果 Annotation 有帶參數的話([TaiwanId(xxx, ErrorMessage="...")])，就要改用 addSingleVal、addMinMax
 $.validator.unobtrusive.adapters.addBool("taiwanid");
 ```
 

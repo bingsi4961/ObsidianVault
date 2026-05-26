@@ -232,30 +232,58 @@ ModelState.AddModelError(string.Empty, "伺服器處理失敗，請稍後再試"
 
 > ⚠️ **不要直接呼叫 `ModelState["Age"].Errors.Clear()`**：這個做法很危險！`Errors.Clear()` 只清除了錯誤文字，但該欄位的 `ValidationState` 已經被蓋上了 `Invalid` 的紅章，`ModelState.IsValid` 依然可能判定為失敗。請永遠使用 `ModelState.Remove()` 或 `ModelState.Clear()` 這兩個框架層級的方法，它們是「砍掉整個抽屜」而不是「只擦掉抽屜裡的文字」。
 
----
-### `ModelState.ClearValidationState(key)`
-
-把指定欄位的**錯誤清空**，並將**狀態重置回 `Unvalidated`（排隊中）**，但不會刪除該欄位的抽屜（保留 `AttemptedValue` 使用者輸入值）。
-
-適用於**打算後續手動重新執行驗證**的進階情境。
-
-**正確 SOP：**
+**運用場景**
 
 ```csharp
-ModelState.ClearValidationState("Age");  // 清除舊錯誤，重置狀態（保留輸入值）
-TryValidateModel(model.Age, "Age");      // 重新驗證，寫入最新錯誤
+[HttpPost]
+public IActionResult Register(UserModel model)
+{
+    if (!ModelState.IsValid)
+    {
+        // 你在後端手動把髒資料清掉
+        model.ReferralCode = ""; 
+        
+        // ⚠️ 陷阱來了！如果你就這樣 return View，
+        // 畫面上還是會顯示他剛剛亂填的 "!@#$"！
+        // 因為前端會優先抓 ModelState 裡面的原始輸入值。
+
+        // 💡 正解：你必須把這個欄位從 ModelState 拔掉
+        ModelState.Remove("ReferralCode"); 
+        
+        return View(model); // 這樣畫面才會乖乖顯示空字串
+    }
+}
 ```
 
-> ⚠️ `TryValidateModel()` 不會自動清空 Errors，只會「疊加」新錯誤，所以必須先呼叫 `ClearValidationState`。
+```csharp
+// 新增與修改共用同一個 Model，修改時沒有密碼欄位，但 [Required] 讓驗證永遠失敗。
+// 用 ModelState.Remove("Password") 把密碼欄位從驗證中排除，繞過這個問題。
+[HttpPost]
+public IActionResult Register(UserModel model)
+{
+    // 把密碼欄位從驗證名單中剔除，強迫它 Valid
+	ModelState.Remove("Password"); 
 
-### `TryValidateModel(object model, string prefix)`
+	if (ModelState.IsValid) { ... }
+}
+```
 
-手動對指定的值重新執行驗證，並將結果存回 `ModelState`。
+```csharp
+[HttpPost]
+public IActionResult SubmitContact(ContactModel model)
+{
+    // ... 寫入資料庫成功 ...
 
-|參數|說明|
-|---|---|
-|`model.Age`|驗**什麼**（要驗證的值）|
-|`"Age"`|存到**哪裡**（ModelState 的 key）|
+    // 如果你不想 Redirect，而是想原頁顯示成功訊息並給他一張白紙（空表單）
+    ViewBag.Message = "送出成功！";
+    
+    // 必須 Clear！否則即使你 return 一個全新的 new ContactModel()
+    // 畫面上還是會塞滿他剛剛填寫的資料（因為 ModelState 的值還在）
+    ModelState.Clear(); 
+
+    return View(new ContactModel());
+}
+```
 
 ---
 ## 七、嵌套物件的 Key 命名規則
