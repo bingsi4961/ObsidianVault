@@ -80,7 +80,7 @@ public class RegisterViewModel
 | C# Annotation                                              | 用途說明                 |
 | ---------------------------------------------------------- | -------------------- |
 | `[Required(ErrorMessage="必填")]`                            | 確保欄位不為 null 或空字串     |
-| `[EmailAddress(ErrorMessage="格式錯")]`                       | 驗證 Email 格式（含 @ 與網域） |
+| `[EmailAddress(ErrorMessage="格式錯誤")]`                      | 驗證 Email 格式（含 @ 與網域） |
 | `[StringLength(10, ErrorMessage="超長")]`                    | 限制字串最大長度             |
 | `[StringLength(10, MinimumLength=3, ErrorMessage="長度不對")]` | 同時限制最大與最小長度          |
 | `[Range(1, 100, ErrorMessage="超範圍")]`                      | 限制數值必須在指定範圍內         |
