@@ -263,14 +263,14 @@ ModelState.AddModelError("Email", "此信箱已被其他人註冊");
 
 到這裡，我們已經把整套機制的拼圖拼完了。用一張表格幫你做個總結：
 
-|角色|位置|負責的事|
-|---|---|---|
-|`[Required]` 等 Annotation|`ViewModel.cs`|定義安檢規則，會自動翻譯成前後端都認識的形式|
-|`asp-validation-for`|`.cshtml` (View)|在單一輸入框旁邊顯示該欄位的錯誤訊息|
-|`asp-validation-summary`|`.cshtml` (View)|在表單頂部顯示整體性錯誤訊息|
-|`_ValidationScriptsPartial`|`.cshtml` (View)|載入前端 JS 品管員，讓前端攔截機制正式生效|
-|`ModelState.IsValid`|`Controller.cs`|後端最終把關，確認所有規則都通過|
-|`ModelState.AddModelError()`|`Controller.cs`|手動把複雜業務邏輯的錯誤塞入驗證系統|
+| 角色                           | 位置               | 負責的事                    |
+| ---------------------------- | ---------------- | ----------------------- |
+| `[Required]` 等 Annotation    | `ViewModel.cs`   | 定義安檢規則，會自動翻譯成前後端都認識的形式  |
+| `asp-validation-for`         | `.cshtml` (View) | 在單一輸入框旁邊顯示該欄位的錯誤訊息      |
+| `asp-validation-summary`     | `.cshtml` (View) | 在表單頂部顯示整體性錯誤訊息          |
+| `_ValidationScriptsPartial`  | `.cshtml` (View) | 載入前端 JS 品管員，讓前端攔截機制正式生效 |
+| `ModelState.IsValid`         | `Controller.cs`  | 後端最終把關，確認所有規則都通過        |
+| `ModelState.AddModelError()` | `Controller.cs`  | 手動把複雜業務邏輯的錯誤塞入驗證系統      |
 
 ---
 ## 延伸：遠端驗證（`[Remote]`）—— 連通前後端的即時橋樑
