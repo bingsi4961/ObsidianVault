@@ -81,12 +81,12 @@ public class RegisterViewModel
 | ---------------------------------------------------------- | -------------------- |
 | `[Required(ErrorMessage="必填")]`                            | 確保欄位不為 null 或空字串     |
 | `[EmailAddress(ErrorMessage="格式錯誤")]`                      | 驗證 Email 格式（含 @ 與網域） |
-| `[StringLength(10, ErrorMessage="超長")]`                    | 限制字串最大長度             |
+| `[StringLength(10, ErrorMessage="不得超過10個字元")]`             | 限制字串最大長度             |
 | `[StringLength(10, MinimumLength=3, ErrorMessage="長度不對")]` | 同時限制最大與最小長度          |
-| `[Range(1, 100, ErrorMessage="超範圍")]`                      | 限制數值必須在指定範圍內         |
+| `[Range(1, 100, ErrorMessage="超出範圍")]`                     | 限制數值必須在指定範圍內         |
 | `[RegularExpression(@"^\d+$", ErrorMessage="限數字")]`        | 用正規表達式自訂格式           |
 | `[Compare("Password", ErrorMessage="密碼不一致")]`              | 比對另一個欄位的值（最常用在確認密碼）  |
-| `[Phone(ErrorMessage="電話格式錯")]`                            | 驗證電話號碼格式             |
+| `[Phone(ErrorMessage="電話格式錯誤")]`                           | 驗證電話號碼格式             |
 
 ---
 ### 什麼時候「不該」用 Annotation？
