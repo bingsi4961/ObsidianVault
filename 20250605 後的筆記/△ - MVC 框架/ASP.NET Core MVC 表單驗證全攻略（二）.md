@@ -31,6 +31,11 @@ Topics :: {筆記跟什麼主題有關，用 `[Topic],[Topic]` 格式}
 
 這兩個過程中，可能發生各種狀況。`ModelState` 就是用來**統一收集、記錄這整個過程中所有成功與失敗的細節**，讓你的 Controller 能夠根據這份「總結報告」決定下一步怎麼做。
 
+> 💡 **釐清一個常見誤解**：`ModelState` **不是只存放「驗證失敗」的欄位**——它存放的是**所有欄位的資料，無論驗證通過與否**。每個欄位都會有自己的 `ModelStateEntry`，差別只在於：
+> 
+> - **驗證失敗的欄位**：`AttemptedValue` 存放使用者輸入的錯誤字串，`Errors` 裡有錯誤訊息，`ValidationState` 是 `Invalid`。
+> - **驗證成功的欄位**：`AttemptedValue` 同樣存放使用者輸入的字串，`Errors` 是空的（`Count = 0`），`ValidationState` 是 `Valid`。
+
 ---
 ## 二、生活比喻：海關的安檢紀錄本 🛂
 
@@ -200,14 +205,14 @@ public enum ModelValidationState
 
 這兩個屬性看起來很像，但有明確的差異：
 
-**`AttemptedValue`（嘗試值）**：型別是 `string`，永遠是純字串。這是 HTML 畫面產生器（Tag Helper）用來把「使用者填錯的字」重新貼回輸入框的依據。例如使用者在年齡欄位填了 `"十歲"`，轉型為 `int` 失敗，`AttemptedValue` 就保留了 `"十歲"` 這個字串，讓畫面退回後輸入框裡不會變空白。
+**`AttemptedValue`（嘗試值）**：型別是 `string`，永遠是純字串。這是 HTML 畫面產生器（Tag Helper）用來把「使用者填的字」重新貼回輸入框的依據。**重要：不只是填錯的欄位有 `AttemptedValue`，填對的欄位同樣也有**。例如使用者在姓名欄位填了 `"王小明"`（驗證通過），`AttemptedValue` 就是 `"王小明"`；在年齡欄位填了 `"十歲"`（轉型失敗），`AttemptedValue` 同樣保留 `"十歲"`。
 
 **`RawValue`（原始值）**：型別是 `object`，在 .NET Core 通常是字串陣列（`string[]` 或 `StringValues`），保留了原始 HTTP 請求的資料結構。例如使用者勾選了多個 Checkbox，`RawValue` 會保留完整的陣列 `["看書", "打球"]`，而 `AttemptedValue` 則是逗號串接後的字串 `"看書,打球"`。
 
-|屬性|型別|誰會用到它|實務用途|
-|---|---|---|---|
-|`AttemptedValue`|`string`|HTML Tag Helper|把使用者填錯的字串還原到輸入框|
-|`RawValue`|`object`（通常是字串陣列）|C# 底層轉換引擎|寫自訂 Model Binder 時使用|
+| 屬性               | 型別                | 誰會用到它           | 實務用途                 |
+| ---------------- | ----------------- | --------------- | -------------------- |
+| `AttemptedValue` | `string`          | HTML Tag Helper | 把使用者填的字串還原到輸入框       |
+| `RawValue`       | `object`（通常是字串陣列） | C# 底層轉換引擎       | 寫自訂 Model Binder 時使用 |
 
 > 💡 **實務準則**：在日常的 CRUD 開發中，這兩個屬性你幾乎不需要主動去碰。它們是 MVC 框架幕後自動使用的工具。你真的要動到它們的情境，只有寫自訂 Model Binder，或是記錄惡意攻擊的 Log 時。
 
@@ -354,7 +359,7 @@ public class Address
 ---
 ## 八、實戰演練：從一次完整的表單提交看 ModelState 如何填入
 
-讓我們模擬一個情境：年齡欄位預期是 `int`，使用者填了 `"十歲"`；信箱欄位使用者填了 `"abc"`（格式不對）。
+讓我們模擬一個情境：年齡欄位預期是 `int`，使用者填了 `"十歲"`；信箱欄位使用者填了 `"abc"`（格式不對）；姓名欄位使用者填了 `"王小明"`（正確）。
 
 當這份表單送到 Controller，`ModelState` 內部的狀態會是這樣：
 
@@ -362,8 +367,11 @@ public class Address
 | --------- | -------------- | --------------- | -------------------------------------- | --------------------- |
 | `"Age"`   | `"十歲"`         | `Invalid`       | "The value '十歲' is not valid for Age." | 第一關：型別轉換失敗（字串無法轉 int） |
 | `"Email"` | `"abc"`        | `Invalid`       | "信箱格式不正確"                              | 第二關：Annotation 規則失敗   |
+| `"Name"`  | `"王小明"`        | `Valid`         | （空，Count = 0）                          | 第二關：通過，沒有任何錯誤         |
 
-系統先嘗試把 `"十歲"` 塞進 `int Age`，失敗，建立 Key 為 `"Age"` 的抽屜，把原始字串存進 `AttemptedValue`，並在 `Errors` 寫下型別錯誤。接著處理 `Email`，字串轉換成功，但進入第二關後發現 `[EmailAddress]` 規則不通過，建立 Key 為 `"Email"` 的抽屜並記下格式錯誤。最外層的 `ModelState.IsValid` 看到有抽屜有錯，自動變成 `false`。
+注意最後一列：**驗證成功的 `Name` 欄位，`ModelState` 同樣為它建立了抽屜，`AttemptedValue` 也存著 `"王小明"`**，只是 `Errors` 是空的、`ValidationState` 是 `Valid`。
+
+系統先嘗試把 `"十歲"` 塞進 `int Age`，失敗，建立 Key 為 `"Age"` 的抽屜，把原始字串存進 `AttemptedValue`，並在 `Errors` 寫下型別錯誤。接著處理 `Email`，字串轉換成功，但進入第二關後發現 `[EmailAddress]` 規則不通過，建立 Key 為 `"Email"` 的抽屜並記下格式錯誤。`Name` 欄位兩關都順利通過，建立 Key 為 `"Name"` 的抽屜，`Errors` 是空的。最外層的 `ModelState.IsValid` 看到有抽屜有錯，自動變成 `false`。
 
 ---
 ## 九、`ModelState.Clear()` 解決「畫面改不掉」的經典地雷

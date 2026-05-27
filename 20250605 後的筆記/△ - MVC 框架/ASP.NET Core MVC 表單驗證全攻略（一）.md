@@ -173,7 +173,17 @@ public IActionResult Register(RegisterViewModel model)
 }
 ```
 
-> ⚠️ **新手地雷**：很多人第一次寫會寫 `return View()` 而不是 `return View(model)`。差別在於：`model` 是使用者剛才填寫的表單資料，如果你不把它傳回去，網頁重新載入後，使用者辛苦填寫的所有輸入框都會變成空白！`ModelState` 雖然會自動帶回前端（錯誤訊息還在），但輸入框的值需要靠 `model` 來還原。
+>⚠️ **新手地雷**：很多人第一次寫會寫 `return View()` 而不是 `return View(model)`。差別在於：`model` 是使用者剛才填寫的表單資料，如果你不把它傳回去，網頁重新載入後，使用者辛苦填寫的所有輸入框都會變成空白！
+
+你可能會問：「`ModelState` 不是也存著使用者的輸入嗎？為什麼還需要傳 `model` 回去？」
+
+這是個很好的問題，答案分兩層：
+
+**第一層（觀念釐清）**：`ModelState` 並非只存放「驗證失敗」的欄位——它其實**存放所有欄位的資料，無論驗證通過與否**。驗證成功的欄位，`AttemptedValue` 一樣有值，只是 `Errors` 是空的、`ValidationState` 是 `Valid`。
+
+**第二層（為什麼還要傳 `model`）**：既然 `ModelState` 裡已有所有欄位的原始值，為什麼光靠它還不夠？因為 `return View()`（不帶 model）會讓 View 的 `@model` 變成 `null`。`Tag Helper`（如 `<input asp-for="Name" />`）在渲染時，需要一個完整的強型別 Model 實例作為「骨架」，才能對照著去 `ModelState` 裡把 `AttemptedValue` 填回對應的輸入框。沒有這個骨架，不但欄位值可能無法正確還原，只要頁面有任何 `@Model.Property` 的存取就會直接拋出 `NullReferenceException`。
+
+**結論**：`return View(model)` 的目的不是「補傳 ModelState 沒存到的資料」，而是「給 View 一個完整的強型別實例，讓前端元件有骨架可以依附」。只要驗證失敗要讓使用者停在原頁面修改，一律都是 `return View(model);` 準沒錯。
 
 ---
 ### 手動把錯誤塞進 ModelState
