@@ -77,16 +77,16 @@ public class RegisterViewModel
 
 以下是你在日常 CRUD 開發中最常用到的內建標籤，搭配 `ErrorMessage` 的完整寫法：
 
-| C# Annotation                                              | 用途說明                 |
-| ---------------------------------------------------------- | -------------------- |
-| `[Required(ErrorMessage="必填")]`                            | 確保欄位不為 null 或空字串     |
-| `[EmailAddress(ErrorMessage="格式錯誤")]`                      | 驗證 Email 格式（含 @ 與網域） |
-| `[StringLength(10, ErrorMessage="不得超過10個字元")]`             | 限制字串最大長度             |
-| `[StringLength(10, MinimumLength=3, ErrorMessage="長度不對")]` | 同時限制最大與最小長度          |
-| `[Range(1, 100, ErrorMessage="超出範圍")]`                     | 限制數值必須在指定範圍內         |
-| `[RegularExpression(@"^\d+$", ErrorMessage="限數字")]`        | 用正規表達式自訂格式           |
-| `[Compare("Password", ErrorMessage="密碼不一致")]`              | 比對另一個欄位的值（最常用在確認密碼）  |
-| `[Phone(ErrorMessage="電話格式錯誤")]`                           | 驗證電話號碼格式             |
+| C# Annotation                                              | 用途說明                                                               |
+| ---------------------------------------------------------- | ------------------------------------------------------------------ |
+| `[Required(ErrorMessage="必填")]`                            | 確保欄位不為 null 或空字串                                                   |
+| `[EmailAddress(ErrorMessage="格式錯誤")]`                      | 驗證 Email 格式（含 @ 與網域）                                               |
+| `[StringLength(10, ErrorMessage="不得超過10個字元")]`             | 限制字串最大長度                                                           |
+| `[StringLength(10, MinimumLength=3, ErrorMessage="長度不對")]` | 同時限制最大與最小長度                                                        |
+| `[Range(1, 100, ErrorMessage="超出範圍")]`                     | 限制數值必須在指定範圍內                                                       |
+| `[RegularExpression(@"^\d+$", ErrorMessage="限數字")]`        | 用正規表達式自訂格式                                                         |
+| `[Compare("Password", ErrorMessage="密碼不一致")]`              | 比對另一個欄位的值（最常用在確認密碼）                                                |
+| `[Phone(ErrorMessage="電話格式錯誤")]`                           | 驗證電話號碼格式 (主要檢查是否含數字及常見電話符號，如需限制台灣 10 碼手機號碼，建議改用 RegularExpression) |
 
 ---
 ### 什麼時候「不該」用 Annotation？
