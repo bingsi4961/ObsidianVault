@@ -86,7 +86,7 @@ public class RegisterViewModel
 | `[Range(1, 100, ErrorMessage="超出範圍")]`                     | 限制數值必須在指定範圍內                                                       |
 | `[RegularExpression(@"^\d+$", ErrorMessage="限數字")]`        | 用正規表達式自訂格式                                                         |
 | `[Compare("Password", ErrorMessage="密碼不一致")]`              | 比對另一個欄位的值（最常用在確認密碼）                                                |
-| `[Phone(ErrorMessage="電話格式錯誤")]`                           | 驗證電話號碼格式 (主要檢查是否含數字及常見電話符號，如需限制台灣 10 碼手機號碼，建議改用 RegularExpression) |
+| `[Phone(ErrorMessage="電話格式錯誤")]`                           | 驗證電話號碼格式 (主要檢查是否含數字及常見電話符號，如需限制台灣 10 碼手機號碼，建議改用 RegularExpression) |                              |
 
 ---
 ### 什麼時候「不該」用 Annotation？
