@@ -21,7 +21,7 @@ Topics :: {筆記跟什麼主題有關，用 `[Topic],[Topic]` 格式}
 ---
 ## 一、C# 和瀏覽器的語言障礙：誰來翻譯？
 
-瀏覽器只看得懂 HTML、CSS 和 JavaScript，完全不認識 C# 或 `[Required]` 這種標籤。但我們不想在前端把所有驗證規則用 JavaScript 重寫一遍——這樣跟前一篇說的「避免重複造輪子」的精神就衝突了。
+瀏覽器只看得懂 HTML、CSS 和 JavaScript，完全不認識 C# 或 `[Required]` 這種標籤。但我們不想在前端把所有驗證規則用 JavaScript 重寫一遍 -- 這樣跟前一篇說的「避免重複造輪子」的精神就衝突了。
 
 微軟的解法是利用 **HTML5 的自訂資料屬性（`data-*`）** 作為溝通橋樑。當 ASP.NET Core 把畫面渲染成 HTML 時，它會把 C# 的 Annotation 「翻譯」成 HTML 標籤上的 `data-val-*` 屬性，讓前端的 JavaScript 可以讀懂。
 
