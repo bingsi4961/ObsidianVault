@@ -64,7 +64,7 @@ Topics :: {筆記跟什麼主題有關，用 `[Topic],[Topic]` 格式}
 | `[Compare(nameof(Password), ErrorMessage = "密碼不一致")]`                                                                                                                  | `data-val-equalto="密碼不一致"`<br>`data-val-equalto-other="*.Password"`                                                                             |
 | `[Remote(action: "IsExists", controller: "CheckAccount", AdditionalFields = "Id, Name", ErrorMessage = "此帳號已被使用")]`                                                    | `data-val-remote="此帳號已被使用"`<br>`data-val-remote-url="/CheckAccount/IsExists"` _(依路由設定自動生成)_<br>`data-val-remote-additionalfields="*.Id,*.Name"` |
 
-> 💡 **你有沒有注意到**，有些規則會拆成兩個 HTML 屬性——一個存錯誤訊息，一個存數字參數？例如 `data-val-range="錯誤訊息"` 和 `data-val-range-min="1"`。這是因為 HTML 屬性只能存字串，數字參數需要另外一個屬性來承載。
+> 💡 **你有沒有注意到**，有些規則會拆成兩個 HTML 屬性，一個存錯誤訊息，一個存數字參數？例如 `data-val-range="錯誤訊息"` 和 `data-val-range-min="1"`。這是因為 HTML 屬性只能存字串，數字參數需要另外一個屬性來承載。
 
 ---
 ### `data-val-equalto-other` 裡的 `*.` 是什麼意思？
