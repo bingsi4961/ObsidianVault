@@ -75,11 +75,13 @@ public class UserModel
 
 ```javascript
 // 翻譯橋樑在背景幫你組裝出的設定檔，準備交給品管員（jQuery Validate）
-rules: {
-    Name: { required: true }
-},
-messages: {
-    Name: { required: "請輸入姓名" }
+{
+	rules: {
+		Name: { required: true }
+	},
+	messages: {
+		Name: { required: "請輸入姓名" }
+	}
 }
 ```
 
