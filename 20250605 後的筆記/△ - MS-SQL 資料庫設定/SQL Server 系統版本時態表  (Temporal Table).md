@@ -33,14 +33,14 @@ ALTER TABLE [dbo].[GroupSetting] -- (改成要記錄的 Table 名稱)
 ADD
   -- 1. 定義「開始時間」欄位
   FromTime DATETIME2(2) GENERATED ALWAYS AS ROW START -- HIDDEN (加入 HIDDEN，需指定欄位名稱(FromTime) 才會顯示)
-        CONSTRAINT DF_GroupSetting_FromTime DEFAULT DATEADD(SECOND, -1, SYSUTCDATETIME())
+        CONSTRAINT DF_GroupSetting_FromTime DEFAULT DATEADD(SECOND, -1, SYSUTCDATETIME()) NOT NULL,
   
   -- 2. 定義「結束時間」欄位
-, ToTime DATETIME2(2) GENERATED ALWAYS AS ROW END   
-        CONSTRAINT DF_GroupSetting_ToTime DEFAULT '9999.12.31 23:59:59.99'
+  ToTime DATETIME2(2) GENERATED ALWAYS AS ROW END   
+        CONSTRAINT DF_GroupSetting_ToTime DEFAULT '9999.12.31 23:59:59.99' NOT NULL,
   
   -- 3. 定義這兩個欄位為「系統時間區間」
-, PERIOD FOR SYSTEM_TIME (FromTime, ToTime);
+  PERIOD FOR SYSTEM_TIME (FromTime, ToTime);
 GO
 ```
 
