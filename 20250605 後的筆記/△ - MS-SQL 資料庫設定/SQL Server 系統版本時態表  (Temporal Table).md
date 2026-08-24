@@ -130,18 +130,16 @@ GO
 ```sql
 SELECT     
     -- UTC 轉台北時間
-    CAST(FromTime AT TIME ZONE 'UTC' AT TIME ZONE 'Taipei Standard Time' AS DATETIME) 
-    AS FromTime_TW
+    CAST(FromTime AT TIME ZONE 'UTC' AT TIME ZONE 'Taipei Standard Time' AS DATETIME) AS FromTime_TW,
     
     -- UTC 轉台北時間（包含溢位保護）
-    ,CASE 
+    CASE 
         WHEN ToTime < '9999-01-01' 
         THEN CAST(ToTime AT TIME ZONE 'UTC' AT TIME ZONE 'Taipei Standard Time' AS DATETIME)
         ELSE ToTime 
-    END AS ToTime_TW
-
-	,*
-FROM [dbo].[GroupSetting] FOR SYSTEM_TIME ALL
+    END AS ToTime_TW,
+    
+* FROM [dbo].[GroupSetting] FOR SYSTEM_TIME ALL
 WHERE Id = 286 
 ORDER BY FromTime DESC;
 ```
