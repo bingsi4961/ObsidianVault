@@ -157,18 +157,16 @@ DECLARE @OneHourAgo DATETIME2 = DATEADD(hour, -1, SYSUTCDATETIME());
 
 SELECT     
     -- UTC 轉台北時間
-    CAST(FromTime AT TIME ZONE 'UTC' AT TIME ZONE 'Taipei Standard Time' AS DATETIME) 
-    AS FromTime_TW
+    CAST(FromTime AT TIME ZONE 'UTC' AT TIME ZONE 'Taipei Standard Time' AS DATETIME) AS FromTime_TW,
     
     -- UTC 轉台北時間（包含溢位保護）
-    ,CASE 
+    CASE 
         WHEN ToTime < '9999-01-01' 
         THEN CAST(ToTime AT TIME ZONE 'UTC' AT TIME ZONE 'Taipei Standard Time' AS DATETIME)
         ELSE ToTime 
-    END AS ToTime_TW
+    END AS ToTime_TW,
     
-    ,*
-FROM [dbo].[GroupSetting] FOR SYSTEM_TIME AS OF @OneHourAgo
+* FROM [dbo].[GroupSetting] FOR SYSTEM_TIME AS OF @OneHourAgo
 WHERE Id = 286;
 ```
 
