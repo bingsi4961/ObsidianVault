@@ -18,7 +18,7 @@ Topics :: {筆記跟什麼主題有關，用 `[Topic],[Topic]` 格式}
 
 ---
 # 連結筆記
-#### 📑 [[]]
+#### 📑 [[SQL Server 時態表入門（一）：基礎觀念與建立語法]]
 
 ---
 ## 一、查詢前的核心觀念：強制使用 UTC
@@ -86,14 +86,14 @@ WHERE Id = 286;
 
 很多剛接觸時態表的人（這是常見踩坑點 🧨）會以為它跟平常寫 `WHERE CreateTime = '2026-08-20'` 一樣，是去對齊「單一日期欄位」。
 
-但其實，時態表的時間過濾，是**同時針對 `FromTime` 與 `EndTime` 兩個欄位一起做綜合比對**的。
+但其實，時態表的時間過濾，是**同時針對 `FromTime` 與 `ToTime` 兩個欄位一起做綜合比對**的。
 
-> 🏨 **日常比喻**：把歷史表裡的每一筆資料想像成「入住飯店的房客」。`FromTime` 是 Check-in（入住）時間，`EndTime` 是 Check-out（退房）時間。當你下 `AS OF '下午 3 點'`，你問的不是「誰剛好在下午 3 點 Check-in」，而是「下午 3 點這個時刻，**誰『正在』房間裡面**」。
+> 🏨 **日常比喻**：把歷史表裡的每一筆資料想像成「入住飯店的房客」。`FromTime` 是 Check-in（入住）時間，`ToTime` 是 Check-out（退房）時間。當你下 `AS OF '下午 3 點'`，你問的不是「誰剛好在下午 3 點 Check-in」，而是「下午 3 點這個時刻，**誰『正在』房間裡面**」。
 
 底層邏輯展開：`FOR SYSTEM_TIME AS OF '2026-08-20 15:00:00'` 實際上會轉譯成：
 
 ```
-找出所有 FromTime <= 下午3點 而且 EndTime > 下午3點 的資料
+找出所有 FromTime <= 下午3點 而且 ToTime > 下午3點 的資料
 ```
 
 它看的是這筆資料的「存活區間」有沒有包含你指定的那個時間點。
@@ -101,18 +101,17 @@ WHERE Id = 286;
 > 📝 **補充**：由於建表時用 `GENERATED ALWAYS AS ROW START/END` 標註了欄位，SQL Server 底層的 Metadata 系統已經牢牢記住這兩個欄位的特殊身份，查詢時會自動鎖定它們，即使你把欄位取名為 `ValidFrom` / `ValidTo` 也不需要手動指定。
 
 ---
-
 ## 五、查詢一段時間區間
 
 當你只用 `AS OF`，看到的是「案發瞬間的照片」。但如果客戶抱怨「我下午 3 點到 3 點 25 分之間，一直狂按修改按鈕都失敗！」，這時候你需要的是一段「監視器錄影畫面」，把這段時間內所有變更過程都拉出來看。
 
 SQL Server 提供三種區間查詢語法，差別在於「有沒有包含頭尾的邊界點」：
 
-|語法指令|邊界條件|什麼時候該用？|
-|---|---|---|
-|`FOR SYSTEM_TIME FROM '開始' TO '結束'`|包頭，不包尾|最常用！查詢「從某個整點到另一個整點之間」，不會不小心把下一個時段的起點算進來|
-|`FOR SYSTEM_TIME BETWEEN '開始' AND '結束'`|包頭，包尾|需要明確指定到毫秒，且起迄時間點都要涵蓋時使用|
-|`FOR SYSTEM_TIME CONTAINED IN ('開始', '結束')`|嚴格包在區間內|只查「這段時間內才出現，且這段時間內就消滅」的短命紀錄|
+| 語法指令                                        | 邊界條件    | 什麼時候該用？                                 |
+| ------------------------------------------- | ------- | --------------------------------------- |
+| `FOR SYSTEM_TIME FROM '開始' TO '結束'`         | 包頭，不包尾  | 最常用！查詢「從某個整點到另一個整點之間」，不會不小心把下一個時段的起點算進來 |
+| `FOR SYSTEM_TIME BETWEEN '開始' AND '結束'`     | 包頭，包尾   | 需要明確指定到毫秒，且起迄時間點都要涵蓋時使用                 |
+| `FOR SYSTEM_TIME CONTAINED IN ('開始', '結束')` | 嚴格包在區間內 | 只查「這段時間內才出現，且這段時間內就消滅」的短命紀錄             |
 
 ```sql
 -- 調閱這 25 分鐘內的變更「錄影帶」（記得先轉 UTC）
@@ -124,17 +123,36 @@ WHERE ID = 1;
 
 > 📝 小結：`AS OF` 是看靜態照片，`FROM ... TO ...` 是調閱動態錄影帶，記得根據要不要「包含邊界」來挑選指令。
 
----
+### 精確版的「包頭 / 包尾」說法
 
+所以「包頭，不包尾」跟「包頭，包尾」這兩句話，精確一點應該這樣理解：
+
+> **`FROM...TO` 包頭，不包尾** —— 在 `@start` 誕生的版本算（包頭）；但「剛好在 `@end` 誕生」的新版本不算（不包尾）。
+> **`BETWEEN...AND` 包頭又包尾** —— 在 `@start` 誕生的版本算（包頭，跟上面一樣）；「剛好在 `@end` 誕生」的新版本也算（包尾）。
+
+「在 `@end` 死亡」的資料，兩個子句其實**都會撈出來**，不是差異點，千萬別跟「在 `@end` 誕生」搞混了。
+
+### 簡單記法：一句話 + 區間直覺
+
+不用硬背四種情境，記住這一句就夠了：`
+
+> **A 這端，兩個子句永遠一樣：只要那筆資料在 `@start` 這個時間點「還活著」，就算。**
+> **B 這端，才是兩者唯一的差別：`FROM...TO` 不把「剛好在 `@end` 誕生的新版本」算進去；`BETWEEN...AND` 會多算這一種。**
+
+### 選哪個的判斷口訣
+- 不確定選哪個、想保守一點、**不要漏資料** → 選 `BETWEEN...AND`（多收一種邊界情況，比較不會漏掉稽核紀錄）
+- 需要**精準切段**、做連續報表區間（例如每月一段、避免月底交界重複計算）→ 選 `FROM...TO` 
+
+---
 ## 六、核心觀念釐清：重疊邏輯 vs 完全包含邏輯
 
 這是整份資料裡最容易搞混、也最值得花時間搞懂的一段。我們先看底層轉譯：
 
-|子句|底層轉譯條件（`sysstart` = FromTime，`sysend` = ToTime）|邏輯意圖|
-|---|---|---|
-|`FROM @start TO @end`|`sysstart < @end AND sysend > @start`|版本在這段期間內**曾經有效過（重疊）**，不包含剛好壓線在 `@end` 才生效的新版本|
-|`BETWEEN @start AND @end`|`sysstart <= @end AND sysend > @start`|同上，但**包含**剛好在 `@end` 生效的版本|
-|`CONTAINED IN (@start, @end)`|`sysstart >= @start AND sysend <= @end`|版本的**生效起訖都完全落在**區間內|
+| 子句                            | 底層轉譯條件                                  | 邏輯意圖                                          |
+| ----------------------------- | --------------------------------------- | --------------------------------------------- |
+| `FROM @start TO @end`         | `FromTime < @end AND ToTime > @start`   | 版本在這段期間內**曾經有效過（重疊）**，不包含剛好壓線在 `@end` 才生效的新版本 |
+| `BETWEEN @start AND @end`     | `FromTime <= @end AND ToTime > @start`  | 同上，但**包含**剛好在 `@end` 生效的版本                    |
+| `CONTAINED IN (@start, @end)` | `FromTime >= @start AND ToTime <= @end` | 版本的**生效起訖都完全落在**區間內                           |
 
 ### 為什麼 FROM/TO、BETWEEN/AND 用的是「重疊」邏輯？
 
@@ -142,13 +160,44 @@ WHERE ID = 1;
 
 `FROM...TO` 與 `BETWEEN...AND` 的設計目的是：**只要這個版本在查詢區間內「曾經生效過一部分」，就要撈出來**，不管它的起訖時間有沒有超出區間邊界。用時間軸攤開來看最清楚：
 
-```
-查詢區間：             [@start ─────────────── @end]
-
-版本A（跨進來）：            [FromTime ────── ToTime]     ← 起點在區間內、結束在外，仍算「重疊」
-版本B（跨出去）：       [FromTime ────── ToTime]          ← 起點在區間外、結束在內，仍算「重疊」
-版本C（整個包住）：[FromTime ──────────────────────────── ToTime]  ← 起訖都跨出區間，仍算「重疊」
-版本D（完全被包住）：        [FromTime ── ToTime]         ← 只有這種，CONTAINED IN 才會抓
+```mermaid
+%%{init: {
+  "theme": "base",
+  "themeVariables": {
+    "background": "#1a1a1a",
+    "primaryColor": "#FAEEDA",
+    "primaryBorderColor": "#FAC775",
+    "primaryTextColor": "#3d3d3a",
+    "taskBkgColor": "#FAEEDA",
+    "taskBorderColor": "#FAC775",
+    "taskTextColor": "#3d3d3a",
+    "taskTextOutsideColor": "#c2c0b6",
+    "activeTaskBkgColor": "#FAEEDA",
+    "activeTaskBorderColor": "#FAC775",
+    "sectionBkgColor": "#2a2a2a",
+    "altSectionBkgColor": "#1a1a1a",
+    "gridColor": "#555555",
+    "lineColor": "#666666",
+    "todayLineColor": "#e24b4a"
+  },
+  "gantt": {
+    "leftPadding": 400,
+    "rightPadding": 20
+  }
+}}%%
+gantt
+    dateFormat HH:mm
+    axisFormat %H:%M
+    section 查詢區間
+    @start ~ @end :active, q1, 08:00, 16:00
+    section 版本A 跨進來 ← 起點在區間外、結束在內，算重疊
+    FromTime ~ ToTime :a1, 06:00, 11:00
+    section 版本B 跨出去 ← 起點在區間內、結束在外，算重疊
+    FromTime ~ ToTime :b1, 13:00, 18:00
+    section 版本C 整個包住 ← 起訖都跨出區間，算重疊
+    FromTime ~ ToTime :c1, 07:00, 17:00
+    section 版本D 完全被包住 ← 只有這種，CONTAINED IN 才會抓
+    FromTime ~ ToTime :d1, 09:00, 15:00
 ```
 
 判斷「兩個區間是否重疊」的標準寫法是：
@@ -160,7 +209,6 @@ WHERE ID = 1;
 > 🧨 **常見踩坑**：一般 T-SQL 的 `WHERE Col BETWEEN X AND Y` 相當於 `>= X AND <= Y`（兩端都包含）。但在時態表中，`FOR SYSTEM_TIME BETWEEN X AND Y` 的底層邏輯完全不同（是重疊判斷，不是單欄位範圍判斷）。很多人會誤把它當成一般 SQL 的 `BETWEEN` 來理解，結果撈出超乎預期的資料。
 
 ---
-
 ## 七、我該用哪一個語法？決策流程
 
 ```mermaid
@@ -201,9 +249,3 @@ flowchart TD
 |`FROM...TO`|監視器錄影（看一段期間的變化，不含結尾）|找與 `指定區間` **重疊**的所有歷史紀錄|
 |`BETWEEN...AND`|監視器錄影（含結尾）|同上，但含上邊界|
 |`CONTAINED IN`|只找完全落在區間內的短命紀錄|找 `FromTime` ~ `ToTime` **完全被包住**的紀錄|
-
----
-
-## 下一步
-
-搞懂查詢之後，接下來自然會遇到兩個實務問題：查出舊資料後**怎麼還原**？還有隨著系統跑久了，歷史表資料量爆炸，**要怎麼維護效能**？這些留到 **第三篇：資料還原與維運** 說明。
